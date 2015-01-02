@@ -110,6 +110,8 @@ rec {
 
   gnome-user-share = callPackage ./core/gnome-user-share { };
 
+  gnome-video-effects = callPackage ./core/gnome-video-effects { };
+
   grilo = callPackage ./core/grilo { };
 
   grilo-plugins = callPackage ./core/grilo-plugins { };

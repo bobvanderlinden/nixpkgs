@@ -163,6 +163,7 @@ in {
         gnome3.gnome-system-monitor
         gnome3.gnome_terminal
         gnome3.gnome-user-docs
+        gnome3.gnome-video-plugins
 
         gnome3.bijiben
         gnome3.evolution

@@ -9804,6 +9804,12 @@ let
 
   chatzilla = callPackage ../applications/networking/irc/chatzilla { };
 
+  cheese = callPackage ../applications/video/cheese {
+    gst = gst_all_1;
+    clutter-gtk = clutter_gtk;
+    inherit (gnome3) gnome_icon_theme gnome_icon_theme_symbolic;
+  };
+
   chromium = callPackage ../applications/networking/browsers/chromium {
     channel = "stable";
     pulseSupport = config.pulseaudio or true;
