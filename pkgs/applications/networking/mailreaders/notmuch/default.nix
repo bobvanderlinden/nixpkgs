@@ -1,17 +1,18 @@
-{ fetchurl, stdenv, bash, emacs, fixDarwinDylibNames,
-  gdb, glib, gmime, gnupg,
-  pkgconfig, talloc, xapian
+{ fetchurl, stdenv, bash, emacs, fixDarwinDylibNames
+, gdb, glib, gmime, gnupg
+, pkgconfig, talloc, xapian
+, sphinx, python
 }:
 
 stdenv.mkDerivation rec {
-  name = "notmuch-0.18.1";
+  name = "notmuch-0.19";
 
   src = fetchurl {
     url = "http://notmuchmail.org/releases/${name}.tar.gz";
-    sha256 = "1pdp9l7yv71d3fjb30qyccva8h03hvg88q4a00yi50v2j70kvmgj";
+    sha256 = "1szf6c44g209pcjq5nvfhlp3nzcm3lrcwv4spsxmwy13hiaccvrr";
   };
 
-  buildInputs = [ bash emacs gdb glib gmime gnupg pkgconfig talloc xapian ]
+  buildInputs = [ bash emacs gdb glib gmime gnupg pkgconfig talloc xapian sphinx python ]
     ++ stdenv.lib.optionals stdenv.isDarwin [ fixDarwinDylibNames ];
 
   patchPhase = ''
@@ -27,6 +28,10 @@ stdenv.mkDerivation rec {
       substituteInPlace "$src" \
         --replace \"gpg\" \"${gnupg}/bin/gpg2\"
     done
+  '';
+
+  postInstall = ''
+    make install-man
   '';
 
   preFixup = if stdenv.isDarwin then

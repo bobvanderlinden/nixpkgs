@@ -4,6 +4,7 @@
 , zlib, fftw
 , jackaudioSupport ? false, jack2
 , cudaSupport ? false, cudatoolkit6
+, colladaSupport ? true, opencollada
 }:
 
 with lib;
@@ -17,12 +18,13 @@ stdenv.mkDerivation rec {
   };
 
   buildInputs =
-    [ SDL boost boost.lib cmake ffmpeg gettext glew ilmbase libXi
+    [ SDL boost cmake ffmpeg gettext glew ilmbase libXi
       libjpeg libpng libsamplerate libsndfile libtiff mesa openal
       opencolorio openexr openimageio /* openjpeg */ python zlib fftw
     ]
     ++ optional jackaudioSupport jack2
-    ++ optional cudaSupport cudatoolkit6;
+    ++ optional cudaSupport cudatoolkit6
+    ++ optional colladaSupport opencollada;
 
   postUnpack =
     ''
@@ -30,8 +32,7 @@ stdenv.mkDerivation rec {
     '';
 
   cmakeFlags =
-    [ "-DWITH_OPENCOLLADA=OFF"
-      "-DWITH_MOD_OCEANSIM=ON"
+    [ "-DWITH_MOD_OCEANSIM=ON"
       "-DWITH_CODEC_FFMPEG=ON"
       "-DWITH_CODEC_SNDFILE=ON"
       "-DWITH_INSTALL_PORTABLE=OFF"
@@ -41,7 +42,8 @@ stdenv.mkDerivation rec {
       "-DPYTHON_VERSION=${python.majorVersion}"
     ]
     ++ optional jackaudioSupport "-DWITH_JACK=ON"
-    ++ optional cudaSupport "-DWITH_CYCLES_CUDA_BINARIES=ON";
+    ++ optional cudaSupport "-DWITH_CYCLES_CUDA_BINARIES=ON"
+    ++ optional colladaSupport "-DWITH_OPENCOLLADA=ON";
 
   NIX_CFLAGS_COMPILE = "-I${ilmbase}/include/OpenEXR -I${python}/include/${python.libPrefix}m";
 

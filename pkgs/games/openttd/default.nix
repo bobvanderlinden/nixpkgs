@@ -2,11 +2,11 @@
 
 stdenv.mkDerivation rec {
   name = "openttd-${version}";
-  version = "1.4.3";
+  version = "1.4.4";
 
   src = fetchurl {
     url = "http://binaries.openttd.org/releases/${version}/${name}-source.tar.xz";
-    sha256 = "1pb3vzmqkzxdrrrxvrji66bjiz5bx7n6c6d1pkqnjkc6p7fvpg0i";
+    sha256 = "1xykqb5bx2dzffxhvm4cbn1nf72f7zcdz8hy25i5wky4hfw31x3h";
   };
 
   buildInputs = [ SDL libpng pkgconfig xz zlib freetype fontconfig ];
@@ -32,7 +32,7 @@ stdenv.mkDerivation rec {
 
       In multiplayer networked mode, players may:
         - play competitively as different businesses
-        - play cooperatively controling the same business
+        - play cooperatively controlling the same business
         - observe as spectators
     '';
     homepage = http://www.openttd.org/;
