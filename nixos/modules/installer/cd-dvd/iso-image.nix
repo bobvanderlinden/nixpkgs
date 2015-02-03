@@ -72,6 +72,7 @@ let
       #Let's hope 10M is enough
       dd bs=2048 count=5120 if=/dev/zero of="$out"
       ${pkgs.dosfstools}/sbin/mkfs.vfat "$out"
+      mlabel -i "$out" ::EFIBOOT
       mcopy -svi "$out" ${efiDir}/* ::
       mmd -i "$out" boot
       mcopy -v -i "$out" \
