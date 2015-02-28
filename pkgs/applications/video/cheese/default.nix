@@ -7,7 +7,7 @@
 , systemd
 , clutter, clutter-gtk, clutter-gst
 , librsvg, libcanberra_gtk3
-, gnome_icon_theme, gnome_icon_theme_symbolic, gnome3}:
+, gnome_icon_theme, hicolor_icon_theme, gnome_icon_theme_symbolic, gnome3}:
 
 stdenv.mkDerivation rec {
   name = "cheese";
@@ -31,7 +31,7 @@ stdenv.mkDerivation rec {
     systemd clutter-gtk clutter-gst gtk3 clutter
     librsvg libcanberra_gtk3
     ] ++ (with gnome3; [
-      gnome_desktop gsettings_desktop_schemas gnome-video-effects
+      gnome_desktop gsettings_desktop_schemas gnome-video-effects gnome_themes_standard
     ]) ++ (with gst; [
       gstreamer
       gst-python gst-editing-services
@@ -43,7 +43,8 @@ stdenv.mkDerivation rec {
     for f in $out/bin/*; do
       wrapProgram $f \
         --prefix GST_PLUGIN_SYSTEM_PATH ":" "$GST_PLUGIN_SYSTEM_PATH" \
-        --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH:$out/share"
+        --prefix XDG_DATA_DIRS : "${gnome3.gnome_themes_standard}:${gnome3.gnome-video-effects}/share:$XDG_ICON_DIRS:$GSETTINGS_SCHEMAS_PATH:$out/share" \
+        --prefix GIO_EXTRA_MODULES : "${gnome3.dconf}/lib/gio/modules"
     done
   '';
 
