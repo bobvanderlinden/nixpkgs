@@ -809,6 +809,31 @@ let
     };
   };
 
+  caldavclientlibrary-asynk = buildPythonPackage rec {
+    version = "asynkdev";
+    name = "caldavclientlibrary-asynk-${version}";
+
+    src = pkgs.fetchgit {
+      url = "https://github.com/skarra/CalDAVClientLibrary.git";
+      rev = "06699b08190d50cc2636b921a654d67db0a967d1";
+      sha256 = "1i6is7lv4v9by4panrd9w63m4xsmhwlp3rq4jjj3azwg5jm10940";
+    };
+
+    meta = {
+      description = "CalDAVCLientLibrary is a Python library and tool for CalDAV";
+
+      longDescription = ''
+        CalDAVCLientLibrary is a Python library and tool for CalDAV.
+
+        This package is the unofficial CalDAVCLientLibrary Python
+        library maintained by the author of Asynk and is needed for
+        that package.
+      '';
+
+      homepage = https://github.com/skarra/CalDAVClientLibrary/tree/asynkdev/;
+      maintainers = with maintainers; [ pjones ];
+    };
+  };
 
   bedup = buildPythonPackage rec {
     name = "bedup-20140413";
@@ -2615,13 +2640,13 @@ let
 
 
   evdev = buildPythonPackage rec {
-    version = "0.4.6";
+    version = "0.4.7";
     name = "evdev-${version}";
     disabled = isPy34;  # see http://bugs.python.org/issue21121
 
     src = pkgs.fetchurl {
       url = "https://pypi.python.org/packages/source/e/evdev/${name}.tar.gz";
-      sha256 = "08bzyr3zc8ijnv25bysmmvzircblh42ja15f6ijdzmqqw8vfaij8";
+      sha256 = "1mz8cfncpxc1wbk2nj7apl0ssqc0vfndysxchq3wabd9vzx5p71k";
     };
 
     buildInputs = with self; [ pkgs.linuxHeaders ];
@@ -3057,15 +3082,15 @@ let
     src = pkgs.fetchurl {
       url = "https://pypi.python.org/packages/source/m/mailchimp/mailchimp-${version}.tar.gz";
       sha256 = "0351ai0jqv3dzx0xxm1138sa7mb42si6xfygl5ak8wnfc95ff770";
-    };  
-  
+    };
+
     # Test fails because specific version of docopt is searched
     # (Possible fix: Needs upstream patching in the library)
     doCheck = false;
 
     buildInputs = with self; [ docopt ];
 
-    propagatedBuildInputs = with self; [ requests ];                                       
+    propagatedBuildInputs = with self; [ requests ];
 
     meta = {
       description = "A CLI client and Python API library for the MailChimp email platform";
@@ -3900,6 +3925,24 @@ let
   };
 
   django = self.django_1_6;
+
+  django_1_7 = buildPythonPackage rec {
+    name = "Django-${version}";
+    version = "1.7.6";
+
+    src = pkgs.fetchurl {
+      url = "http://www.djangoproject.com/m/releases/1.7/${name}.tar.gz";
+      sha256 = "142cim55wnv5q0zg039rankwah1gbpq46dgmp9yg78jrzq7mxwdh";
+    };
+
+    # error: invalid command 'test'
+    doCheck = false;
+
+    meta = {
+      description = "A high-level Python Web framework";
+      homepage = https://www.djangoproject.com/;
+    };
+  };
 
   django_1_6 = buildPythonPackage rec {
     name = "Django-${version}";
@@ -5072,7 +5115,6 @@ let
       platforms   = platforms.all;
     };
   };
-
 
   gyp = buildPythonPackage rec {
     rev = "1977";
@@ -6554,12 +6596,12 @@ let
 
 
   nbxmpp = buildPythonPackage rec {
-    name = "nbxmpp-0.5.1";
+    name = "nbxmpp-0.5.2";
 
     src = pkgs.fetchurl {
       name = "${name}.tar.gz";
-      url = "https://python-nbxmpp.gajim.org/downloads/6";
-      sha256 = "0agr0ikfdmna5rjvm7lm0mx52cdwqp5b2xbx3inagp70whmdv219";
+      url = "https://python-nbxmpp.gajim.org/downloads/7";
+      sha256 = "0q2iph07aahwn6hlr38v0cvzlfc9hrf5mz6qs1kp4b4x9l8x5mqn";
     };
 
     meta = {
@@ -7444,10 +7486,10 @@ let
 
   pgcli = buildPythonPackage rec {
     name = "pgcli-${version}";
-    version = "0.16.0";
+    version = "0.16.1";
 
     src = pkgs.fetchFromGitHub {
-      sha256 = "05xqv3z47xk8v4pbhkavbw49wxq4i3zg49v4g074spqgvcs4jy1n";
+      sha256 = "1sysx67inf0fcfa4qhqcii97y59zpg98f4kcvz15rlbnsi357css";
       rev = "v${version}";
       repo = "pgcli";
       owner = "amjith";
@@ -10513,9 +10555,6 @@ let
   sphinxcontrib_httpdomain = buildPythonPackage (rec {
     name = "sphinxcontrib-httpdomain-1.3.0";
 
-    # See issue #6548
-    disabled = isPyPy;
-
     # Check is disabled due to this issue:
     # https://bitbucket.org/pypa/setuptools/issue/137/typeerror-unorderable-types-str-nonetype
     doCheck = false;
@@ -10539,9 +10578,6 @@ let
 
   sphinxcontrib_plantuml = buildPythonPackage (rec {
     name = "sphinxcontrib-plantuml-0.5";
-
-    # See issue #6548
-    disabled = isPyPy;
 
     src = pkgs.fetchurl {
       url = "https://pypi.python.org/packages/source/s/sphinxcontrib-plantuml/${name}.tar.gz";
@@ -13394,12 +13430,12 @@ let
     };
   };
 
-  pythonefl_1_12 = buildPythonPackage rec {
+  pythonefl_1_13 = buildPythonPackage rec {
     name = "python-efl-${version}";
-    version = "1.12.0";
+    version = "1.13.0";
     src = pkgs.fetchurl {
-      url = "http://download.enlightenment.org/rel/bindings/python/${name}.tar.gz";
-      sha256 = "0rxv5nrqg5c2l93ns2k6gjil1y7qq6amfh5slkarm3kv8fzk17xv";
+      url = "http://download.enlightenment.org/rel/bindings/python/${name}.tar.bz2";
+      sha256 = "0yy4v0f04dgdz21wd2c09x9w6lzsbq6g12s8895laln44l5aqd82";
     };
     preConfigure = ''
       export NIX_CFLAGS_COMPILE="-I${pkgs.e19.efl}/include/eo-1 -I${pkgs.e19.efl}/include/eina-1 -I${pkgs.e19.efl}/include/eina-1/eina -I${pkgs.e19.efl}/include/evas-1 -I${self.dbus}/include/dbus-1.0 -I${pkgs.e19.efl}/include/efl-1 -I${pkgs.e19.efl}/include/eet-1 -I${pkgs.e19.efl}/include/ecore-1 -I${pkgs.e19.efl}/include/ecore-evas-1 -I${pkgs.e19.efl}/include/ecore-file-1 -I${pkgs.e19.efl}/include/ecore-input-1 -I${pkgs.e19.efl}/include/ecore-imf-1 -I${pkgs.e19.efl}/include/ecore-con-1 -I${pkgs.e19.efl}/include/edje-1 -I${pkgs.e19.efl}/include/eldbus-1 -I${pkgs.e19.efl}/include/efreet-1 -I${pkgs.e19.efl}/include/ethumb-client-1 -I${pkgs.e19.efl}/include/ethumb-1 -I${pkgs.e19.efl}/include/ecore-x-1 $NIX_CFLAGS_COMPILE"
@@ -13408,7 +13444,7 @@ let
     meta = {
       description = "Python bindings for EFL and Elementary.";
       homepage = http://enlightenment.org/;
-      maintainers = [ stdenv.lib.maintainers.matejc ];
+      maintainers = [ stdenv.lib.maintainers.matejc stdenv.lib.maintainers.tstrobel ];
       platforms = stdenv.lib.platforms.linux;
       license = stdenv.lib.licenses.gpl3;
     };
@@ -13474,6 +13510,7 @@ let
     };
   };
 
+
   moreItertools = buildPythonPackage rec {
     name = "more-itertools-2.2";
 
@@ -13483,7 +13520,7 @@ let
       url = "https://github.com/erikrose/more-itertools/archive/2.2.tar.gz";
       sha256 = "4606417182e0a1289e23fb7f964a64ca9fdaafb7c1999034dc4fa0cc5850c478";
     };
-   
+
     propagatedBuildInputs = with self; [ nose ];
 
     meta = {
@@ -13492,6 +13529,7 @@ let
       license = licenses.mit;
     };
   };
+
 
   uncertainties = buildPythonPackage rec {
     name = "uncertainties-2.4.6.1";
@@ -13502,11 +13540,28 @@ let
     };
 
     buildInputs = with self; [ nose numpy ];
-   
+
     meta = {
       homepage = "http://pythonhosted.org/uncertainties/";
       description = "Transparent calculations with uncertainties on the quantities involved (aka error propagation)";
       license = licenses.bsd3;
+    };
+  };
+
+
+  funcy = buildPythonPackage rec {
+    name = "funcy-1.4";
+
+    src = pkgs.fetchurl {
+        url = "https://github.com/Suor/funcy/archive/1.4.tar.gz";
+        sha256 = "694e29aa67d03a6ab006f1854740b65f4f87e581afb33853f80e647ddb5f24e7";
+    };
+
+    meta = with stdenv.lib; {
+      description = "Collection of fancy functional tools focused on practicality.";
+      homepage = "http://funcy.readthedocs.org/";
+      license = stdenv.lib.licenses.bsd3;
+
     };
   };
 
@@ -13765,7 +13820,7 @@ let
       license = licenses.mit;
     };
   };
-  
+
   html2text = buildPythonPackage rec {
     name = "html2text-2014.12.29";
 
@@ -13809,21 +13864,6 @@ let
       homepage = "https://github.com/erikrose/parsimonious";
       description = "Fast arbitrary-lookahead packrat parser written in pure Python.";
       license = licenses.mit;
-    };
-  };
-
-  funcy = buildPythonPackage rec {
-    name = "funcy-1.4";
-
-    src = pkgs.fetchurl {
-        url = "https://github.com/Suor/funcy/archive/1.4.tar.gz";
-        sha256 = "694e29aa67d03a6ab006f1854740b65f4f87e581afb33853f80e647ddb5f24e7";
-    };
-
-    meta = with stdenv.lib; {
-      description = "Collection of fancy functional tools focused on practicality.";
-      homepage = "http://funcy.readthedocs.org/";
-      license = stdenv.lib.licenses.bsd3;
     };
   };
 

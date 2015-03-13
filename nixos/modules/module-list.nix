@@ -60,6 +60,7 @@
   ./programs/dconf.nix
   ./programs/environment.nix
   ./programs/info.nix
+  ./programs/ibus.nix
   ./programs/light.nix
   ./programs/nano.nix
   ./programs/screen.nix
@@ -353,12 +354,14 @@
   ./services/web-servers/varnish/default.nix
   ./services/web-servers/winstone.nix
   ./services/web-servers/zope2.nix
+  ./services/x11/unclutter.nix
   ./services/x11/desktop-managers/default.nix
   ./services/x11/display-managers/auto.nix
   ./services/x11/display-managers/default.nix
   ./services/x11/display-managers/gdm.nix
   ./services/x11/display-managers/kdm.nix
   ./services/x11/display-managers/lightdm.nix
+  ./services/x11/display-managers/sddm.nix
   ./services/x11/display-managers/slim.nix
   ./services/x11/hardware/multitouch.nix
   ./services/x11/hardware/synaptics.nix

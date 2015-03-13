@@ -35,7 +35,7 @@ self: super: {
   xhtml = null;
 
   # mtl 2.2.x needs the latest transformers.
-  mtl_2_2_1 = super.mtl_2_2_1.override { transformers = self.transformers_0_4_2_0; };
+  mtl_2_2_1 = super.mtl_2_2_1.override { transformers = self.transformers_0_4_3_0; };
 
   # Configure build for mtl 2.1.x.
   mtl-compat = addBuildDepend (enableCabalFlag super.mtl-compat "two-point-one") self.transformers-compat;
@@ -43,7 +43,7 @@ self: super: {
   # Idris requires mtl 2.2.x.
   idris = overrideCabal (super.idris.overrideScope (self: super: {
     mkDerivation = drv: super.mkDerivation (drv // { doCheck = false; });
-    transformers = super.transformers_0_4_2_0;
+    transformers = super.transformers_0_4_3_0;
     transformers-compat = disableCabalFlag super.transformers-compat "three";
     haskeline = self.haskeline_0_7_1_3;
     mtl = super.mtl_2_2_1;
@@ -78,27 +78,24 @@ self: super: {
   hosc = dontDistribute super.hosc;
   tidal-midi = dontDistribute super.tidal-midi;
 
-  # Needs mtl 2.2.x due to "plailude".
-  clac = dontDistribute super.clac;
-
-  # https://github.com/junjihashimoto/test-sandbox-compose/issues/1
-  hspec-test-sandbox = markBroken super.hspec-test-sandbox;
-  test-framework-sandbox = markBroken super.test-sandbox-quickcheck;
-  test-sandbox = markBroken super.test-sandbox;
-  test-sandbox-compose = markBroken super.test-sandbox-compose;
-  test-sandbox-hunit = markBroken super.test-sandbox-hunit;
-  test-sandbox-quickcheck = markBroken super.test-sandbox-quickcheck;
-
   # These packages need mtl 2.2.x directly or indirectly via dependencies.
   apiary-purescript = markBroken super.apiary-purescript;
+  clac = dontDistribute super.clac;
   highlighter2 = markBroken super.highlighter2;
   hypher = markBroken super.hypher;
+  miniforth = markBroken super.miniforth;
   purescript = markBroken super.purescript;
+  xhb-atom-cache = markBroken super.xhb-atom-cache;
+  xhb-ewmh = markBroken super.xhb-ewmh;
   yesod-purescript = markBroken super.yesod-purescript;
   yet-another-logger = markBroken super.yet-another-logger;
 
   # https://github.com/frosch03/arrowVHDL/issues/2
   ArrowVHDL = markBroken super.ArrowVHDL;
+
+  # https://ghc.haskell.org/trac/ghc/ticket/9625
+  wai-middleware-preprocessor = dontCheck super.wai-middleware-preprocessor;
+  incremental-computing = dontCheck super.incremental-computing;
 
 }
 
@@ -122,7 +119,7 @@ self: super: {
       ) ];
     });
     mtl = self.mtl_2_2_1;
-    transformers = self.transformers_0_4_2_0;
+    transformers = self.transformers_0_4_3_0;
     transformers-compat = disableCabalFlag super.transformers-compat "three";
     hscolour = super.hscolour;
     time = self.time_1_5_0_1;
@@ -137,7 +134,8 @@ self: super: {
   amazonka-ecs = super.amazonka-ecs.overrideScope amazonkaEnv;
   amazonka-glacier = super.amazonka-glacier.overrideScope amazonkaEnv;
   amazonka-kms = super.amazonka-kms.overrideScope amazonkaEnv;
+  amazonka-ssm = super.amazonka-ssm.overrideScope amazonkaEnv;
 in {
   inherit amazonkaEnv;
-  inherit amazonka amazonka-cloudwatch amazonka-core amazonka-ecs amazonka-kms amazonka-glacier;
+  inherit amazonka amazonka-cloudwatch amazonka-core amazonka-ecs amazonka-kms amazonka-glacier amazonka-ssm;
 })

@@ -1,10 +1,10 @@
 {stdenv, fetchurl, apacheAnt, jdk, axis2, dbus_java}:
 
 stdenv.mkDerivation {
-  name = "DisnixWebService-0.2";
+  name = "DisnixWebService-0.3";
   src = fetchurl {
-    url = http://hydra.nixos.org/build/19859888/download/4/DisnixWebService-0.2.tar.bz2;
-    sha256 = "1gcrgjscd8mkixi5js6j44yiiyyz2vg7bdn5qp42vr4r8rh9zgq4";
+    url = http://hydra.nixos.org/build/20213076/download/4/DisnixWebService-0.3.tar.bz2;
+    sha256 = "0m3hk8nfgfnmd503pkpb6n2z944haq2n22d44q6n6zzqnfkjm175";
   };
   buildInputs = [ apacheAnt jdk ];
   PREFIX = ''''${env.out}'';
