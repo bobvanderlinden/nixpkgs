@@ -69,17 +69,21 @@ let
   '';
 
   efiImg = pkgs.runCommand "efi-image_eltorito" { buildInputs = [ pkgs.mtools ]; }
+    # Be careful about determinism: du --apparent-size,
+    #   dates (cp -p, touch, mcopy -m), IDs (mkfs.vfat -i, ?mlabel -N)
     ''
-      #Let's hope 15M is enough
-      dd bs=2048 count=7680 if=/dev/zero of="$out"
-      ${pkgs.dosfstools}/sbin/mkfs.vfat "$out"
-      mlabel -i "$out" ::EFIBOOT
-      mcopy -svi "$out" ${efiDir}/* ::
-      mmd -i "$out" boot
-      mcopy -v -i "$out" \
-        ${config.boot.kernelPackages.kernel}/bzImage ::boot/bzImage
-      mcopy -v -i "$out" \
-        ${config.system.build.initialRamdisk}/initrd ::boot/initrd
+      mkdir ./contents && cd ./contents
+      cp -rp "${efiDir}"/* .
+      mkdir ./boot
+      cp -p "${config.boot.kernelPackages.kernel}/bzImage" \
+        "${config.system.build.initialRamdisk}/initrd" ./boot/
+      touch --date=@0 ./*
+
+      size_kb=$(du -sk --apparent-size . | tr -cd '[:digit:]')
+      dd bs=1M count=$(($size_kb * 11 / 10240)) if=/dev/zero of="$out"
+      ${pkgs.dosfstools}/sbin/mkfs.vfat -i 12345678 "$out"
+      mcopy -bpsvm -i "$out" ./* ::
+      #mlabel -N 12345678 -i "$out" ::EFIBOOT
     ''; # */
 
   targetArch = if pkgs.stdenv.isi686 then
