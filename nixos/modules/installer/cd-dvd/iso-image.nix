@@ -68,7 +68,7 @@ let
     echo "timeout ${builtins.toString config.boot.loader.gummiboot.timeout}" >> $out/loader/loader.conf
   '';
 
-  efiImg = pkgs.runCommand "efi-image_eltorito" { buildInputs = [ pkgs.mtools ]; }
+  efiImg = pkgs.runCommand "efi-image_eltorito" { buildInputs = [ pkgs.mtools pkgs.libfaketime ]; }
     # Be careful about determinism: du --apparent-size,
     #   dates (cp -p, touch, mcopy -m), IDs (mkfs.vfat -i, ?mlabel -N)
     ''
@@ -79,12 +79,18 @@ let
         "${config.system.build.initialRamdisk}/initrd" ./boot/
       touch --date=@0 ./*
 
-      size_kb=$(du -sk --apparent-size . | tr -cd '[:digit:]')
-      dd bs=1M count=$(($size_kb * 11 / 10240)) if=/dev/zero of="$out"
-      ${pkgs.dosfstools}/sbin/mkfs.vfat -i 12345678 "$out"
+      usage_size=$(du -sb --apparent-size . | tr -cd '[:digit:]')
+      # Make the image 110% as big as the files need to make up for FAT overhead
+      image_size=$(( ($usage_size * 110) / 100 ))
+      # Make the image fit blocks of 1M
+      block_size=$((1024*1024))
+      image_size=$(( ($image_size / $block_size + 1) * $block_size ))
+      echo "Usage size: $usage_size"
+      echo "Image size: $image_size"
+      truncate --size=$image_size "$out"
+      ${pkgs.libfaketime}/bin/faketime "2000-01-01 00:00:00" ${pkgs.dosfstools}/sbin/mkfs.vfat -i 12345678 -n EFIBOOT "$out"
       mcopy -bpsvm -i "$out" ./* ::
-      #mlabel -N 12345678 -i "$out" ::EFIBOOT
-    ''; # */
+    '';
 
   targetArch = if pkgs.stdenv.isi686 then
     "ia32"
@@ -187,7 +193,6 @@ in
     };
 
   };
-
 
   config = {
 
