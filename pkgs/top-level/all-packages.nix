@@ -400,6 +400,12 @@ let
     url = "http://repo.or.cz/${repo}.git/snapshot/${rev}.tar.gz";
   };
 
+  fetchNuGet = { name, version, sha256 ? "", md5 ? "", meta ? {} }: fetchurl {
+    inherit sha256 md5;
+    url = "https://www.nuget.org/api/v2/package/${name}/${version}";
+    name = "${name}.${version}.nupkg";
+  };
+
   resolveMirrorURLs = {url}: fetchurl {
     showURLs = true;
     inherit url;

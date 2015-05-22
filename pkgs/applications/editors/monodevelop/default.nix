@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, fetchgit
+{ stdenv, fetchurl, fetchgit, fetchNuGet
 , autoconf, automake, pkgconfig, shared_mime_info, intltool
 , glib, mono, gtk-sharp, gnome, gnome-sharp, unzip
 }:
@@ -19,13 +19,15 @@ stdenv.mkDerivation rec {
     sha256 = "1hbnckc4gvqkknf8gh1k7iwqb4vdzifdjd19i60fnczly5v8m1c3";
   };
 
-  srcNUnit = fetchurl {
-    url = "https://www.nuget.org/api/v2/package/NUnit/2.6.3";
+  srcNUnit = fetchNuGet {
+    name = "NUnit";
+    version = "2.6.3";
     sha256 = "0bb16i4ggwz32wkxsh485wf014cqqzhbyx0b3wbpmqjw7p4canph";
   };
 
-  srcNUnitRunners = fetchurl {
-    url = "https://www.nuget.org/api/v2/package/NUnit.Runners/2.6.3";
+  srcNUnitRunners = fetchNuGet {
+    name = "NUnit.Runners";
+    version = "2.6.3";
     sha256 = "0qwx1i9lxkp9pijj2bsczzgsamz651hngkxraqjap1v4m7d09a3b";
   };
 
@@ -34,28 +36,33 @@ stdenv.mkDerivation rec {
     sha256 = "0k5h5bz1p2v3d0w0hpkpbpvdkcszgp8sr9ik498r1bs72w5qlwnc";
   };
 
-  srcNugetSystemWebMvcExtensions = fetchurl {
-    url = https://www.nuget.org/api/v2/package/System.Web.Mvc.Extensions.Mvc.4/1.0.9;
+  srcNugetSystemWebMvcExtensions = fetchNuGet {
+    name = "System.Web.Mvc.Extensions.Mvc.4";
+    version = "1.0.9";
     sha256 = "19wi662m8primpimzifv8k560m6ymm73z0mf1r8ixl0xqag1hx6j";
   };
 
-  srcNugetMicrosoftAspNetMvc = fetchurl {
-    url = https://www.nuget.org/api/v2/package/Microsoft.AspNet.Mvc/5.2.2;
+  srcNugetMicrosoftAspNetMvc = fetchNuGet {
+    name = "Microsoft.AspNet.Mvc";
+    version = "5.2.2";
     sha256 = "1jwfmz42kw2yb1g2hgp2h34fc4wx6s8z71da3mw5i4ivs25w9n2b";
   };
 
-  srcNugetMicrosoftAspNetRazor = fetchurl {
-    url = https://www.nuget.org/api/v2/package/Microsoft.AspNet.Razor/3.2.2;
+  srcNugetMicrosoftAspNetRazor = fetchNuGet {
+    name = "Microsoft.AspNet.Razor";
+    version = "3.2.2";
     sha256 = "1db3apn4vzz1bx6q5fyv6nyx0drz095xgazqbw60qnhfs7z45axd";
   };
 
-  srcNugetMicrosoftAspNetWebPages = fetchurl {
-    url = https://www.nuget.org/api/v2/package/Microsoft.AspNet.WebPages/3.2.2;
+  srcNugetMicrosoftAspNetWebPages = fetchNuGet {
+    name = "Microsoft.AspNet.WebPages";
+    version = "3.2.2";
     sha256 = "17fwb5yj165sql80i47zirjnm0gr4n8ypz408mz7p8a1n40r4i5l";
   };
 
-  srcNugetMicrosoftWebInfrastructure = fetchurl {
-    url = https://www.nuget.org/api/v2/package/Microsoft.Web.Infrastructure/1.0.0.0;
+  srcNugetMicrosoftWebInfrastructure = fetchNuGet {
+    name = "Microsoft.Web.Infrastructure";
+    version = "1.0.0.0";
     sha256 = "1mxl9dri5729d0jl84gkpqifqf4xzb6aw1rzcfh6l0r24bix9afn";
   };
 
