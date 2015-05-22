@@ -285,6 +285,11 @@ let
     dotnetfx = dotnetfx40;
   };
 
+  dotnetbuildhelpers = import ../build-support/dotnetbuildhelpers {
+    inherit helperFunctions;
+    inherit mono;
+  };
+
   scatterOutputHook = makeSetupHook {} ../build-support/setup-hooks/scatter_output.sh;
 
   vsenv = callPackage ../build-support/vsenv {
@@ -3801,6 +3806,8 @@ let
   falcon = callPackage ../development/interpreters/falcon { };
 
   fsharp = callPackage ../development/compilers/fsharp {};
+
+  paket_binary = callPackage ../development/dotnet-modules/Paket/binary.nix { inherit helperFunctions; };
 
   go_1_0 = callPackage ../development/compilers/go { };
 
