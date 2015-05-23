@@ -3807,25 +3807,9 @@ let
 
   fsharp = callPackage ../development/compilers/fsharp {};
 
-  FAKE                    = callPackage ../development/dotnet-modules/FAKE { };
-  FsCheck                 = callPackage ../development/dotnet-modules/FsCheck { };
-  FsCheck_Nunit           = callPackage ../development/dotnet-modules/FsCheck.Nunit { };
-  FSharp_Compiler_Service = callPackage ../development/dotnet-modules/FSharp.Compiler.Service { };
-  FSharp_Core             = callPackage ../development/dotnet-modules/FSharp.Core { };
-  FSharp_Formatting       = callPackage ../development/dotnet-modules/FSharp.Formatting { };
-  FSharpVSPowerTools_Core = callPackage ../development/dotnet-modules/FSharpVSPowerTools.Core { };
-  ILRepack                = callPackage ../development/dotnet-modules/ILRepack { };
-  Microsoft_Bcl_Build     = callPackage ../development/dotnet-modules/Microsoft.Bcl.Build { };
-  Microsoft_Bcl           = callPackage ../development/dotnet-modules/Microsoft.Bcl { };
-  Microsoft_Net_Http      = callPackage ../development/dotnet-modules/Microsoft.Net.Http { };
-  Newtonsoft_Json         = callPackage ../development/dotnet-modules/Newtonsoft.Json { };
-  NUnit                   = callPackage ../development/dotnet-modules/NUnit { };
-  NUnit_Runners           = callPackage ../development/dotnet-modules/NUnit.Runners { };
-  Octokit                 = callPackage ../development/dotnet-modules/Octokit { };
-  UnionArgParser          = callPackage ../development/dotnet-modules/UnionArgParser { };
+  dotnetPackages = recurseIntoAttrs (callPackage ./dotnet-packages.nix { inherit stdenv helperFunctions fetchNuGet; });
 
-  Paket_binary = callPackage ../development/dotnet-modules/Paket/binary.nix { inherit helperFunctions; };
-  Paket        = callPackage ../development/dotnet-modules/Paket { };
+  paket = dotnetPackages.paket;
 
   go_1_0 = callPackage ../development/compilers/go { };
 

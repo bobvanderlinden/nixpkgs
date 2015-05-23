@@ -1,20 +1,22 @@
-{ stdenv, fetchurl, makeWrapper, mono, dotnetbuildhelpers, fsharp, Paket_binary
-, FAKE
-, FsCheck
-, FsCheck_Nunit
-, FSharp_Compiler_Service
-, FSharp_Core
-, FSharp_Formatting
-, FSharpVSPowerTools_Core
-, ILRepack
-, Microsoft_Bcl_Build
-, Microsoft_Bcl
-, Microsoft_Net_Http
-, Newtonsoft_Json
-, NUnit
-, NUnit_Runners
-, Octokit
-, UnionArgParser
+{ stdenv, fetchurl, makeWrapper, mono, dotnetbuildhelpers, fsharp
+, paket_binary
+, fake
+, fsCheck
+, fsCheckNunit
+, fsharpCompilerService
+, fsharpCore
+, fsharpFormatting
+, fsharpVSPowerToolsCore
+, ilRepack
+, microsoftBclBuild
+, microsoftBcl
+, microsoftNetHttp
+, newtonsoftJson
+, nunit
+, nunitRunners
+, octokit
+, unionArgParser
+, ...
 }:
 
 stdenv.mkDerivation rec {
@@ -27,7 +29,7 @@ stdenv.mkDerivation rec {
     sha256 = "1f6b0m67lncgpa1pxa1w086jc15nppjf3nb6np9f1zpdxag2dwws";
   };
 
-  buildInputs = [ makeWrapper mono dotnetbuildhelpers fsharp Paket_binary ];
+  buildInputs = [ makeWrapper mono dotnetbuildhelpers fsharp paket_binary ];
 
   fileFsUnit = fetchurl {
     name = "FsUnit.fs";
@@ -56,22 +58,22 @@ stdenv.mkDerivation rec {
   configurePhase = ''
      # Generate a local directory containing all NuPkgs
      createNuPkgMirror.sh \
-       ${FAKE} \
-       ${FsCheck} \
-       ${FsCheck_Nunit} \
-       ${FSharp_Compiler_Service} \
-       ${FSharp_Core} \
-       ${FSharp_Formatting} \
-       ${FSharpVSPowerTools_Core} \
-       ${ILRepack} \
-       ${Microsoft_Bcl_Build} \
-       ${Microsoft_Bcl} \
-       ${Microsoft_Net_Http} \
-       ${Newtonsoft_Json} \
-       ${NUnit} \
-       ${NUnit_Runners} \
-       ${Octokit} \
-       ${UnionArgParser}
+       ${fake} \
+       ${fsCheck} \
+       ${fsCheckNunit} \
+       ${fsharpCompilerService} \
+       ${fsharpCore} \
+       ${fsharpFormatting} \
+       ${fsharpVSPowerToolsCore} \
+       ${ilRepack} \
+       ${microsoftBclBuild} \
+       ${microsoftBcl} \
+       ${microsoftNetHttp} \
+       ${newtonsoftJson} \
+       ${nunit} \
+       ${nunitRunners} \
+       ${octokit} \
+       ${unionArgParser}
     
      # Get NuPkgs from local directory rather than remote sever
      substituteInPlace paket.dependencies --replace "source https://nuget.org/api/v2" "source nupkg-local-mirror"
