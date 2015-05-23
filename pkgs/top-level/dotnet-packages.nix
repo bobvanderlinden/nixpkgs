@@ -104,6 +104,36 @@ let self = _self // overrides; _self = with self; {
     sha256 = "0lgyc3mb7ja07r0vh9b88yr8va9fbwppidgq83vzh3k61xvij9id";
   };
 
+  systemWebMvcExtensions = fetchNuGet {
+    name = "System.Web.Mvc.Extensions.Mvc.4";
+    version = "1.0.9";
+    sha256 = "19wi662m8primpimzifv8k560m6ymm73z0mf1r8ixl0xqag1hx6j";
+  };
+
+  microsoftAspNetMvc = fetchNuGet {
+    name = "Microsoft.AspNet.Mvc";
+    version = "5.2.2";
+    sha256 = "1jwfmz42kw2yb1g2hgp2h34fc4wx6s8z71da3mw5i4ivs25w9n2b";
+  };
+
+  microsoftAspNetRazor = fetchNuGet {
+    name = "Microsoft.AspNet.Razor";
+    version = "3.2.2";
+    sha256 = "1db3apn4vzz1bx6q5fyv6nyx0drz095xgazqbw60qnhfs7z45axd";
+  };
+
+  microsoftAspNetWebPages = fetchNuGet {
+    name = "Microsoft.AspNet.WebPages";
+    version = "3.2.2";
+    sha256 = "17fwb5yj165sql80i47zirjnm0gr4n8ypz408mz7p8a1n40r4i5l";
+  };
+
+  microsoftWebInfrastructure = fetchNuGet {
+    name = "Microsoft.Web.Infrastructure";
+    version = "1.0.0.0";
+    sha256 = "1mxl9dri5729d0jl84gkpqifqf4xzb6aw1rzcfh6l0r24bix9afn";
+  };
+
   nuget_binary = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
   paket_binary = callPackage ../development/dotnet-modules/paket/binary.nix { inherit helperFunctions; };
   paket        = callPackage ../development/dotnet-modules/paket self;

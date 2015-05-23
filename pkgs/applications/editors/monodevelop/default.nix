@@ -1,6 +1,7 @@
 { stdenv, fetchurl, fetchgit, fetchNuGet
 , autoconf, automake, pkgconfig, shared_mime_info, intltool
 , glib, mono, gtk-sharp, gnome, gnome-sharp, unzip
+, dotnetPackages
 }:
 
 stdenv.mkDerivation rec {
@@ -13,57 +14,9 @@ stdenv.mkDerivation rec {
     sha256 = "1bgqvlfi6pilj2zxsviqilh63qq98wsijqdiqwpkqchcw741zlyn";
   };
 
-  srcNugetBinary = fetchgit {
-    url = "https://github.com/mono/nuget-binary.git";
-    rev = "da1f2102f8172df6f7a1370a4998e3f88b91c047";
-    sha256 = "1hbnckc4gvqkknf8gh1k7iwqb4vdzifdjd19i60fnczly5v8m1c3";
-  };
-
-  srcNUnit = fetchNuGet {
-    name = "NUnit";
-    version = "2.6.3";
-    sha256 = "0bb16i4ggwz32wkxsh485wf014cqqzhbyx0b3wbpmqjw7p4canph";
-  };
-
-  srcNUnitRunners = fetchNuGet {
-    name = "NUnit.Runners";
-    version = "2.6.3";
-    sha256 = "0qwx1i9lxkp9pijj2bsczzgsamz651hngkxraqjap1v4m7d09a3b";
-  };
-
-  srcNUnit2510 = fetchurl {
+  nunit2510 = fetchurl {
     url = "http://launchpad.net/nunitv2/2.5/2.5.10/+download/NUnit-2.5.10.11092.zip";
     sha256 = "0k5h5bz1p2v3d0w0hpkpbpvdkcszgp8sr9ik498r1bs72w5qlwnc";
-  };
-
-  srcNugetSystemWebMvcExtensions = fetchNuGet {
-    name = "System.Web.Mvc.Extensions.Mvc.4";
-    version = "1.0.9";
-    sha256 = "19wi662m8primpimzifv8k560m6ymm73z0mf1r8ixl0xqag1hx6j";
-  };
-
-  srcNugetMicrosoftAspNetMvc = fetchNuGet {
-    name = "Microsoft.AspNet.Mvc";
-    version = "5.2.2";
-    sha256 = "1jwfmz42kw2yb1g2hgp2h34fc4wx6s8z71da3mw5i4ivs25w9n2b";
-  };
-
-  srcNugetMicrosoftAspNetRazor = fetchNuGet {
-    name = "Microsoft.AspNet.Razor";
-    version = "3.2.2";
-    sha256 = "1db3apn4vzz1bx6q5fyv6nyx0drz095xgazqbw60qnhfs7z45axd";
-  };
-
-  srcNugetMicrosoftAspNetWebPages = fetchNuGet {
-    name = "Microsoft.AspNet.WebPages";
-    version = "3.2.2";
-    sha256 = "17fwb5yj165sql80i47zirjnm0gr4n8ypz408mz7p8a1n40r4i5l";
-  };
-
-  srcNugetMicrosoftWebInfrastructure = fetchNuGet {
-    name = "Microsoft.Web.Infrastructure";
-    version = "1.0.0.0";
-    sha256 = "1mxl9dri5729d0jl84gkpqifqf4xzb6aw1rzcfh6l0r24bix9afn";
   };
 
   postPatch = ''
@@ -72,22 +25,22 @@ stdenv.mkDerivation rec {
     # it seems parts of MonoDevelop 5.2+ need NUnit 2.6.4, which isn't included
     # (?), so download it and put it in the right place in the tree
     mkdir packages
-    unzip ${srcNUnit} -d packages/NUnit.2.6.3
-    unzip ${srcNUnitRunners} -d packages/NUnit.Runners.2.6.3
+    unzip ${dotnetPackages.nunit} -d packages/NUnit.2.6.3
+    unzip ${dotnetPackages.nunitRunners} -d packages/NUnit.Runners.2.6.3
 
     # cecil needs NUnit 2.5.10 - this is also missing from the tar
-    unzip -j ${srcNUnit2510} -d external/cecil/Test/libs/nunit-2.5.10 NUnit-2.5.10.11092/bin/net-2.0/framework/\*
+    unzip -j ${nunit2510} -d external/cecil/Test/libs/nunit-2.5.10 NUnit-2.5.10.11092/bin/net-2.0/framework/\*
 
     # the tar doesn't include the nuget binary, so grab it from github and copy it
     # into the right place
-    cp -vfR ${srcNugetBinary}/* external/nuget-binary/
+    cp -vfR ${dotnetPackages.nuget_binary}/opt/dotnet/nuget-binary/* external/nuget-binary/
 
     # AspNet plugin requires these packages
-    unzip ${srcNugetSystemWebMvcExtensions} -d packages/System.Web.Mvc.Extensions.Mvc.4.1.0.9
-    unzip ${srcNugetMicrosoftAspNetMvc} -d packages/Microsoft.AspNet.Mvc.5.2.2
-    unzip ${srcNugetMicrosoftAspNetRazor} -d packages/Microsoft.AspNet.Razor.3.2.2
-    unzip ${srcNugetMicrosoftAspNetWebPages} -d packages/Microsoft.AspNet.WebPages.3.2.2
-    unzip ${srcNugetMicrosoftWebInfrastructure} -d packages/Microsoft.Web.Infrastructure.1.0.0.0
+    unzip ${dotnetPackages.systemWebMvcExtensions} -d packages/System.Web.Mvc.Extensions.Mvc.4.1.0.9
+    unzip ${dotnetPackages.microsoftAspNetMvc} -d packages/Microsoft.AspNet.Mvc.5.2.2
+    unzip ${dotnetPackages.microsoftAspNetRazor} -d packages/Microsoft.AspNet.Razor.3.2.2
+    unzip ${dotnetPackages.microsoftAspNetWebPages} -d packages/Microsoft.AspNet.WebPages.3.2.2
+    unzip ${dotnetPackages.microsoftWebInfrastructure} -d packages/Microsoft.Web.Infrastructure.1.0.0.0
   '';
 
   buildInputs = [
