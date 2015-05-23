@@ -57,7 +57,7 @@ stdenv.mkDerivation rec {
 
   configurePhase = ''
      # Generate a local directory containing all NuPkgs
-     createNuPkgMirror.sh \
+     create-nupkg-mirror.sh \
        ${fake} \
        ${fsCheck} \
        ${fsCheckNunit} \

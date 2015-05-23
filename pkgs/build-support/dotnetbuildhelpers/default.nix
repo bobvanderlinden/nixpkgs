@@ -1,16 +1,16 @@
 { helperFunctions, mono }:
   helperFunctions.runCommand
-    "dotnetbuildcreateNuPkgMirrors"
+    "dotnetbuildhelpers"
     { preferLocalBuild = true; }
     ''
       target="$out/bin"
       mkdir -p "$target"
 
-      cp -v ${./createNuPkgMirror.sh} "$target/createNuPkgMirror.sh"
-      chmod 755 "$target"/createNuPkgMirror.sh
-      patchShebangs "$target/createNuPkgMirror.sh"
+      cp -v ${./create-nupkg-mirror.sh} "$target/create-nupkg-mirror.sh"
+      chmod 755 "$target"/create-nupkg-mirror.sh
+      patchShebangs "$target/create-nupkg-mirror.sh"
 
-      cp -v ${./patchFSharpTargets.sh} "$target/patchFSharpTargets.sh"
-      chmod 755 "$target"/patchFSharpTargets.sh
-      patchShebangs "$target/patchFSharpTargets.sh"
+      cp -v ${./patch-fsharp-targets.sh} "$target/patch-fsharp-targets.sh"
+      chmod 755 "$target"/patch-fsharp-targets.sh
+      patchShebangs "$target/patch-fsharp-targets.sh"
     ''
