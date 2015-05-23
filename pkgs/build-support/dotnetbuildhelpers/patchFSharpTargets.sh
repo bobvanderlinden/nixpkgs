@@ -12,4 +12,7 @@
 # However, some project files look for F# targets in the main Mono directory. When that happens
 # patch the project files using this script so they will look in $(FSharpTargetsPath) instead.
 
-sed --in-place=.bak "s,\$(MSBuildExtensionsPath32).*Microsoft.FSharp.Targets,\$(FSharpTargetsPath),g" "$@"
+sed --in-place=.bak \
+    -e "s,\$(MSBuildExtensionsPath.*).*Microsoft.FSharp.Targets,\$(FSharpTargetsPath),g" \
+    -e "s,\$(MSBuildExtensionsPath.*).*Microsoft.Portable.FSharp.Targets,\$(FSharpTargetsPath),g" \
+    "$@"
