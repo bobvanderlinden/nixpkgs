@@ -1,4 +1,4 @@
-{ stdenv, helperFunctions, makeWrapper, fetchNuGet, unzip, mono, dotnetbuildhelpers }:
+{ stdenv, helperFunctions, makeWrapper, fetchNuGet, unzip, mono }:
 
 let
   pkg = fetchNuGet {
