@@ -3,8 +3,8 @@
 let
   pkg = fetchNuGet {
     name = "Paket";
-    version = "1.4.3";
-    sha256 = "1ww40x3z7rpq56n68401gbjkjy6n7cjg20icgc4ns6qjw8fkygpa";
+    version = "1.5.3";
+    sha256 = "12hlh4cbsispdzzqh5pdjrsvk8g4ajrbzpifqlaa35lrqwws267w";
   };
 in
   helperFunctions.runCommand
