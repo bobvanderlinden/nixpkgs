@@ -104,6 +104,6 @@ let self = _self // overrides; _self = with self; {
     sha256 = "0lgyc3mb7ja07r0vh9b88yr8va9fbwppidgq83vzh3k61xvij9id";
   };
 
-  paket_binary = callPackage ../development/dotnet-modules/Paket/binary.nix { inherit helperFunctions; };
-  paket        = callPackage ../development/dotnet-modules/Paket self;
+  paket_binary = callPackage ../development/dotnet-modules/paket/binary.nix { inherit helperFunctions; };
+  paket        = callPackage ../development/dotnet-modules/paket self;
 }; in self
