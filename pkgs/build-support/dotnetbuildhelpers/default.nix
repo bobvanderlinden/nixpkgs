@@ -6,11 +6,11 @@
       target="$out/bin"
       mkdir -p "$target"
 
-      cp -v ${./create-nupkg-mirror.sh} "$target/create-nupkg-mirror.sh"
-      chmod 755 "$target"/create-nupkg-mirror.sh
-      patchShebangs "$target/create-nupkg-mirror.sh"
-
-      cp -v ${./patch-fsharp-targets.sh} "$target/patch-fsharp-targets.sh"
-      chmod 755 "$target"/patch-fsharp-targets.sh
-      patchShebangs "$target/patch-fsharp-targets.sh"
+      for script in ${./create-nupkg-mirror.sh} ${./create-pkg-config-for-dll.sh} ${./patch-fsharp-targets.sh}
+      do
+        scriptName="$(basename "$script" | cut -f 2- -d -)"
+        cp -v "$script" "$target"/"$scriptName"
+        chmod 755 "$target"/"$scriptName"
+        patchShebangs "$target"/"$scriptName"
+      done
     ''
