@@ -117,6 +117,7 @@ let self = _self // overrides; _self = with self; {
     name = "UnionArgParser";
     version = "0.8.7";
     sha256 = "0lgyc3mb7ja07r0vh9b88yr8va9fbwppidgq83vzh3k61xvij9id";
+    dlls = [ "lib/net40/*.dll" ];
   };
 
   systemWebMvcExtensions = fetchNuGet {
@@ -152,5 +153,5 @@ let self = _self // overrides; _self = with self; {
   fsharpData   = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
 
   nuget_binary = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
-  paket        = callPackage ../development/dotnet-modules/paket self;
+  paket        = callPackage ../development/dotnet-modules/paket { dotnetPackages = self; };
 }; in self

@@ -1,22 +1,4 @@
-{ stdenv, fetchurl, makeWrapper, mono, dotnetbuildhelpers, fsharp, pkgconfig
-, fake
-, fsCheck
-, fsCheckNunit
-, fsharpCompilerService
-, fsharpCore
-, fsharpFormatting
-, fsharpVSPowerToolsCore
-, ilRepack
-, microsoftBclBuild
-, microsoftBcl
-, microsoftNetHttp
-, newtonsoftJson
-, nunit
-, nunitRunners
-, octokit
-, unionArgParser
-, ...
-}:
+{ stdenv, fetchurl, makeWrapper, mono, dotnetbuildhelpers, fsharp, pkgconfig, dotnetPackages }:
 
 stdenv.mkDerivation rec {
   name = "paket-${version}";
@@ -33,22 +15,8 @@ stdenv.mkDerivation rec {
     mono
     dotnetbuildhelpers
     fsharp pkgconfig
-    fake
-    fsCheck
-    fsCheckNunit
-    fsharpCompilerService
-    fsharpCore
-    fsharpFormatting
-    fsharpVSPowerToolsCore
-    ilRepack
-    microsoftBclBuild
-    microsoftBcl
-    microsoftNetHttp
-    newtonsoftJson
-    nunit
-    nunitRunners
-    octokit
-    unionArgParser
+    dotnetPackages.newtonsoftJson
+    dotnetPackages.unionArgParser
   ];
 
   fileFsUnit = fetchurl {
@@ -71,31 +39,44 @@ stdenv.mkDerivation rec {
 
   fileErrorHandling = fetchurl {
     name = "ErrorHandling.fs";
-    url = https://raw.githubusercontent.com/fsprojects/Chessie/master/src/Chessie/ErrorHandling.fs;
+    url = https://raw.githubusercontent.com/fsprojects/Chessie/3017092260b4a59a3b4b25bf8fca6be6eb7487eb/src/Chessie/ErrorHandling.fs;
     sha256 = "0ka9ilfbl4izxc1wqd5vlfjnp7n2xcckfhp13gzhqbdx7464van9";
   };
 
   configurePhase = ''
      # Copy said single-files-in-git-repos
-     cp -v "${fileFsUnit}" "tests/Paket.Tests/FsUnit.fs"
-     cp -v "${fileGlobbing}" "src/Paket.Core/Globbing.fs"
-     cp -v "${fileErrorHandling}" "src/Paket.Core/ErrorHandling.fs"
+     mkdir -p "paket-files/forki/FsUnit"
+     cp -v "${fileFsUnit}" "paket-files/forki/FsUnit/FsUnit.fs"
 
-     # Prevent the bootstrapper from being downloaded during build
+     mkdir -p "paket-files/fsharp/FAKE/src/app/FakeLib/Globbing"
+     cp -v "${fileGlobbing}" "paket-files/fsharp/FAKE/src/app/FakeLib/Globbing/Globbing.fs"
+
+     mkdir -p "paket-files/fsprojects/Chessie/src/Chessie"
+     cp -v "${fileErrorHandling}" "paket-files/fsprojects/Chessie/src/Chessie/ErrorHandling.fs"
+
+     # Prevent the bootstrapper from being executed during build
      sed -i -e 's,<Exec Command=.*/>,,g' .paket/paket.targets
+     rm -vf .paket/*.exe # Just to be sure
   '';
 
-  patches = [ ./paket.patch ];
+  # patches = [ ./paket.patch ];
 
   buildPhase = ''
     export FSharpTargetsPath="${fsharp}/lib/mono/4.0/Microsoft.FSharp.Targets"
-    xbuild
+
+    # Tests won't build so we only build the main fsprojs
+    xbuild src/Paket/Paket.fsproj
+    xbuild src/Paket.Bootstrapper/Paket.Bootstrapper.csproj
   '';
 
   installPhase = ''
     mkdir -p "$out"/opt/dotnet/paket
     cp -v bin/* "$out"/opt/dotnet/paket
     makeWrapper "${mono}/bin/mono $out/opt/dotnet/paket/paket.exe" "$out/bin/paket"
+    for dll in "$out"/opt/dotnet/paket/Paket*.dll
+    do
+      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll" "${version}"
+    done
   '';
 
   dontStrip = true;
