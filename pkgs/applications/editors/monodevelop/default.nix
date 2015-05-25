@@ -25,8 +25,8 @@ stdenv.mkDerivation rec {
     # it seems parts of MonoDevelop 5.2+ need NUnit 2.6.4, which isn't included
     # (?), so download it and put it in the right place in the tree
     mkdir packages
-    unzip ${dotnetPackages.nunit} -d packages/NUnit.2.6.3
-    unzip ${dotnetPackages.nunitRunners} -d packages/NUnit.Runners.2.6.3
+    cp -rv ${dotnetPackages.nunit}/opt/dotnet/* -d packages/NUnit.2.6.3
+    cp -rv ${dotnetPackages.nunitRunners}/opt/dotnet/* -d packages/NUnit.Runners.2.6.3
 
     # cecil needs NUnit 2.5.10 - this is also missing from the tar
     unzip -j ${nunit2510} -d external/cecil/Test/libs/nunit-2.5.10 NUnit-2.5.10.11092/bin/net-2.0/framework/\*
@@ -36,11 +36,11 @@ stdenv.mkDerivation rec {
     cp -vfR ${dotnetPackages.nuget_binary}/opt/dotnet/nuget-binary/* external/nuget-binary/
 
     # AspNet plugin requires these packages
-    unzip ${dotnetPackages.systemWebMvcExtensions} -d packages/System.Web.Mvc.Extensions.Mvc.4.1.0.9
-    unzip ${dotnetPackages.microsoftAspNetMvc} -d packages/Microsoft.AspNet.Mvc.5.2.2
-    unzip ${dotnetPackages.microsoftAspNetRazor} -d packages/Microsoft.AspNet.Razor.3.2.2
-    unzip ${dotnetPackages.microsoftAspNetWebPages} -d packages/Microsoft.AspNet.WebPages.3.2.2
-    unzip ${dotnetPackages.microsoftWebInfrastructure} -d packages/Microsoft.Web.Infrastructure.1.0.0.0
+    cp -rv ${dotnetPackages.systemWebMvcExtensions}/opt/dotnet/* -d packages/System.Web.Mvc.Extensions.Mvc.4.1.0.9
+    cp -rv ${dotnetPackages.microsoftAspNetMvc}/opt/dotnet/* -d packages/Microsoft.AspNet.Mvc.5.2.2
+    cp -rv ${dotnetPackages.microsoftAspNetRazor}/opt/dotnet/* -d packages/Microsoft.AspNet.Razor.3.2.2
+    cp -rv ${dotnetPackages.microsoftAspNetWebPages}/opt/dotnet/* -d packages/Microsoft.AspNet.WebPages.3.2.2
+    cp -rv ${dotnetPackages.microsoftWebInfrastructure}/opt/dotnet/* -d packages/Microsoft.Web.Infrastructure.1.0.0.0
   '';
 
   buildInputs = [
