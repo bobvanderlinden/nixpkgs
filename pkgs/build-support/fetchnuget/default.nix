@@ -25,7 +25,7 @@
           (dll : ''
             for dll in "$target"/${dll}
             do 
-              ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll" "${version}"
+              ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
             done'')
           dlls));
   }

@@ -51,7 +51,7 @@ stdenv.mkDerivation rec {
     cp -rv bin/* "$out"/opt/dotnet/FSharp.Data
     for dll in "$out"/opt/dotnet/FSharp.Data/*.dll 
     do
-      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll" "${version}"
+      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
     done
   '';
 

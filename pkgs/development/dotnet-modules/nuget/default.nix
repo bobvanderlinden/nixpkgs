@@ -17,5 +17,5 @@ in
       mkdir -p "$out/bin"
       source "${makeWrapper}/nix-support/setup-hook" # Surely there's a better way to do this?
       makeWrapper "${mono}/bin/mono $out/opt/dotnet/nuget-binary/NuGet.exe" "$out/bin/nuget"
-      ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$out/opt/dotnet/nuget-binary/NuGet.Core.dll" "2.8.5"
+      ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$out/opt/dotnet/nuget-binary/NuGet.Core.dll"
     ''

@@ -40,7 +40,7 @@ stdenv.mkDerivation rec {
     cp -rv build/DataStructures/* "$out"/opt/dotnet/FSharpx.Extras
     for dll in "$out"/opt/dotnet/FSharpx.Extras/FSharpx*.dll
     do
-      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll" "${version}"
+      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
     done
   '';
 

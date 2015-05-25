@@ -75,7 +75,7 @@ stdenv.mkDerivation rec {
     makeWrapper "${mono}/bin/mono $out/opt/dotnet/paket/paket.exe" "$out/bin/paket"
     for dll in "$out"/opt/dotnet/paket/Paket*.dll
     do
-      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll" "${version}"
+      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
     done
   '';
 
