@@ -91,14 +91,14 @@ let self = _self // overrides; _self = with self; {
     dlls = [ "lib/net45/*.dll" ];
   };
 
-  nunit = fetchNuGet {
+  nUnit = fetchNuGet {
     name = "NUnit";
     version = "2.6.4";
     sha256 = "1acwsm7p93b1hzfb83ia33145x0w6fvdsfjm9xflsisljxpdx35y";
     dlls = [ "lib/*.dll" ];
   };
 
-  nunitRunners = fetchNuGet {
+  nUnitRunners = fetchNuGet {
     name = "NUnit.Runners";
     version = "2.6.4";
     sha256 = "11nmi7vikn9idz8qcad9z7f73arsh5rw18fc1sri9ywz77mpm1s4";
@@ -150,8 +150,16 @@ let self = _self // overrides; _self = with self; {
     sha256 = "1mxl9dri5729d0jl84gkpqifqf4xzb6aw1rzcfh6l0r24bix9afn";
   };
 
-  fsharpData   = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
+  fsUnit = fetchNuGet {
+    name = "FsUnit";
+    version = "1.3.0.1";
+    sha256 = "1k7w8pc81aplsfn7n46617khmzingd2v7hcgdhh7vgsssibwms64";
+    dlls = [ "Lib/Net40/*.dll" ];
+  };
 
-  nuget_binary = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
-  paket        = callPackage ../development/dotnet-modules/paket { dotnetPackages = self; };
+  fsharpData    = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
+  fsharpxExtras = callPackage ../development/dotnet-modules/FSharpx.Extras { dotnetPackages = self; };
+
+  nuget_binary  = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
+  paket         = callPackage ../development/dotnet-modules/paket { dotnetPackages = self; };
 }; in self

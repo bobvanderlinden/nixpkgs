@@ -18,4 +18,4 @@ Version: $dllVersion
 Libs: -r:$dllFileName
 EOF
 
-echo "Created $targetPcFile."
+echo "Created $targetPcFile"

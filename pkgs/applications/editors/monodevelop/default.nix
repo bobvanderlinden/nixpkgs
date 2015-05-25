@@ -25,8 +25,8 @@ stdenv.mkDerivation rec {
     # it seems parts of MonoDevelop 5.2+ need NUnit 2.6.4, which isn't included
     # (?), so download it and put it in the right place in the tree
     mkdir packages
-    cp -rv ${dotnetPackages.nunit}/opt/dotnet/* -d packages/NUnit.2.6.3
-    cp -rv ${dotnetPackages.nunitRunners}/opt/dotnet/* -d packages/NUnit.Runners.2.6.3
+    cp -rv ${dotnetPackages.nUnit}/opt/dotnet/* -d packages/NUnit.2.6.3
+    cp -rv ${dotnetPackages.nUnitRunners}/opt/dotnet/* -d packages/NUnit.Runners.2.6.3
 
     # cecil needs NUnit 2.5.10 - this is also missing from the tar
     unzip -j ${nunit2510} -d external/cecil/Test/libs/nunit-2.5.10 NUnit-2.5.10.11092/bin/net-2.0/framework/\*

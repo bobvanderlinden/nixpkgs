@@ -27,8 +27,11 @@ stdenv.mkDerivation rec {
     substituteInPlace $out/bin/fsharpiAnyCpu --replace " mono " " ${mono}/bin/mono "
     ln -s $out/bin/fsharpc $out/bin/fsc
     ln -s $out/bin/fsharpi $out/bin/fsi
-    # create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$out/lib/mono/4.0/FSharp.Core.dll" "${version}"
-    bash ${../../../build-support/dotnetbuildhelpers/create-pkg-config-for-dll.sh} "$out/lib/pkgconfig" "$out/lib/mono/4.0/FSharp.Core.dll" "${version}"
+    for dll in "$out/lib/mono/4.0"/FSharp*.dll
+    do
+      # create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll" "${version}"
+      bash ${../../../build-support/dotnetbuildhelpers/create-pkg-config-for-dll.sh} "$out/lib/pkgconfig" "$dll" "${version}"
+    done
   '';
 
   # To fix this error when running:

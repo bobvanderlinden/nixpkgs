@@ -1,0 +1,33 @@
+--- FSharpx.Extras-1.8.41/FSharpx.WithTypeProviders.sln.old	2015-05-25 13:37:45.941915893 +0100
++++ FSharpx.Extras-1.8.41/FSharpx.WithTypeProviders.sln	2015-05-25 13:41:53.663843587 +0100
+@@ -52,8 +52,6 @@
+ EndProject
+ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpx.TypeProviders.Math", "src\FSharpx.TypeProviders.Math\FSharpx.TypeProviders.Math.fsproj", "{97790318-92B5-4A6D-A367-498850D3A7A4}"
+ EndProject
+-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpx.TypeProviders.Excel", "src\FSharpx.TypeProviders.Excel\FSharpx.TypeProviders.Excel.fsproj", "{CAE212FE-242B-4E56-8685-80C3245AB562}"
+-EndProject
+ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpx.TypeProviders.Machine", "src\FSharpx.TypeProviders.Machine\FSharpx.TypeProviders.Machine.fsproj", "{0171175C-20D6-4061-8F88-E2786B1272DF}"
+ EndProject
+ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpx.TypeProviders.Regex", "src\FSharpx.TypeProviders.Regex\FSharpx.TypeProviders.Regex.fsproj", "{48770C02-8F6B-4B82-8911-EE365E9E8C9C}"
+@@ -298,21 +296,6 @@
+ 		{97790318-92B5-4A6D-A367-498850D3A7A4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+ 		{97790318-92B5-4A6D-A367-498850D3A7A4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+ 		{97790318-92B5-4A6D-A367-498850D3A7A4}.Release|x86.ActiveCfg = Release|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.DataStructures|Any CPU.ActiveCfg = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.DataStructures|Any CPU.Build.0 = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.DataStructures|Mixed Platforms.ActiveCfg = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.DataStructures|Mixed Platforms.Build.0 = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.DataStructures|x86.ActiveCfg = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Debug|Any CPU.Build.0 = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Debug|x86.ActiveCfg = Debug|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Release|Any CPU.ActiveCfg = Release|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Release|Any CPU.Build.0 = Release|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+-		{CAE212FE-242B-4E56-8685-80C3245AB562}.Release|x86.ActiveCfg = Release|Any CPU
+ 		{0171175C-20D6-4061-8F88-E2786B1272DF}.DataStructures|Any CPU.ActiveCfg = Debug|Any CPU
+ 		{0171175C-20D6-4061-8F88-E2786B1272DF}.DataStructures|Any CPU.Build.0 = Debug|Any CPU
+ 		{0171175C-20D6-4061-8F88-E2786B1272DF}.DataStructures|Mixed Platforms.ActiveCfg = Debug|Any CPU
