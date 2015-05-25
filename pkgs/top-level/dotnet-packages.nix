@@ -35,14 +35,6 @@ let self = _self // overrides; _self = with self; {
     dlls = [ "lib/net45/*.dll" ];
   };
 
-  # We should be able to get this out of the F# compiler?
-  fsharpCore = fetchNuGet {
-    name = "FSharp.Core";
-    version = "3.1.2.1";
-    sha256 = "0g9chz2mi7r8gw94wdlb99dlgina73fhqijv0qs7ca2lhy3mk1sj";
-    dlls = [ "lib/net40/*.dll" ];
-  };
-
   fsharpFormatting = fetchNuGet {
     name = "FSharp.Formatting";
     version = "2.9.6";
