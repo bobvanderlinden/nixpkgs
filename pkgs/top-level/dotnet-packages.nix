@@ -149,6 +149,8 @@ let self = _self // overrides; _self = with self; {
     sha256 = "1mxl9dri5729d0jl84gkpqifqf4xzb6aw1rzcfh6l0r24bix9afn";
   };
 
+  fsharpData   = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
+
   nuget_binary = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
   paket        = callPackage ../development/dotnet-modules/paket self;
 }; in self
