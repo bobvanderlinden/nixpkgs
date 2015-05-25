@@ -150,6 +150,5 @@ let self = _self // overrides; _self = with self; {
   };
 
   nuget_binary = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
-  paket_binary = callPackage ../development/dotnet-modules/paket/binary.nix { inherit helperFunctions; };
   paket        = callPackage ../development/dotnet-modules/paket self;
 }; in self
