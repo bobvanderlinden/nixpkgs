@@ -31,6 +31,10 @@ stdenv.mkDerivation rec {
   # Parallel building doesn't work, as shows http://hydra.nixos.org/build/2983601
   enableParallelBuilding = false;
 
+  # We want pkg-config to take priority over the dlls in the Mono framework and the GAC
+  # because we control pkg-config
+  patches = [ ./pkgconfig-before-gac.patch ];
+
   # Patch all the necessary scripts. Also, if we're using LLVM, we fix the default
   # LLVM path to point into the Mono LLVM build, since it's private anyway.
   preBuild = ''
