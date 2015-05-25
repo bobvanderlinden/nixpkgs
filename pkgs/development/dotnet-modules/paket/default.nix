@@ -2,12 +2,12 @@
 
 stdenv.mkDerivation rec {
   name = "paket-${version}";
-  version = "1.5.0";
+  version = "1.5.3";
 
   src = fetchurl {
     name = "${name}.tar.gz";
     url = "https://github.com/fsprojects/Paket/archive/${version}.tar.gz";
-    sha256 = "1f6b0m67lncgpa1pxa1w086jc15nppjf3nb6np9f1zpdxag2dwws";
+    sha256 = "0pf16944b6yvhbnfvw9p7zgjj07r5c1sbcxq2fajb7x9vq9nd718";
   };
 
   buildInputs = [
