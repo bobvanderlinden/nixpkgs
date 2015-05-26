@@ -22,7 +22,7 @@ stdenv.mkDerivation rec {
     dotnetPackages.fsUnit
   ];
 
-  patches = [ ./fsharpx.patch ];
+  patches = [ ./disable_excel.patch ];
 
   configurePhase = ''
      # Just to make sure there's no attempt to call these executables
