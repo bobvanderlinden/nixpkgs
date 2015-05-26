@@ -1,8 +1,9 @@
 { stdenv, fetchurl, makeWrapper, mono, dotnetbuildhelpers, fsharp, pkgconfig, dotnetPackages }:
 
 stdenv.mkDerivation rec {
-  name = "FSharp.Data-${version}";
+  baseName = "FSharp.Data";
   version = "2.2.2";
+  name = "${baseName}-${version}";
 
   src = fetchurl {
     name = "${name}.tar.gz";
@@ -37,7 +38,8 @@ stdenv.mkDerivation rec {
      cp -v "${fileDebugProvidedTypes}" "paket-files/fsprojects/FSharp.TypeProviders.StarterPack/src/DebugProvidedTypes.fs"
 
      # Just to make sure there's no attempt to call these executables
-     rm -rvf .paket 
+     sed -i -e 's,mono --runtime=.* \$(.*),true,g' .paket/paket.targets
+     rm -vf .paket/paket.bootstrapper.exe # Just to be sure
   '';
 
   buildPhase = ''
@@ -47,9 +49,9 @@ stdenv.mkDerivation rec {
   '';
 
   installPhase = ''
-    mkdir -p "$out"/opt/dotnet/FSharp.Data
-    cp -rv bin/* "$out"/opt/dotnet/FSharp.Data
-    for dll in "$out"/opt/dotnet/FSharp.Data/*.dll 
+    mkdir -p "$out"/opt/dotnet/${baseName}
+    cp -rv bin/* "$out"/opt/dotnet/${baseName}
+    for dll in "$out"/opt/dotnet/${baseName}/*.dll
     do
       create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
     done
