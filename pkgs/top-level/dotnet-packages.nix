@@ -88,7 +88,14 @@ let self = _self // overrides; _self = with self; {
     version = "2.6.4";
     sha256 = "11nmi7vikn9idz8qcad9z7f73arsh5rw18fc1sri9ywz77mpm1s4";
     dlls = [ "tools/lib/*.dll" ];
-    exes = [ ];
+    exes = {
+      "nunit-agent" = "tools/nunit-agent.exe";
+      "nunit-console" = "tools/nunit-console.exe";
+      "nunit-editor" = "tools/nunit-editor.exe";
+      "nunit" = "tools/nunit.exe";
+      "pnunit-agent" = "tools/pnunit-agent.exe";
+      "pnunit-launcher" = "tools/pnunit-launcher.exe";
+    };
   };
 
   octokit = fetchNuGet {

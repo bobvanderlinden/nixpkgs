@@ -1,4 +1,4 @@
-{ stdenv, lib, fetchurl, unzip, dotnetbuildhelpers }:
+{ stdenv, lib, makeWrapper, fetchurl, unzip, mono, dotnetbuildhelpers }:
 
 { name
 , version
@@ -36,6 +36,8 @@
       }
 
       (cd "$target"; traverseRename)
+
+      source "${makeWrapper}/nix-support/setup-hook" # Surely there's a better way to do this?
     ''
     + (lib.concatStringsSep "\n"
         (map
@@ -44,5 +46,12 @@
             do 
               ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
             done'')
-          dlls));
+          dlls)) + "\n"
+    + (lib.concatStringsSep "\n"
+        (builtins.attrValues
+          (lib.mapAttrs
+            (commandName: exePath: ''
+              mkdir -p "$out"/bin
+              makeWrapper "${mono}/bin/mono \"$target/${exePath}\"" "$out"/bin/"${commandName}"
+            '') exes))) + "\n";
   }

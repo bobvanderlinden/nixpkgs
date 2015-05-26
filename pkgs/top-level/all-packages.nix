@@ -411,7 +411,7 @@ let
   #   name = "${name}.${version}.nupkg";
   # };
 
-  fetchNuGet = import ../build-support/fetchnuget { inherit stdenv lib fetchurl unzip dotnetbuildhelpers; };
+  fetchNuGet = import ../build-support/fetchnuget { inherit stdenv lib fetchurl makeWrapper unzip mono dotnetbuildhelpers; };
 
   resolveMirrorURLs = {url}: fetchurl {
     showURLs = true;
