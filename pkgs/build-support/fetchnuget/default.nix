@@ -7,9 +7,10 @@
 , md5 ? ""
 , dlls ? []
 , exes ? {}
+, postInstall ? ""
 }:
   stdenv.mkDerivation {
-    inherit name version;
+    inherit name version postInstall;
     src = fetchurl {
       inherit url sha256 md5;
       name = "${name}.${version}.nupkg";
@@ -19,6 +20,22 @@
       target="$out/opt/dotnet/${name}"
       mkdir -p "$target"
       ${unzip}/bin/unzip -d "$target" "$src"
+
+      function traverseRename () {
+        for e in *
+        do
+          t="$(echo "$e" | sed -e "s/%20/\ /g" -e "s/%2B/+/g")"
+          [ "$t" != "$e" ] && mv -vn "$e" "$t"
+          if [ -d "$t" ]
+          then
+            cd "$t"
+            traverseRename
+            cd ..
+          fi
+        done
+      }
+
+      (cd "$target"; traverseRename)
     ''
     + (lib.concatStringsSep "\n"
         (map
