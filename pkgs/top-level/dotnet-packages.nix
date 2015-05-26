@@ -76,13 +76,6 @@ let self = _self // overrides; _self = with self; {
     dlls = [ "lib/net40/*.dll" ];
   };
 
-  newtonsoftJson = fetchNuGet {
-    name = "Newtonsoft.Json";
-    version = "6.0.8";
-    sha256 = "1daz1zj2lvb20d9mk1bzxjgd8syr2m9glnwgibkkx0l6z0qx1asz";
-    dlls = [ "lib/net45/*.dll" ];
-  };
-
   nUnit = fetchNuGet {
     name = "NUnit";
     version = "2.6.4";
@@ -149,9 +142,24 @@ let self = _self // overrides; _self = with self; {
     dlls = [ "Lib/Net40/*.dll" ];
   };
 
-  fsharpData    = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
-  fsharpxExtras = callPackage ../development/dotnet-modules/FSharpx.Extras { dotnetPackages = self; };
+  systemCollectionsImmutable = fetchNuGet {
+    name = "System.Collections.Immutable";
+    version = "1.1.36";
+    sha256 = "0760kzf5s771pnvnxsgas446kqdh1b71w6g3k75jpzldfmsd3vyq";
+    dlls = [ "lib/portable-net45+win8+wp8+wpa81/*.dll" ];
+  };
 
-  nuget_binary  = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
-  paket         = callPackage ../development/dotnet-modules/paket { dotnetPackages = self; };
+  autofac = fetchNuGet {
+    name = "Autofac";
+    version = "3.5.2";
+    sha256 = "194cs8ybn5xjqnzy643w5i62m0d5s34d3nshwxp2v4fcb94wa4ri";
+    dlls = [ "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/*.dll" ];
+  };
+
+  newtonsoftJson = callPackage ../development/dotnet-modules/Newtonsoft.Json { dotnetPackages = self; };
+  fsharpData     = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
+  fsharpxExtras  = callPackage ../development/dotnet-modules/FSharpx.Extras { dotnetPackages = self; };
+
+  nuget_binary   = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
+  paket          = callPackage ../development/dotnet-modules/paket { dotnetPackages = self; };
 }; in self
