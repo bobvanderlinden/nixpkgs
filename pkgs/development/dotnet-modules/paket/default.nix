@@ -17,6 +17,7 @@ stdenv.mkDerivation rec {
     fsharp pkgconfig
     dotnetPackages.newtonsoftJson
     dotnetPackages.unionArgParser
+    dotnetPackages.nUnit
   ];
 
   fileFsUnit = fetchurl {
@@ -59,14 +60,9 @@ stdenv.mkDerivation rec {
      rm -vf .paket/*.exe # Just to be sure
   '';
 
-  # patches = [ ./paket.patch ];
-
   buildPhase = ''
     export FSharpTargetsPath="${fsharp}/lib/mono/4.0/Microsoft.FSharp.Targets"
-
-    # Tests won't build so we only build the main fsprojs
-    xbuild src/Paket/Paket.fsproj
-    xbuild src/Paket.Bootstrapper/Paket.Bootstrapper.csproj
+    xbuild /p:Configuration=Release
   '';
 
   installPhase = ''
