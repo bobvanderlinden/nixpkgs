@@ -39,11 +39,6 @@ stdenv.mkDerivation rec {
     mono gtk-sharp gnome-sharp unzip
     dotnetPackages.nUnit
     dotnetPackages.nUnitRunners
-    dotnetPackages.systemWebMvcExtensions
-    dotnetPackages.microsoftAspNetMvc
-    dotnetPackages.microsoftAspNetRazor
-    dotnetPackages.microsoftAspNetWebPages
-    dotnetPackages.microsoftWebInfrastructure
   ];
 
   preConfigure = "patchShebangs ./configure";
