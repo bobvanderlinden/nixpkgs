@@ -22,12 +22,6 @@ stdenv.mkDerivation rec {
   postPatch = ''
     # From https://bugzilla.xamarin.com/show_bug.cgi?id=23696#c19
 
-    # it seems parts of MonoDevelop 5.2+ need NUnit 2.6.4, which isn't included
-    # (?), so download it and put it in the right place in the tree
-    mkdir packages
-    cp -rv ${dotnetPackages.nUnit}/opt/dotnet/* -d packages/NUnit.2.6.3
-    cp -rv ${dotnetPackages.nUnitRunners}/opt/dotnet/* -d packages/NUnit.Runners.2.6.3
-
     # cecil needs NUnit 2.5.10 - this is also missing from the tar
     unzip -j ${nunit2510} -d external/cecil/Test/libs/nunit-2.5.10 NUnit-2.5.10.11092/bin/net-2.0/framework/\*
 
@@ -35,17 +29,21 @@ stdenv.mkDerivation rec {
     # into the right place
     cp -vfR ${dotnetPackages.nuget_binary}/opt/dotnet/nuget-binary/* external/nuget-binary/
 
-    # AspNet plugin requires these packages
-    cp -rv ${dotnetPackages.systemWebMvcExtensions}/opt/dotnet/* -d packages/System.Web.Mvc.Extensions.Mvc.4.1.0.9
-    cp -rv ${dotnetPackages.microsoftAspNetMvc}/opt/dotnet/* -d packages/Microsoft.AspNet.Mvc.5.2.2
-    cp -rv ${dotnetPackages.microsoftAspNetRazor}/opt/dotnet/* -d packages/Microsoft.AspNet.Razor.3.2.2
-    cp -rv ${dotnetPackages.microsoftAspNetWebPages}/opt/dotnet/* -d packages/Microsoft.AspNet.WebPages.3.2.2
-    cp -rv ${dotnetPackages.microsoftWebInfrastructure}/opt/dotnet/* -d packages/Microsoft.Web.Infrastructure.1.0.0.0
+    # Revert this commit which broke the ability to use pkg-config to locate dlls
+    echo Applying ${./git-revert-12d610fb3f6dce121df538e36f21d8c2eeb0a6e3.patch}
+    patch -p2 < ${./git-revert-12d610fb3f6dce121df538e36f21d8c2eeb0a6e3.patch}
   '';
 
   buildInputs = [
     autoconf automake pkgconfig shared_mime_info intltool
     mono gtk-sharp gnome-sharp unzip
+    dotnetPackages.nUnit
+    dotnetPackages.nUnitRunners
+    dotnetPackages.systemWebMvcExtensions
+    dotnetPackages.microsoftAspNetMvc
+    dotnetPackages.microsoftAspNetRazor
+    dotnetPackages.microsoftAspNetWebPages
+    dotnetPackages.microsoftWebInfrastructure
   ];
 
   preConfigure = "patchShebangs ./configure";
