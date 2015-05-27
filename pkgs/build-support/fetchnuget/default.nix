@@ -11,11 +11,16 @@
 }:
   stdenv.mkDerivation {
     inherit name version postInstall;
+
     src = fetchurl {
       inherit url sha256 md5;
       name = "${name}.${version}.nupkg";
     };
+
     phases = [ "installPhase" ];
+
+    buildInputs = [ makeWrapper ];
+
     installPhase = ''
       target="$out/opt/dotnet/${name}"
       mkdir -p "$target"
@@ -36,8 +41,6 @@
       }
 
       (cd "$target"; traverseRename)
-
-      source "${makeWrapper}/nix-support/setup-hook" # Surely there's a better way to do this?
     ''
     + (lib.concatStringsSep "\n"
         (map
