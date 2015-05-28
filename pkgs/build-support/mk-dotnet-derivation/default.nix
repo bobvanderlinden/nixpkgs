@@ -87,7 +87,7 @@
     installPhase = preInstall + ''
       ${preInstall}
 
-      target="$out/opt/dotnet/${baseName}"
+      target="$out/lib/dotnet/${baseName}"
       mkdir -p "$target"
       for output in ${toString outputFiles}
       do

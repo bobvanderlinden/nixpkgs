@@ -27,7 +27,7 @@ stdenv.mkDerivation rec {
 
     # the tar doesn't include the nuget binary, so grab it from github and copy it
     # into the right place
-    cp -vfR ${dotnetPackages.nuget_binary}/opt/dotnet/*/* external/nuget-binary/
+    cp -vfR "$(pkg-config NuGet.Core --variable=Libraries | cut -f 2- -d = | xargs dirname)"/* external/nuget-binary/
   '';
 
   # Revert this commit which broke the ability to use pkg-config to locate dlls
@@ -37,8 +37,10 @@ stdenv.mkDerivation rec {
   buildInputs = [
     autoconf automake pkgconfig shared_mime_info intltool
     mono gtk-sharp gnome-sharp unzip
+    pkgconfig
     dotnetPackages.nUnit
     dotnetPackages.nUnitRunners
+    dotnetPackages.nuget_binary
   ];
 
   preConfigure = "patchShebangs ./configure";
