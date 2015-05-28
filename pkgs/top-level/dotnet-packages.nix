@@ -105,13 +105,6 @@ let self = _self // overrides; _self = with self; {
   #   dllFiles = [ "lib/net45/*.dll" ];
   # };
 
-  unionArgParser = fetchNuGet {
-    name = "UnionArgParser";
-    version = "0.8.7";
-    sha256 = "0lgyc3mb7ja07r0vh9b88yr8va9fbwppidgq83vzh3k61xvij9id";
-    dllFiles = [ "lib/net40/*.dll" ];
-  };
-
   # systemWebMvcExtensions = fetchNuGet {
   #   name = "System.Web.Mvc.Extensions.Mvc.4";
   #   version = "1.0.9";
@@ -165,6 +158,7 @@ let self = _self // overrides; _self = with self; {
 
   newtonsoftJson = callPackage ../development/dotnet-modules/Newtonsoft.Json { dotnetPackages = self; };
   extCore        = callPackage ../development/dotnet-modules/ExtCore { dotnetPackages = self; };
+  unionArgParser = callPackage ../development/dotnet-modules/UnionArgParser { dotnetPackages = self; };
   fsharpData     = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
   fsharpxExtras  = callPackage ../development/dotnet-modules/FSharpx.Extras { dotnetPackages = self; };
 
