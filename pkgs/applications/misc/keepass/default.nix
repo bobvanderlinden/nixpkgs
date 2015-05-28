@@ -1,7 +1,7 @@
-{ stdenv, fetchurl, makeWrapper, unzip, makeDesktopItem, mono, dotnetbuildhelpers }:
+{ stdenv, fetchurl, mkDotnetDerivation, makeWrapper, unzip, makeDesktopItem }:
 
-stdenv.mkDerivation rec {
-  name = "keepass-${version}";
+mkDotnetDerivation rec {
+  baseName = "keepass";
   version = "2.29";
 
   src = fetchurl {
@@ -11,18 +11,11 @@ stdenv.mkDerivation rec {
 
   sourceRoot = ".";
 
-  buildInputs = [
-    unzip
-    mono
-    dotnetbuildhelpers
-    makeWrapper
-  ];
+  extraBuildInputs = [ unzip ];
 
   patches = [ ./keepass.patch ];
 
-  configurePhase = "rm -rvf Build/*";
-
-  buildPhase = "xbuild /p:Configuration=Release";
+  preConfigure = "rm -rvf Build/*";
 
   desktopItem = makeDesktopItem {
     name = "keepass";
@@ -33,19 +26,12 @@ stdenv.mkDerivation rec {
     categories = "Application;Other;";
   };
 
-  installPhase = ''
-    mkdir -p "$out/opt/dotnet/Keepass/bin"
-    mkdir -p "$out/opt/dotnet/Keepass/lib"
+  outputFiles = [ "Build/KeePass/Release/*" "Build/KeePassLib/Release/*" ];
+  dllFiles = [ "KeePassLib.dll" ];
+  exeFiles = [ "KeePass.exe" ];
 
-    cp -v Build/KeePass/Release/* "$out/opt/dotnet/Keepass/bin"
-    cp -v Build/KeePassLib/Release/* "$out/opt/dotnet/Keepass/lib"
-
-    mkdir -p "$out/bin"
-    mkdir -p "$out/lib"
+  postInstall = ''
     mkdir -p "$out/share/applications"
-
-    makeWrapper "${mono}/bin/mono $out/opt/dotnet/Keepass/bin/KeePass.exe" "$out/bin/keepass" 
-    create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$out/opt/dotnet/Keepass/lib/KeePassLib.dll"
     cp ${desktopItem}/share/applications/* $out/share/applications
   '';
 
