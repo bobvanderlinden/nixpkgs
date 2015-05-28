@@ -286,7 +286,7 @@ let
   };
 
   dotnetbuildhelpers = import ../build-support/dotnetbuildhelpers {
-    inherit mono helperFunctions;
+    inherit mono helperFunctions pkgconfig;
   };
 
   scatterOutputHook = makeSetupHook {} ../build-support/setup-hooks/scatter_output.sh;

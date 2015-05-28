@@ -6,6 +6,7 @@
 , placateNuget ? true
 , placatePaket ? true
 , patchFSharpTargets ? true
+, removeDuplicatedDlls ? true
 , xBuildFiles ? [ ]
 , xBuildFlags ? [ "/p:Configuration=Release" ]
 , outputFiles ? [ "bin/Release/*" ] # Wildcards allowed
@@ -92,6 +93,13 @@
       do
         cp -rv "$output" "$target"
       done
+
+      if ${if removeDuplicatedDlls then "true" else "false"}
+      then
+        pushd "$out"
+        remove-duplicated-dlls.sh
+        popd
+      fi
     ''
     + (lib.concatStringsSep "\n"
         (map
