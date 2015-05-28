@@ -1,23 +1,16 @@
-{ stdenv, fetchurl, makeWrapper, mono, dotnetbuildhelpers, fsharp, pkgconfig, dotnetPackages }:
+{ stdenv, fetchurl, mkDotnetDerivation, fsharp, dotnetPackages }:
 
-stdenv.mkDerivation rec {
+mkDotnetDerivation rec {
   baseName = "FSharp.Data";
   version = "2.2.2";
-  name = "${baseName}-${version}";
 
   src = fetchurl {
-    name = "${name}.tar.gz";
+    name = "${baseName}-${version}.tar.gz";
     url = "https://github.com/fsharp/FSharp.Data/archive/${version}.tar.gz";
     sha256 = "1li33ydjxz18v8siw53vv1nmkp5w7sdlsjcrfp6dzcynpvwbjw3s";
   };
 
-  buildInputs = [
-    makeWrapper
-    mono
-    dotnetbuildhelpers
-    fsharp
-    pkgconfig
-  ];
+  extraBuildInputs = [ fsharp ];
 
   fileProvidedTypes = fetchurl {
     name = "ProvidedTypes.fs";
@@ -31,33 +24,16 @@ stdenv.mkDerivation rec {
     sha256 = "1whyrf2jv6fs7kgysn2086v15ggjsd54g1xfs398mp46m0nxp91f";
   };
 
-  configurePhase = ''
+  preConfigure = ''
      # Copy single-files-in-git-repos
      mkdir -p "paket-files/fsprojects/FSharp.TypeProviders.StarterPack/src"
      cp -v "${fileProvidedTypes}" "paket-files/fsprojects/FSharp.TypeProviders.StarterPack/src/ProvidedTypes.fs"
      cp -v "${fileDebugProvidedTypes}" "paket-files/fsprojects/FSharp.TypeProviders.StarterPack/src/DebugProvidedTypes.fs"
-
-     # Just to make sure there's no attempt to call these executables
-     sed -i -e 's,mono --runtime=.* \$(.*),true,g' .paket/paket.targets
-     rm -vf .paket/paket.bootstrapper.exe # Just to be sure
   '';
 
-  buildPhase = ''
-    export FSharpTargetsPath="${fsharp}/lib/mono/4.0/Microsoft.FSharp.Targets"
-    xbuild src/FSharp.Data.fsproj
-    xbuild src/FSharp.Data.DesignTime.fsproj
-  '';
-
-  installPhase = ''
-    mkdir -p "$out"/opt/dotnet/${baseName}
-    cp -rv bin/* "$out"/opt/dotnet/${baseName}
-    for dll in "$out"/opt/dotnet/${baseName}/*.dll
-    do
-      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
-    done
-  '';
-
-  dontStrip = true;
+  xBuildFiles = [ "src/FSharp.Data.fsproj" "src/FSharp.Data.DesignTime.fsproj" ];
+  outputFiles = [ "bin/*.dll" "bin/*.xml" ];
+  dllFiles = [ "*.dll" ];
 
   meta = {
     description = "F# Data: Library for Data Access";
