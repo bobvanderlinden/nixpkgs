@@ -286,8 +286,7 @@ let
   };
 
   dotnetbuildhelpers = import ../build-support/dotnetbuildhelpers {
-    inherit helperFunctions;
-    inherit mono;
+    inherit mono helperFunctions;
   };
 
   scatterOutputHook = makeSetupHook {} ../build-support/setup-hooks/scatter_output.sh;
@@ -3804,7 +3803,7 @@ let
 
   fsharp = callPackage ../development/compilers/fsharp {};
 
-  dotnetPackages = recurseIntoAttrs (callPackage ./dotnet-packages.nix { inherit stdenv helperFunctions fetchNuGet; });
+  dotnetPackages = recurseIntoAttrs (callPackage ./dotnet-packages.nix { inherit stdenv fetchNuGet; });
 
   nuget = dotnetPackages.nuget_binary;
   paket = dotnetPackages.paket;

@@ -1,6 +1,5 @@
 { stdenv
 , callPackage
-, helperFunctions
 , fetchNuGet
 , overrides ? {}
 }:
@@ -169,6 +168,6 @@ let self = _self // overrides; _self = with self; {
   fsharpData     = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
   fsharpxExtras  = callPackage ../development/dotnet-modules/FSharpx.Extras { dotnetPackages = self; };
 
-  nuget_binary   = callPackage ../development/dotnet-modules/nuget { inherit helperFunctions; };
+  nuget_binary   = callPackage ../development/dotnet-modules/nuget { };
   paket          = callPackage ../development/dotnet-modules/paket { dotnetPackages = self; };
 }; in self
