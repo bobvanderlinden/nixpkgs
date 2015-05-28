@@ -8,9 +8,9 @@
 , patchFSharpTargets ? true
 , xBuildFiles ? [ ]
 , xBuildFlags ? [ "/p:Configuration=Release" ]
-, outputFiles ? [ "bin/Release/*" ]
-, dllFiles ? []
-, exeFiles ? []
+, outputFiles ? [ "bin/Release/*" ] # Wildcards allowed
+, dllFiles ? [] # Wildcards allowed
+, exeFiles ? [] # Wildcards NOT allowed
 , preConfigure ? ""
 , postConfigure ? ""
 , preBuild ? ""
@@ -90,7 +90,7 @@
       mkdir -p "$target"
       for output in ${toString outputFiles}
       do
-        cp -rv $output "$target"
+        cp -rv "$output" "$target"
       done
     ''
     + (lib.concatStringsSep "\n"

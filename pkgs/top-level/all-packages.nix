@@ -404,7 +404,7 @@ let
     url = "http://repo.or.cz/${repo}.git/snapshot/${rev}.tar.gz";
   };
 
-  fetchNuGet = import ../build-support/fetchnuget { inherit stdenv lib fetchurl makeWrapper unzip mono dotnetbuildhelpers; };
+  fetchNuGet = import ../build-support/fetchnuget { inherit stdenv fetchurl mkDotnetDerivation unzip; };
   mkDotnetDerivation = import ../build-support/mk-dotnet-derivation { inherit stdenv lib makeWrapper mono pkgconfig dotnetbuildhelpers; };
 
   resolveMirrorURLs = {url}: fetchurl {
