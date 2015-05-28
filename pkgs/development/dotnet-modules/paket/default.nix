@@ -1,20 +1,17 @@
-{ stdenv, fetchurl, makeWrapper, mono, dotnetbuildhelpers, fsharp, pkgconfig, dotnetPackages }:
+{ stdenv, fetchurl, mkDotnetDerivation, fsharp, dotnetPackages }:
 
-stdenv.mkDerivation rec {
-  name = "paket-${version}";
+mkDotnetDerivation rec {
+  baseName = "paket";
   version = "1.6.2";
 
   src = fetchurl {
-    name = "${name}.tar.gz";
+    name = "${baseName}-${version}.tar.gz";
     url = "https://github.com/fsprojects/Paket/archive/${version}.tar.gz";
     sha256 = "1ryslxdgc3r7kcn1gq4bqcyrqdi8z6364aj3lr7yjz71wi22fca8";
   };
 
-  buildInputs = [
-    makeWrapper
-    mono
-    dotnetbuildhelpers
-    fsharp pkgconfig
+  extraBuildInputs = [
+    fsharp
     dotnetPackages.newtonsoftJson
     dotnetPackages.unionArgParser
     dotnetPackages.nUnit
@@ -44,7 +41,7 @@ stdenv.mkDerivation rec {
     sha256 = "0ka9ilfbl4izxc1wqd5vlfjnp7n2xcckfhp13gzhqbdx7464van9";
   };
 
-  configurePhase = ''
+  postConfigure = ''
      # Copy said single-files-in-git-repos
      mkdir -p "paket-files/forki/FsUnit"
      cp -v "${fileFsUnit}" "paket-files/forki/FsUnit/FsUnit.fs"
@@ -54,28 +51,13 @@ stdenv.mkDerivation rec {
 
      mkdir -p "paket-files/fsprojects/Chessie/src/Chessie"
      cp -v "${fileErrorHandling}" "paket-files/fsprojects/Chessie/src/Chessie/ErrorHandling.fs"
-
-     # Prevent the bootstrapper from being executed during build
-     sed -i -e 's,<Exec Command=.*/>,,g' .paket/paket.targets
-     rm -vf .paket/*.exe # Just to be sure
   '';
 
-  buildPhase = ''
-    export FSharpTargetsPath="${fsharp}/lib/mono/4.0/Microsoft.FSharp.Targets"
-    xbuild /p:Configuration=Release
-  '';
+  xBuildFiles = [ ];
 
-  installPhase = ''
-    mkdir -p "$out"/opt/dotnet/paket
-    cp -v bin/* "$out"/opt/dotnet/paket
-    makeWrapper "${mono}/bin/mono $out/opt/dotnet/paket/paket.exe" "$out/bin/paket"
-    for dll in "$out"/opt/dotnet/paket/Paket*.dll
-    do
-      create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
-    done
-  '';
-
-  dontStrip = true;
+  outputFiles = [ "bin/*" ];
+  dllFiles = [ "Paket*.dll" ];
+  exeFiles = [ "paket.exe" ];
 
   meta = {
     description = "A dependency manager for .NET and Mono projects";

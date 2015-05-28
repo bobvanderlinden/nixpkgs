@@ -6,7 +6,7 @@
 , placateNuget ? true
 , placatePaket ? true
 , patchFSharpTargets ? true
-, xBuildFiles ? [ "" ]
+, xBuildFiles ? [ ]
 , xBuildFlags ? [ "/p:Configuration=Release" ]
 , outputFiles ? [ "bin/Release/*" ]
 , dllFiles ? []
@@ -68,10 +68,15 @@
         export FSharpTargetsPath="$(pkg-config FSharp.Core --variable=Libraries | cut -f 2- -d = | xargs dirname)/Microsoft.FSharp.Targets"
       fi
 
-      for xBuildFile in ${toString xBuildFiles}
-      do
-        xbuild ${toString xBuildFlags} $xBuildFile
-      done
+      if ${if builtins.length(xBuildFiles) > 0 then "true" else "false"}
+      then
+        for xBuildFile in ${toString xBuildFiles}
+        do
+          xbuild ${toString xBuildFlags} $xBuildFile
+        done
+      else
+        xbuild ${toString xBuildFlags}
+      fi
 
       ${postBuild}
     '';
@@ -100,7 +105,7 @@
         (map
           (exe : ''
             mkdir -p "$out"/bin
-            commandName="$(basename -s .exe "$(echo "$exe" | tr [A-Z] [a-z])"" 
+            commandName="$(basename -s .exe "$(echo "${exe}" | tr "[A-Z]" "[a-z]")")" 
             makeWrapper "${mono}/bin/mono \"$target/${exe}\"" "$out"/bin/"$commandName"
           '') exeFiles)) + "\n"
     + postInstall;
