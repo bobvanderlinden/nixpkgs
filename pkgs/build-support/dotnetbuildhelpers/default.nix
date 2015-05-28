@@ -6,7 +6,7 @@
       target="$out/bin"
       mkdir -p "$target"
 
-      for script in ${./create-nupkg-mirror.sh} ${./create-pkg-config-for-dll.sh} ${./patch-fsharp-targets.sh}
+      for script in ${./create-pkg-config-for-dll.sh} ${./patch-fsharp-targets.sh}
       do
         scriptName="$(basename "$script" | cut -f 2- -d -)"
         cp -v "$script" "$target"/"$scriptName"
