@@ -164,6 +164,7 @@ let self = _self // overrides; _self = with self; {
   };
 
   newtonsoftJson = callPackage ../development/dotnet-modules/Newtonsoft.Json { dotnetPackages = self; };
+  extCore        = callPackage ../development/dotnet-modules/ExtCore { dotnetPackages = self; };
   fsharpData     = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
   fsharpxExtras  = callPackage ../development/dotnet-modules/FSharpx.Extras { dotnetPackages = self; };
 
