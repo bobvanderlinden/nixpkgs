@@ -27,12 +27,12 @@ stdenv.mkDerivation rec {
 
     # the tar doesn't include the nuget binary, so grab it from github and copy it
     # into the right place
-    cp -vfR ${dotnetPackages.nuget_binary}/opt/dotnet/nuget-binary/* external/nuget-binary/
-
-    # Revert this commit which broke the ability to use pkg-config to locate dlls
-    echo Applying ${./git-revert-12d610fb3f6dce121df538e36f21d8c2eeb0a6e3.patch}
-    patch -p2 < ${./git-revert-12d610fb3f6dce121df538e36f21d8c2eeb0a6e3.patch}
+    cp -vfR ${dotnetPackages.nuget_binary}/opt/dotnet/*/* external/nuget-binary/
   '';
+
+  # Revert this commit which broke the ability to use pkg-config to locate dlls
+  patchFlags = [ "-p2" ];
+  patches = [ ./git-revert-12d610fb3f6dce121df538e36f21d8c2eeb0a6e3.patch ];
 
   buildInputs = [
     autoconf automake pkgconfig shared_mime_info intltool
