@@ -40,7 +40,7 @@ stdenv.mkDerivation rec {
     pkgconfig
     dotnetPackages.nUnit
     dotnetPackages.nUnitRunners
-    dotnetPackages.nuget_binary
+    dotnetPackages.nuget
   ];
 
   preConfigure = "patchShebangs ./configure";

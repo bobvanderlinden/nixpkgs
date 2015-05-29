@@ -3805,7 +3805,7 @@ let
 
   dotnetPackages = recurseIntoAttrs (callPackage ./dotnet-packages.nix { inherit stdenv fetchNuGet; });
 
-  nuget = dotnetPackages.nuget_binary;
+  nuget = dotnetPackages.nuget;
   paket = dotnetPackages.paket;
 
   go_1_0 = callPackage ../development/compilers/go { };
