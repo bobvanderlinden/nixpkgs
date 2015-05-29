@@ -1,6 +1,6 @@
-{ stdenv, fetchgit, mkDotnetDerivation, unzip }:
+{ stdenv, fetchgit, buildDotnetPackage, unzip }:
 
-mkDotnetDerivation {
+buildDotnetPackage {
   baseName = "nuget";
   version = "2.8.5";
 

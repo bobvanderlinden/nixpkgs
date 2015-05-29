@@ -1,6 +1,6 @@
-{ stdenv, fetchgit, mkDotnetDerivation, fsharp, dotnetPackages }:
+{ stdenv, fetchgit, buildDotnetPackage, fsharp, dotnetPackages }:
 
-mkDotnetDerivation rec {
+buildDotnetPackage rec {
   baseName = "UnionArgParser";
   version = "0.8.7";
 

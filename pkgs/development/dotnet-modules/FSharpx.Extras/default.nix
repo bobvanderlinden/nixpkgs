@@ -1,6 +1,6 @@
-{ stdenv, fetchurl, mkDotnetDerivation, fsharp, dotnetPackages }:
+{ stdenv, fetchurl, buildDotnetPackage, fsharp, dotnetPackages }:
 
-mkDotnetDerivation rec {
+buildDotnetPackage rec {
   baseName = "FSharpx.Extras";
   version = "1.8.41";
 

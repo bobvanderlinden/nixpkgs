@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, mkDotnetDerivation, unzip }:
+{ stdenv, fetchurl, buildDotnetPackage, unzip }:
 
 { name
 , version
@@ -8,7 +8,7 @@
 , dllFiles ? []
 , exeFiles ? []
 }:
-  mkDotnetDerivation {
+  buildDotnetPackage {
     inherit version dllFiles exeFiles;
 
     baseName = name;

@@ -35,7 +35,7 @@
       if ${if placateNuget then "true" else "false"}
       then
         echo Placating Nuget in nuget.targets
-        find -iname nuget.targets -print -exec sed -i -e 's,mono --runtime[^<]*,true NUGET PLACATED BY mkDotnetDerivation,g' {} \;
+        find -iname nuget.targets -print -exec sed -i -e 's,mono --runtime[^<]*,true NUGET PLACATED BY buildDotnetPackage,g' {} \;
 
         echo Just to be sure, replacing Nuget executables by empty files.
         find . -iname nuget.exe -exec rm -v {} \; -exec touch {} \; 
@@ -44,7 +44,7 @@
       if ${if placatePaket then "true" else "false"}
       then
         echo Placating Paket in paket.targets
-        find -iname paket.targets -print -exec sed -i -e 's,mono --runtime[^<]*,true PAKET PLACATED BY mkDotnetDerivation,g' {} \;
+        find -iname paket.targets -print -exec sed -i -e 's,mono --runtime[^<]*,true PAKET PLACATED BY buildDotnetPackage,g' {} \;
 
         echo Just to be sure, replacing Paket executables by empty files.
         find . -iname paket\*.exe -exec rm -v {} \; -exec touch {} \; 

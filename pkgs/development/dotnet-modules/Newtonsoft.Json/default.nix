@@ -1,6 +1,6 @@
-{ stdenv, fetchurl, mkDotnetDerivation, fsharp, dotnetPackages }:
+{ stdenv, fetchurl, buildDotnetPackage, fsharp, dotnetPackages }:
 
-mkDotnetDerivation rec {
+buildDotnetPackage rec {
   baseName = "Newtonsoft.Json";
   version = "6.0.8";
 

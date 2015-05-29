@@ -1,6 +1,6 @@
-{ stdenv, fetchurl, mkDotnetDerivation, makeWrapper, unzip, makeDesktopItem }:
+{ stdenv, fetchurl, buildDotnetPackage, makeWrapper, unzip, makeDesktopItem }:
 
-mkDotnetDerivation rec {
+buildDotnetPackage rec {
   baseName = "keepass";
   version = "2.29";
 
