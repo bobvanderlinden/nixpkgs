@@ -2,7 +2,7 @@
 
 { baseName
 , version
-, extraBuildInputs ? []
+, buildInputs ? []
 , placateNuget ? true
 , placatePaket ? true
 , patchFSharpTargets ? true
@@ -27,7 +27,7 @@
       mono
       dotnetbuildhelpers
       makeWrapper
-    ] ++ extraBuildInputs;
+    ] ++ buildInputs;
 
     configurePhase = ''
       ${preConfigure}
@@ -117,4 +117,4 @@
             makeWrapper "${mono}/bin/mono \"$target/${exe}\"" "$out"/bin/"$commandName"
           '') exeFiles)) + "\n"
     + postInstall;
-  } // attrs)
+  } // (builtins.removeAttrs attrs [ "buildInputs" ] ))

@@ -20,7 +20,7 @@
 
     sourceRoot = ".";
 
-    extraBuildInputs = [ unzip ];
+    buildInputs = [ unzip ];
 
     phases = [ "unpackPhase" "installPhase" ];
 

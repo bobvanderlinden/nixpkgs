@@ -10,7 +10,7 @@ buildDotnetPackage rec {
     sha256 = "102z5bvk3ffi1crgyp51488vamv41fsf61n8x8pdiznq155zydhl";
   };
 
-  extraBuildInputs = [
+  buildInputs = [
     fsharp
     dotnetPackages.nUnit
     dotnetPackages.fsCheck

@@ -10,7 +10,7 @@ buildDotnetPackage rec {
     sha256 = "1li33ydjxz18v8siw53vv1nmkp5w7sdlsjcrfp6dzcynpvwbjw3s";
   };
 
-  extraBuildInputs = [ fsharp ];
+  buildInputs = [ fsharp ];
 
   fileProvidedTypes = fetchurl {
     name = "ProvidedTypes.fs";

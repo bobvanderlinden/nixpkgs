@@ -10,7 +10,7 @@ buildDotnetPackage rec {
     sha256 = "1ryslxdgc3r7kcn1gq4bqcyrqdi8z6364aj3lr7yjz71wi22fca8";
   };
 
-  extraBuildInputs = [
+  buildInputs = [
     fsharp
     dotnetPackages.newtonsoftJson
     dotnetPackages.unionArgParser

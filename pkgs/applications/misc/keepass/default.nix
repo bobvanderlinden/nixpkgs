@@ -11,7 +11,7 @@ buildDotnetPackage rec {
 
   sourceRoot = ".";
 
-  extraBuildInputs = [ unzip ];
+  buildInputs = [ unzip ];
 
   patches = [ ./keepass.patch ];
 

@@ -10,7 +10,7 @@ buildDotnetPackage {
     sha256 = "1hbnckc4gvqkknf8gh1k7iwqb4vdzifdjd19i60fnczly5v8m1c3";
   };
 
-  extraBuildInputs = [ unzip ];
+  buildInputs = [ unzip ];
 
   phases = [ "unpackPhase" "installPhase" ];
 
