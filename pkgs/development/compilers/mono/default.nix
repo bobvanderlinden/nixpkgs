@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, bison, pkgconfig, glib, gettext, perl, libgdiplus, libX11, callPackage, ncurses, zlib, withLLVM ? true }:
+{ stdenv, fetchurl, bison, pkgconfig, glib, gettext, perl, libgdiplus, libX11, callPackage, ncurses, zlib, withLLVM ? true, cacert }:
 
 let
   llvm     = callPackage ./llvm.nix { };
@@ -40,6 +40,7 @@ stdenv.mkDerivation rec {
   preBuild = ''
     makeFlagsArray=(INSTALL=`type -tp install`)
     patchShebangs ./
+    substituteInPlace mcs/class/corlib/System/Environment.cs --replace /usr/share "$out/share"
   '' + stdenv.lib.optionalString withLLVM ''
     substituteInPlace mono/mini/aot-compiler.c --replace "llvm_path = g_strdup (\"\")" "llvm_path = g_strdup (\"${llvm}/bin/\")"
   '';
@@ -52,6 +53,14 @@ stdenv.mkDerivation rec {
         sed -i "s@libX11.so.6@${libX11}/lib/libX11.so.6@g" $i
         sed -i "s@/.*libgdiplus.so@${libgdiplus}/lib/libgdiplus.so@g" $i
     done
+  '';
+
+  # Without this, any Mono application attempting to open an SSL connection will throw with 
+  # The authentication or decryption has failed.
+  # ---> Mono.Security.Protocol.Tls.TlsException: Invalid certificate received from server.
+  postInstall = ''
+    echo "Updating Mono key store"
+    $out/bin/cert-sync ${cacert}/etc/ca-bundle.crt
   '';
 
   meta = {
