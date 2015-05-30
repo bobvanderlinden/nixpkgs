@@ -162,7 +162,11 @@ let self = _self // overrides; _self = with self; {
 
  unionArgParser = callPackage ../development/dotnet-modules/UnionArgParser { dotnetPackages = self; };
 
+ nDeskOptions = callPackage ../development/dotnet-modules/NDesk.Options { dotnetPackages = self; };
+
  fsharpCompilerService = callPackage ../development/dotnet-modules/FSharp.Compiler.Service { dotnetPackages = self; };
+
+ fsharpAutoComplete = callPackage ../development/dotnet-modules/FSharp.AutoComplete { dotnetPackages = self; };
 
  fsharpData = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
 
