@@ -27,7 +27,7 @@ stdenv.mkDerivation rec {
 
     # the tar doesn't include the nuget binary, so grab it from github and copy it
     # into the right place
-    cp -vfR "$(pkg-config NuGet.Core --variable=Libraries | cut -f 2- -d = | xargs dirname)"/* external/nuget-binary/
+    cp -vfR "$(dirname $(pkg-config NuGet.Core --variable=Libraries))"/* external/nuget-binary/
   '';
 
   # Revert this commit which broke the ability to use pkg-config to locate dlls

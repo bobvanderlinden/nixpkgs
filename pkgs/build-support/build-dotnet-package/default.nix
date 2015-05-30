@@ -66,7 +66,7 @@
       # Probably needs to be moved to fsharp
       if pkg-config FSharp.Core
       then
-        export FSharpTargetsPath="$(pkg-config FSharp.Core --variable=Libraries | cut -f 2- -d = | xargs dirname)/Microsoft.FSharp.Targets"
+        export FSharpTargetsPath="$(dirname $(pkg-config FSharp.Core --variable=Libraries))/Microsoft.FSharp.Targets"
       fi
 
       if ${if builtins.length(xBuildFiles) > 0 then "true" else "false"}

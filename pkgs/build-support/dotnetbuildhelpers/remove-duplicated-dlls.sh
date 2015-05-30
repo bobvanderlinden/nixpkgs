@@ -8,7 +8,7 @@ do
     baseName="$(basename "$dll" | sed "s/.dll$//i")"
     if pkg-config "$baseName"
     then
-        candidateDll="$(pkg-config "$baseName" --variable=Libraries | cut -f 2- -d =)"
+        candidateDll="$(pkg-config "$baseName" --variable=Libraries)"
 
         if diff "$dll" "$candidateDll" >/dev/null
         then
