@@ -156,12 +156,19 @@ let self = _self // overrides; _self = with self; {
     dllFiles = [ "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/*.dll" ];
   };
 
-  newtonsoftJson = callPackage ../development/dotnet-modules/Newtonsoft.Json { dotnetPackages = self; };
-  extCore        = callPackage ../development/dotnet-modules/ExtCore { dotnetPackages = self; };
-  unionArgParser = callPackage ../development/dotnet-modules/UnionArgParser { dotnetPackages = self; };
-  fsharpData     = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
-  fsharpxExtras  = callPackage ../development/dotnet-modules/FSharpx.Extras { dotnetPackages = self; };
+ newtonsoftJson = callPackage ../development/dotnet-modules/Newtonsoft.Json { dotnetPackages = self; };
 
-  nuget          = callPackage ../development/dotnet-modules/nuget { };
-  paket          = callPackage ../development/dotnet-modules/paket { dotnetPackages = self; };
+ extCore = callPackage ../development/dotnet-modules/ExtCore { dotnetPackages = self; };
+
+ unionArgParser = callPackage ../development/dotnet-modules/UnionArgParser { dotnetPackages = self; };
+
+ fsharpCompilerService = callPackage ../development/dotnet-modules/FSharp.Compiler.Service { dotnetPackages = self; };
+
+ fsharpData = callPackage ../development/dotnet-modules/FSharp.Data { dotnetPackages = self; };
+
+ fsharpxExtras = callPackage ../development/dotnet-modules/FSharpx.Extras { dotnetPackages = self; };
+
+ nuget = callPackage ../development/dotnet-modules/nuget { };
+
+ paket = callPackage ../development/dotnet-modules/paket { dotnetPackages = self; };
 }; in self
