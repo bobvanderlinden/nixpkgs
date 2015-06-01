@@ -12,12 +12,6 @@
 , outputFiles ? [ "bin/Release/*" ] # Wildcards allowed
 , dllFiles ? [ "*.dll" ] # Wildcards allowed
 , exeFiles ? [] # Wildcards NOT allowed
-, preConfigure ? ""
-, postConfigure ? ""
-, preBuild ? ""
-, postBuild ? ""
-, preInstall ? ""
-, postInstall ? ""
 , ... } @ attrs:
   stdenv.mkDerivation ({
     name = "${baseName}-${version}";
@@ -30,7 +24,7 @@
     ] ++ buildInputs;
 
     configurePhase = ''
-      ${preConfigure}
+      runHook preConfigure
 
       if ${if placateNuget then "true" else "false"}
       then
@@ -56,12 +50,13 @@
         find -iname \*.fsproj -print -exec patch-fsharp-targets.sh {} \;
       fi
 
-      ${postConfigure}
+      runHook postConfigure
     '';
 
     buildPhase = ''
+      runHook preBuild
+
       echo Building dotNET packages...
-      ${preBuild}
 
       # Probably needs to be moved to fsharp
       if pkg-config FSharp.Core
@@ -79,13 +74,13 @@
         xbuild ${toString xBuildFlags}
       fi
 
-      ${postBuild}
+      runHook postBuild
     '';
 
     dontStrip = true;
 
-    installPhase = preInstall + ''
-      ${preInstall}
+    installPhase = ''
+      runHook preInstall
 
       target="$out/lib/dotnet/${baseName}"
       mkdir -p "$target"
@@ -122,5 +117,7 @@
             commandName="$(basename -s .exe "$(echo "${exe}" | tr "[A-Z]" "[a-z]")")" 
             makeWrapper "${mono}/bin/mono \"$target/${exe}\"" "$out"/bin/"$commandName"
           '') exeFiles)) + "\n"
-    + postInstall;
+    + ''
+    runHook postInstall
+    '';
   } // (builtins.removeAttrs attrs [ "buildInputs" ] ))
