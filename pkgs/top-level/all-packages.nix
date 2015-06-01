@@ -2250,6 +2250,8 @@ let
     libcap = if stdenv.isLinux then libcap else null;
   };
 
+  nuget = callPackage ../indevelopment/nuget { };
+
   numdiff = callPackage ../tools/text/numdiff { };
 
   nssmdns = callPackage ../tools/networking/nss-mdns { };
