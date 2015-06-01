@@ -17,8 +17,7 @@ buildDotnetPackage rec {
     dotnetPackages.nDeskOptions
   ];
 
- outputFiles = [ "FSharp.AutoComplete/bin/Release/*" ];
-  dllFiles = [ "FSharp.CompilerBinding.dll" ];
+  outputFiles = [ "FSharp.AutoComplete/bin/Release/*" ];
   exeFiles = [ "fsautocomplete.exe" ];
 
   meta = {

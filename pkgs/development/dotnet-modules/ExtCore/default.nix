@@ -23,7 +23,6 @@ buildDotnetPackage rec {
 
   xBuildFlags = [ "/p:Configuration=\"Release (net45)\"" ];
   outputFiles = [ "ExtCore/bin/net45/Release/*" ];
-  dllFiles = [ "ExtCore*.dll" ];
 
   meta = {
     description = "ExtCore is an extended core library for F#";

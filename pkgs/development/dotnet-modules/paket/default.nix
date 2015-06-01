@@ -56,7 +56,6 @@ buildDotnetPackage rec {
   xBuildFiles = [ ];
 
   outputFiles = [ "bin/*" ];
-  dllFiles = [ "Paket*.dll" ];
   exeFiles = [ "paket.exe" ];
 
   meta = {

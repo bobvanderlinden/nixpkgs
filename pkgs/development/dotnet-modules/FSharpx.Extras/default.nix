@@ -22,7 +22,6 @@ buildDotnetPackage rec {
 
   xBuildFiles = [ "FSharpx.WithTypeProviders.sln" ];
   outputFiles = [ "build/*" ];
-  dllFiles = [ "FSharpx*.dll" ];
 
   meta = {
     description = "FSharpx.Extras is a collection of libraries and tools for use with F#.";

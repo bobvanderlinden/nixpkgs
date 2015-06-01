@@ -33,7 +33,6 @@ buildDotnetPackage rec {
 
   xBuildFiles = [ "src/FSharp.Data.fsproj" "src/FSharp.Data.DesignTime.fsproj" ];
   outputFiles = [ "bin/*.dll" "bin/*.xml" ];
-  dllFiles = [ "*.dll" ];
 
   meta = {
     description = "F# Data: Library for Data Access";

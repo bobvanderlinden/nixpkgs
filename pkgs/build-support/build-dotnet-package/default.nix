@@ -10,7 +10,7 @@
 , xBuildFiles ? [ ]
 , xBuildFlags ? [ "/p:Configuration=Release" ]
 , outputFiles ? [ "bin/Release/*" ] # Wildcards allowed
-, dllFiles ? [] # Wildcards allowed
+, dllFiles ? [ "*.dll" ] # Wildcards allowed
 , exeFiles ? [] # Wildcards NOT allowed
 , preConfigure ? ""
 , postConfigure ? ""
@@ -106,7 +106,13 @@
           (dll : ''
             for dll in "$target"/${dll}
             do 
-              ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
+              [ -f "$dll" ] || continue
+              if pkg-config $(basename -s .dll "$dll")
+              then
+                echo "$dll already exported by a buildInputs, not re-exporting"
+              else
+                ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
+              fi
             done'')
           dllFiles)) + "\n"
     + (lib.concatStringsSep "\n"

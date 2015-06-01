@@ -16,8 +16,7 @@ buildDotnetPackage rec {
     dotnetPackages.fsUnit
   ];
 
-  outputFiles = [ "bin/net40" ];
-  dllFiles = [ "net40/UnionArgParser*.dll" ];
+  outputFiles = [ "bin/net40/*" ];
 
   meta = {
     description = "A declarative CLI argument/XML configuration parser for F# applications.";

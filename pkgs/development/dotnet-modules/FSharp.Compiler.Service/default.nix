@@ -16,7 +16,6 @@ buildDotnetPackage rec {
   ];
 
   outputFiles = [ "bin/v4.5/*" ];
-  dllFiles = [ "[CF]Sharp*.dll" ];
 
   meta = {
     description = "The F# compiler services package is a component derived from the F# compiler source code that exposes additional functionality for implementing F# language bindings";

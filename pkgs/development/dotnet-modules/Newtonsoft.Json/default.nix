@@ -26,7 +26,6 @@ buildDotnetPackage rec {
 
   xBuildFiles = [ "Src/Newtonsoft.Json.sln" ];
   outputFiles = [ "Src/Newtonsoft.Json/bin/Release/Net45/*" ];
-  dllFiles = [ "*.dll" ];
 
   meta = {
     description = "Popular high-performance JSON framework for .NET";
