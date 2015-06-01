@@ -3,18 +3,19 @@
 { baseName
 , version
 , buildInputs ? []
-, placateNuget ? true
-, placatePaket ? true
-, patchFSharpTargets ? true
-, removeDuplicatedDlls ? true
-, xBuildFiles ? [ ]
-, xBuildFlags ? [ "/p:Configuration=Release" ]
-, outputFiles ? [ "bin/Release/*" ] # Wildcards allowed
-, dllFiles ? [ "*.dll" ] # Wildcards allowed
-, exeFiles ? [] # Wildcards NOT allowed
 , ... } @ attrs:
   stdenv.mkDerivation ({
     name = "${baseName}-${version}";
+
+    placateNuget = true;
+    placatePaket = true;
+    patchFSharpTargets = true;
+    removeDuplicatedDlls = true;
+    xBuildFiles = [ ]; # Wildcards allowed
+    xBuildFlags = [ "/p:Configuration=Release" ]; # Wildcards allowed
+    outputFiles = [ "bin/Release/*" ]; # Wildcards allowed
+    dllFiles = [ "*.dll" ]; # Wildcards allowed
+    exeFiles = []; # Wildcards NOT allowed
 
     buildInputs = [
       pkgconfig
@@ -26,7 +27,7 @@
     configurePhase = ''
       runHook preConfigure
 
-      if ${if placateNuget then "true" else "false"}
+      if -n "$placateNuget"
       then
         echo Placating Nuget in nuget.targets
         find -iname nuget.targets -print -exec sed -i -e 's,mono --runtime[^<]*,true NUGET PLACATED BY buildDotnetPackage,g' {} \;
@@ -35,7 +36,7 @@
         find . -iname nuget.exe -exec rm -v {} \; -exec touch {} \; 
       fi
 
-      if ${if placatePaket then "true" else "false"}
+      if -n "$placatePaket"
       then
         echo Placating Paket in paket.targets
         find -iname paket.targets -print -exec sed -i -e 's,mono --runtime[^<]*,true PAKET PLACATED BY buildDotnetPackage,g' {} \;
@@ -44,7 +45,7 @@
         find . -iname paket\*.exe -exec rm -v {} \; -exec touch {} \; 
       fi
 
-      if ${if patchFSharpTargets then "true" else "false"}
+      if -n "$patchFSharpTargets"
       then
         echo Patching F\#  targets in fsproj files
         find -iname \*.fsproj -print -exec patch-fsharp-targets.sh {} \;
@@ -64,14 +65,14 @@
         export FSharpTargetsPath="$(dirname $(pkg-config FSharp.Core --variable=Libraries))/Microsoft.FSharp.Targets"
       fi
 
-      if ${if builtins.length(xBuildFiles) > 0 then "true" else "false"}
+      if -n "$xBuildFiles"
       then
-        for xBuildFile in ${toString xBuildFiles}
+        for xBuildFile in $xBuildFiles
         do
-          xbuild ${toString xBuildFlags} $xBuildFile
+          xbuild $xBuildFlags $xBuildFile
         done
       else
-        xbuild ${toString xBuildFlags}
+        xbuild $xBuildFlags
       fi
 
       runHook postBuild
@@ -84,40 +85,37 @@
 
       target="$out/lib/dotnet/${baseName}"
       mkdir -p "$target"
-      for output in ${toString outputFiles}
+      for output in $outputFiles
       do
         cp -rv "$output" "$target"
       done
 
-      if ${if removeDuplicatedDlls then "true" else "false"}
+      if -n "$removeDuplicatedDlls"
       then
         pushd "$out"
         remove-duplicated-dlls.sh
         popd
       fi
-    ''
-    + (lib.concatStringsSep "\n"
-        (map
-          (dll : ''
-            for dll in "$target"/${dll}
-            do 
-              [ -f "$dll" ] || continue
-              if pkg-config $(basename -s .dll "$dll")
-              then
-                echo "$dll already exported by a buildInputs, not re-exporting"
-              else
-                ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
-              fi
-            done'')
-          dllFiles)) + "\n"
-    + (lib.concatStringsSep "\n"
-        (map
-          (exe : ''
-            mkdir -p "$out"/bin
-            commandName="$(basename -s .exe "$(echo "${exe}" | tr "[A-Z]" "[a-z]")")" 
-            makeWrapper "${mono}/bin/mono \"$target/${exe}\"" "$out"/bin/"$commandName"
-          '') exeFiles)) + "\n"
-    + ''
+
+      for dll in $dllFiles
+      do
+        dll="$target"/$dll
+        [ -f "$dll" ] || continue
+        if pkg-config $(basename -s .dll "$dll")
+        then
+          echo "$dll already exported by a buildInputs, not re-exporting"
+        else
+          ${dotnetbuildhelpers}/bin/create-pkg-config-for-dll.sh "$out/lib/pkgconfig" "$dll"
+        fi
+      done
+
+      for exe in $exeFiles
+      do
+        mkdir -p "$out"/bin
+        commandName="$(basename -s .exe "$(echo "$exe" | tr "[A-Z]" "[a-z]")")" 
+        makeWrapper "${mono}/bin/mono \"$target/$exe\"" "$out"/bin/"$commandName"
+      done
+
     runHook postInstall
     '';
   } // (builtins.removeAttrs attrs [ "buildInputs" ] ))
