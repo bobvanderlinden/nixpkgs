@@ -27,7 +27,7 @@
     configurePhase = ''
       runHook preConfigure
 
-      if -n "$placateNuget"
+      if [ -n "$placateNuget" ]
       then
         echo Placating Nuget in nuget.targets
         find -iname nuget.targets -print -exec sed -i -e 's,mono --runtime[^<]*,true NUGET PLACATED BY buildDotnetPackage,g' {} \;
@@ -36,7 +36,7 @@
         find . -iname nuget.exe -exec rm -v {} \; -exec touch {} \; 
       fi
 
-      if -n "$placatePaket"
+      if [ -n "$placatePaket" ]
       then
         echo Placating Paket in paket.targets
         find -iname paket.targets -print -exec sed -i -e 's,mono --runtime[^<]*,true PAKET PLACATED BY buildDotnetPackage,g' {} \;
@@ -45,7 +45,7 @@
         find . -iname paket\*.exe -exec rm -v {} \; -exec touch {} \; 
       fi
 
-      if -n "$patchFSharpTargets"
+      if [ -n "$patchFSharpTargets" ]
       then
         echo Patching F\#  targets in fsproj files
         find -iname \*.fsproj -print -exec patch-fsharp-targets.sh {} \;
@@ -65,7 +65,7 @@
         export FSharpTargetsPath="$(dirname $(pkg-config FSharp.Core --variable=Libraries))/Microsoft.FSharp.Targets"
       fi
 
-      if -n "$xBuildFiles"
+      if [ -n "$xBuildFiles" ]
       then
         for xBuildFile in $xBuildFiles
         do
@@ -90,7 +90,7 @@
         cp -rv "$output" "$target"
       done
 
-      if -n "$removeDuplicatedDlls"
+      if [ -n "$removeDuplicatedDlls" ]
       then
         pushd "$out"
         remove-duplicated-dlls.sh
