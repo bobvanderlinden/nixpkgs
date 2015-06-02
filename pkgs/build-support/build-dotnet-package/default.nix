@@ -13,7 +13,7 @@
       patchFSharpTargets = true;
       removeDuplicatedDlls = true;
       xBuildFiles = [ ];
-      xBuildFlags = [ "/p:Configuration=Release" ];
+      xBuildFlagsArray = [ "/p:Configuration=Release" ];
       outputFiles = [ "bin/Release/*" ];
       dllFiles = [ "*.dll" ];
       exeFiles = [];
@@ -70,10 +70,10 @@
         then
           for xBuildFile in "''${xBuildFiles}"
           do
-            xbuild "''${xBuildFlags[@]}" "$xBuildFile"
+            xbuild $xBuildFlags "''${xBuildFlagsArray[@]}" "$xBuildFile"
           done
         else
-          xbuild "''${xBuildFlags[@]}"
+          xbuild $xBuildFlags "''${xBuildFlagsArray[@]}"
         fi
 
         runHook postBuild
