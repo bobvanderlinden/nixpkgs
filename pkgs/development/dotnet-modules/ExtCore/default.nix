@@ -21,7 +21,7 @@ buildDotnetPackage rec {
     sed -i -e s,nuget.targets,NuGet.targets, ExtCore.Tests/ExtCore.Tests.fsproj
   '';
 
-  xBuildFlags = [ "/p:Configuration=\"Release (net45)\"" ];
+  xBuildFlags = [ "/p:Configuration=Release (net45)" ];
   outputFiles = [ "ExtCore/bin/net45/Release/*" ];
 
   meta = {
