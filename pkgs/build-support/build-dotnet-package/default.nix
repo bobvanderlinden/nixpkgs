@@ -68,12 +68,12 @@
 
         if [ -n "$xBuildFiles" ]
         then
-          for xBuildFile in $xBuildFiles
+          for xBuildFile in "''${xBuildFiles}"
           do
-            xbuild $xBuildFlags $xBuildFile
+            xbuild "''${xBuildFlags[@]}" "$xBuildFile"
           done
         else
-          xbuild $xBuildFlags
+          xbuild "''${xBuildFlags[@]}"
         fi
 
         runHook postBuild
@@ -106,7 +106,7 @@
 
         echo ">> Generating pkg-config file for dlls..."
         set -f
-        for dllPattern in $dllFiles
+        for dllPattern in "''${dllFiles}"
         do
           set +f
           for dll in "$target"/$dllPattern
@@ -123,7 +123,7 @@
 
         echo ">> Generating wrappers for .NET executables..."
         set -f
-        for exePattern in $exeFiles
+        for exePattern in "''${exeFiles}"
         do
           set +f
           for exe in "$target"/$exePattern
