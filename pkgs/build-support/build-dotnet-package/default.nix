@@ -89,7 +89,7 @@
 
         echo ">> Copying output files to $target..."
         set -f
-        for outputPattern in $outputFiles
+        for outputPattern in "''${outputFiles}"
         do
           set +f
           cp -rv $outputPattern "$target"
