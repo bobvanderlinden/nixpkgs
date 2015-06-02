@@ -88,10 +88,8 @@
         mkdir -p "$target"
 
         echo ">> Copying output files to $target..."
-        set -f
         for outputPattern in "''${outputFiles}"
         do
-          set +f
           cp -rv $outputPattern "$target"
         done
 
@@ -105,10 +103,8 @@
         fi
 
         echo ">> Generating pkg-config file for dlls..."
-        set -f
         for dllPattern in "''${dllFiles}"
         do
-          set +f
           for dll in "$target"/$dllPattern
           do
             [ -f "$dll" ] || continue
@@ -122,10 +118,8 @@
         done
 
         echo ">> Generating wrappers for .NET executables..."
-        set -f
         for exePattern in "''${exeFiles}"
         do
-          set +f
           for exe in "$target"/$exePattern
           do
             [ -f "$exe" ] || continue
