@@ -127,15 +127,15 @@
   };
   "airplay-js" = self.by-version."airplay-js"."0.2.5";
   by-spec."amdefine".">=0.0.4" =
-    self.by-version."amdefine"."0.1.0";
-  by-version."amdefine"."0.1.0" = self.buildNodePackage {
-    name = "amdefine-0.1.0";
-    version = "0.1.0";
+    self.by-version."amdefine"."0.1.1";
+  by-version."amdefine"."0.1.1" = self.buildNodePackage {
+    name = "amdefine-0.1.1";
+    version = "0.1.1";
     bin = false;
     src = fetchurl {
-      url = "http://registry.npmjs.org/amdefine/-/amdefine-0.1.0.tgz";
-      name = "amdefine-0.1.0.tgz";
-      sha1 = "3ca9735cf1dde0edf7a4bf6641709c8024f9b227";
+      url = "http://registry.npmjs.org/amdefine/-/amdefine-0.1.1.tgz";
+      name = "amdefine-0.1.1.tgz";
+      sha1 = "b5c75c532052dccd6a39c0064c772c8d57a06cd2";
     };
     deps = {
     };
@@ -10181,7 +10181,7 @@
       sha1 = "c24bc146ca517c1471f5dacbe2571b2b7f9e3346";
     };
     deps = {
-      "amdefine-0.1.0" = self.by-version."amdefine"."0.1.0";
+      "amdefine-0.1.1" = self.by-version."amdefine"."0.1.1";
     };
     optionalDependencies = {
     };

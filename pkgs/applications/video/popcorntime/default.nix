@@ -13,21 +13,64 @@ let
     self = nodePackages;
     generated = ./node.nix;
   };
+
+  bowerPackages = import ./bower.nix {
+    inherit (pkgs) fetchbower buildEnv;
+  };
+
+  gruntPackages = with nodePackages; [
+    grunt-bower-clean
+    grunt-contrib-clean
+    grunt-contrib-compress
+    grunt-contrib-jshint
+    grunt-contrib-stylus
+    grunt-contrib-watch
+    grunt-exec
+    grunt-githooks
+    grunt-jsbeautifier
+    grunt-node-webkit-builder
+    grunt-shell
+  ];
+
+  popcorntimeSrc = fetchgit {
+    url = "https://git.popcorntime.io/popcorntime/desktop.git";
+    rev = "refs/tags/v0.3.7.2";
+    sha256 = "1r2d553hc8fzq3lgbfhy9l01sf0r27jcij8a6m7zy0iwn3qpvwb1";
+    leaveDotGit = true;
+  };
+
+  popcorntimeTarball = pkgs.runCommand "Popcorn-Time-0.3.7-2.tgz" { buildInputs = [ pkgs.nodejs ]; } ''
+    mv `HOME=$PWD npm pack ${popcorntimeSrc}` $out
+  '';
+
+  popcorntimePackage = nodePackages.buildNodePackage {
+    name = "Popcorn-Time-0.3.7-2";
+    src = [ popcorntimeTarball ];
+    buildInputs = [ pkgs.nodePackages.grunt-cli pkgs.nodePackages.bower bowerPackages ];
+    flags = "--ignore-scripts";
+    deps = [ nodePackages.by-spec."URIjs"."^1.13.2" nodePackages.by-spec."adm-zip"."https://github.com/xeoncore/adm-zip/archive/78f820330c776bca72aad3f22d127b357f57a609.tar.gz" nodePackages.by-spec."airplay-js"."git+https://git.popcorntime.io/mirrors/node-airplay-js.git" nodePackages.by-spec."async"."0.9.0" nodePackages.by-spec."chromecast-js"."git+https://git.popcorntime.io/mirrors/chromecast-js.git" nodePackages.by-spec."dlna-js"."git+https://git.popcorntime.io/mirrors/dlna-js.git" nodePackages.by-spec."upnp-mediarenderer-client"."git+https://github.com/thibauts/node-upnp-mediarenderer-client.git" nodePackages.by-spec."i18n"."0.5.0" nodePackages.by-spec."iconv-lite"."^0.4.3" nodePackages.by-spec."jschardet"."1.1.0" nodePackages.by-spec."json-rpc2"."^0.7.0" nodePackages.by-spec."memoizee"."^0.3.7" nodePackages.by-spec."mime"."1.2.11" nodePackages.by-spec."mkdirp"."*" nodePackages.by-spec."moment"."^2.6.0" nodePackages.by-spec."mv"."^2.0.3" nodePackages.by-spec."native-dns"."^0.7.0" nodePackages.by-spec."nedb"."0.10.11" nodePackages.by-spec."node-captions"."0.2.2" nodePackages.by-spec."node-webkit-fdialogs"."*" nodePackages.by-spec."peerflix"."git+https://git.popcorntime.io/mirrors/peerflix.git" nodePackages.by-spec."popcorn-opensubtitles"."git+https://git.popcorntime.io/popcorntime/opensubtitles.git#a7ad4445a2cc89e3f37d4fe4e6ac06186fd719ea" nodePackages.by-spec."q"."2.0.2" nodePackages.by-spec."read-torrent"."1.0.0" nodePackages.by-spec."readdirp"."*" nodePackages.by-spec."request"."^2.36.0" nodePackages.by-spec."rimraf"."2.2.8" nodePackages.by-spec."semver"."^2.3.1" nodePackages.by-spec."sha1"."1.1.0" nodePackages.by-spec."tar"."^1.0.3" nodePackages.by-spec."temp"."^0.8.1" nodePackages.by-spec."torrent-health"."https://github.com/xeoncore/torrent-health/archive/0.1.1.tar.gz" nodePackages.by-spec."underscore"."^1.6.0" ] ++ [
+       nodePackages.by-spec."grunt-bower-clean"."^0.2.1" nodePackages.by-spec."grunt-contrib-clean"."^0.5.0" nodePackages.by-spec."grunt-contrib-compress"."^0.9.1" nodePackages.by-spec."grunt-contrib-jshint"."^0.10.0" nodePackages.by-spec."grunt-contrib-stylus"."0.16.0" nodePackages.by-spec."grunt-contrib-watch"."0.6.x" nodePackages.by-spec."grunt-exec"."0.4.x" nodePackages.by-spec."grunt-githooks"."^0.3.1" nodePackages.by-spec."grunt-jsbeautifier"."*" nodePackages.by-spec."grunt-legacy-log"."~0.1.0" nodePackages.by-spec."grunt-legacy-log-utils"."^0.1.1" nodePackages.by-spec."grunt-legacy-util"."~0.2.0" nodePackages.by-spec."grunt-node-webkit-builder"."0.1.x" nodePackages.by-spec."grunt-shell"."^1.1.1"
+       nodePackages.by-spec."grunt"."0.4.5" nodePackages.by-spec."load-grunt-tasks"."0.4.0"
+    ];
+    peerDependencies = [];
+  };
 in
 stdenv.mkDerivation rec {
     name = "popcorntime-" + version;
     version = "0.3.7-2";
 
-    src = fetchgit {
-      url = "https://git.popcorntime.io/popcorntime/desktop.git";
-      rev = "refs/tags/v0.3.7.2";
-      sha256 = "0f211csp4d7p8cxa8gnxczc7w5n1mps8jix0h9i42nd8pm49w7xn";
-    };
+    src = popcorntimePackage;
 
-    buildInputs = [ nodejs
+    buildInputs = [
+      nodejs pkgs.nodePackages.grunt-cli pkgs.nodePackages.coffee-script
     ];
 
-    dontBuild = true;
+    inherit gruntPackages;
+
+    buildPhase = ''
+      cd lib/node_modules/Popcorn-Time
+      HOME=$PWD grunt build
+    '';
 
     installPhase = ''
       ${pkgs.bash}/bin/sh dist/linux/exec_installer.sh
