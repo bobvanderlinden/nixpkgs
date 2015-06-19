@@ -118,6 +118,8 @@
     deps = {
       "mdns-js-0.3.1" = self.by-version."mdns-js"."0.3.1";
       "plist-with-patches-0.5.1" = self.by-version."plist-with-patches"."0.5.1";
+      "iconv-lite-0.2.11" = self.by-version."iconv-lite"."0.2.11";
+      "jschardet-1.1.0" = self.by-spec."jschardet"."1.1.0";
     };
     optionalDependencies = {
     };
