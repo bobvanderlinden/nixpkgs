@@ -1,9 +1,11 @@
 { stdenv, pkgs, fetchurl, fetchgit, buildEnv,
-  nodejs, node_webkit_0_9, writeScript, makeWrapper
+  writeScript, makeWrapper,
+  git, zip, nodejs,
+  node_webkit ? pkgs.node_webkit_0_9, 
+  grunt-cli ? pkgs.nodePackages.grunt-cli
 }:
 let
   version = "0.3.7.2";
-  node_webkit = node_webkit_0_9;
   # When upgrading node.nix / node packages:
   #   fetch package.json from Zed's repository
   #   run `npm2nix package.json node.nix`
@@ -43,7 +45,7 @@ let
       leaveDotGit = true;
     };
 
-    buildInputs = [ pkgs.nodePackages.grunt-cli pkgs.git pkgs.zip makeWrapper ] ++
+    buildInputs = [ grunt-cli git zip makeWrapper ] ++
       (with nodePackages; [ bower nw-gyp stylus ]);
 
     buildPhase = ''
