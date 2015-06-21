@@ -69,7 +69,7 @@ let
       # Workaround: grunt packages must be placed in the local node_modules (./node_modules/).
       #             We link the grunt packages from the grunt_env to ./node_modules/
       ln -s ${grunt_env}/lib/node_modules/ ./
-      grunt stylus:offical stylus:third_party
+      grunt stylus:offical stylus:third_party bower_clean
       rm node_modules
     '';
 
