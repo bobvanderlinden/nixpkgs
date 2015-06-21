@@ -47,6 +47,9 @@ let
       (with nodePackages; [ bower nw-gyp stylus ]);
 
     buildPhase = ''
+      export HOME="$PWD/../home"
+      mkdir -p $HOME
+
       echo "Running bower..."
       # Workaround: bower copies packages from cache, keeping the permission.
       #             Since the cache is read-only for owner, bower cannot write .bower.json back to its local equivalent.
@@ -55,7 +58,7 @@ let
       mkdir -p src/app/vendor
       cp -rL ${bowerPackages} ./.bower
       chmod -R u+w ./.bower
-      HOME=$PWD bower install \
+      bower install \
         --offline \
         --config.storage.packages=.bower/packages \
         --config.storage.registry=.bower/registry \
@@ -66,7 +69,7 @@ let
       # Workaround: grunt packages must be placed in the local node_modules (./node_modules/).
       #             We link the grunt packages from the grunt_env to ./node_modules/
       ln -s ${grunt_env}/lib/node_modules/ ./
-      HOME=$PWD grunt stylus:offical stylus:third_party
+      grunt stylus:offical stylus:third_party
       rm node_modules
     '';
 
