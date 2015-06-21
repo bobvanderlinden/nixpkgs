@@ -108,6 +108,9 @@ stdenv.mkDerivation rec {
       makeWrapper ${popcorntimePackage}/popcorntime/Popcorn-Time $out/bin/popcorntime
     '';
 
+    dontStrip = true;
+    dontPatchELF = true;
+
     meta = with stdenv.lib; {
       homepage = http://popcorntime.io/;
       description = "Popcorn-Time";
