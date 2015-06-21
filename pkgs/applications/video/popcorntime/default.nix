@@ -36,7 +36,7 @@ let
     inherit (pkgs) fetchbower buildEnv;
   };
 
-  popcorntimePackage = stdenv.mkDerivation rec {
+  popcorntimeFiles = stdenv.mkDerivation rec {
     name = "popcorntime-files-${version}";
     src = fetchgit {
       url = "https://git.popcorntime.io/popcorntime/desktop.git";
@@ -84,7 +84,7 @@ let
 
       cat $NWPATH/nw $out/popcorntime/package.nw > $out/popcorntime/Popcorn-Time
       cp $NWPATH/nw.pak $out/popcorntime/
-      cp $NWPATH/*.so $out/popcorntime/
+      ln -s ${libffmpegsumo} $out/popcorntime/libffmpegsumo.so
       chmod +x $out/popcorntime/Popcorn-Time
       rm $out/popcorntime/package.nw
     '';
@@ -94,20 +94,41 @@ let
         --prefix NODE_PATH : ${node_env}/lib/node_modules
     '';
   };
+
+  popcorntimePackages = {
+    x86_64-linux = fetchurl {
+      url = "https://get.popcorntime.io/build/Popcorn-Time-${version}-Linux64.tar.xz";
+      sha256 = "0lm9k4fr73a9p00i3xj2ywa4wvjf9csadm0pcz8d6imwwq44sa8b";
+    };
+    i686-linux = fetchurl {
+      url = "https://get.popcorntime.io/build/Popcorn-Time-${version}-Linux32.tar.xz";
+      sha256 = "1dz1cp31qbwamm9pf8ydmzzhnb6d9z73bigdv3y74dgicz3dpr91";
+    };
+  };
+
+  libffmpegsumo = stdenv.mkDerivation {
+    name = "libffmpegsumo";
+    src = popcorntimePackages."${stdenv.system}";
+    sourceRoot = ".";
+    dontBuild = true;
+    installPhase = ''
+      cp libffmpegsumo.so $out
+    '';
+  };
 in
 stdenv.mkDerivation rec {
     inherit version;
     name = "popcorntime-" + version;
 
-    src = popcorntimePackage;
-    
+    src = popcorntimeFiles;
+
     dontBuild = true;
 
     buildInputs = [ makeWrapper ];
 
     installPhase = ''
       mkdir -p $out/bin
-      makeWrapper ${popcorntimePackage}/popcorntime/Popcorn-Time $out/bin/popcorntime
+      makeWrapper ${popcorntimeFiles}/popcorntime/Popcorn-Time $out/bin/popcorntime
     '';
 
     dontStrip = true;
