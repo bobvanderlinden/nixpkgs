@@ -42,14 +42,17 @@ let
     peerDependencies = [];
 
     postConfigure = ''
+      # Make sure we can write permission for .bower.json files.
+      # This is a workaround for an inconvenience of bower described here: https://github.com/bower/bower/issues/1192
       mkdir -p src/app/vendor
-      echo "Bower cache: ${bowerPackages}"
-      BOWER_ARGS="--config.storage.packages=${bowerPackages}/packages --config.storage.registry=${bowerPackages}/registry --config.interactive=false"
-      bower install --offline $BOWER_ARGS || true
+      cp -rL ${bowerPackages} ./.bower
+      chmod -R u+w ./.bower
+      BOWER_ARGS="--config.storage.packages=.bower/packages --config.storage.registry=.bower/registry --config.interactive=false"
+      bower install --offline $BOWER_ARGS
 
       mkdir -p node_modules
       ln -s $HOME/node_modules/grunt* node_modules/
-      HOME=$PWD grunt css bower_clean
+      HOME=$PWD grunt stylus:offical stylus:third_party
       rm -rf node_modules
     '';
   };
