@@ -89,11 +89,6 @@ let
         --prefix NODE_PATH : ${node_env}/lib/node_modules
     '';
   };
-
-  executable = writeScript "popcorntime" ''
-    #! ${stdenv.shell}
-    ${node_webkit}/bin/nw ${popcorntimePackage}/lib/node_modules/Popcorn-Time/
-  '';
 in
 stdenv.mkDerivation rec {
     inherit version;
