@@ -7,7 +7,7 @@
 let
   version = "0.3.7.2";
   # When upgrading node.nix / node packages:
-  #   fetch package.json from Zed's repository
+  #   fetch package.json from PopcornTime's repository
   #   run `npm2nix package.json node.nix`
   #   and replace node.nix with new one
   nodePackages = import ../../../../pkgs/top-level/node-packages.nix {
