@@ -810,6 +810,8 @@ let
 
   image-analyzer = callPackage ../misc/emulators/cdemu/analyzer.nix { };
 
+  imageplay = callPackage ../applications/graphics/imageplay { };
+
   ccnet = callPackage ../tools/networking/ccnet { };
 
   ckbcomp = callPackage ../tools/X11/ckbcomp { };
