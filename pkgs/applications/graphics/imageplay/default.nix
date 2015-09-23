@@ -2,13 +2,13 @@
 
 stdenv.mkDerivation rec {
   name = "imageplay-${version}";
-  version = "6.0.0-beta.3";
+  version = "6.0.0-rc.0";
 
   src = fetchFromGitHub {
     owner = "cpvrlab";
     repo = "ImagePlay";
     rev = "${version}";
-    sha256 = "1wavfg0q8586bygh454fzqwc2rxj71aih7s8nwxxpnmdzabsqjlz";
+    sha256 = "1cfd93pd0n957j8lrizd0k0miyvpx4z0ahkm4wyshlf31j8xdjr3";
   };
 
 
@@ -19,11 +19,9 @@ stdenv.mkDerivation rec {
   '';
 
   installPhase = ''
-    mkdir -p $out/{bin,lib,share/imageplay}
-    mv _bin/Release/linux/ImagePlay $out/bin/imageplay
-    mv _bin/Release/linux/*.a $out/lib/
-    mv _bin/Release/linux/* $out/share/imageplay
-    wrapProgram $out/bin/imageplay --set PWD $out/share/imageplay
+    mkdir -p $out/{bin,opt/imageplay}
+    mv _bin/Release/linux/* $out/opt/imageplay/
+    ln -s $out/opt/imageplay/ImagePlay $out/bin/imageplay
   '';
 
   meta = with stdenv.lib; {
