@@ -11,8 +11,8 @@ cross:
 
 let
 
-  version = "2.23";
-  sha256 = "1lk9a8jv5kyx8hp0wmfzjyk047q95ybyjqbyw5idl7414jxqml1b";
+  version = "2.22";
+
 in
 
 assert cross != null -> gccCross != null;
@@ -49,6 +49,10 @@ stdenv.mkDerivation ({
          "/bin:/usr/bin", which is inappropriate on NixOS machines. This
          patch extends the search path by "/run/current-system/sw/bin". */
       ./fix_path_attribute_in_getconf.patch
+
+      ./cve-2015-7547.patch
+
+      ./glibc-locale-incompatibility.patch
     ];
 
   postPatch =
@@ -139,7 +143,7 @@ stdenv.mkDerivation ({
 
   src = fetchurl {
     url = "mirror://gnu/glibc/glibc-${version}.tar.gz";
-    inherit sha256;
+    sha256 = "1rcby0cqgswgqaxyqz0yqc4zizb1kvpi5vlfqp7dh3sa132109m6";
   };
 
   # Remove absolute paths from `configure' & co.; build out-of-tree.
