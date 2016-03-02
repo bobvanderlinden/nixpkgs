@@ -48,11 +48,41 @@ let
       inherit (platform) gcc;
     };
   };
+
+
+  armv8-a-hf-crossSystem = {
+    crossSystem = rec {
+      config = "aarch64-unknown-linux-gnueabi";
+      bigEndian = false;
+      arch = "arm64";
+      float = "hard";
+      fpu = "vfp";
+      withTLS = true;
+      libc = "glibc";
+      platform = {
+        name = "rpi3";
+        kernelMajor = "2.6";
+        kernelBaseConfig = "defconfig";
+        kernelHeadersBaseConfig = "defconfig";
+        uboot = null;
+        kernelArch = "arm64";
+        kernelAutoModules = false;
+        kernelTarget = "vmlinux.bin";
+      };
+      openssl.system = "linux-generic64";
+      gcc = {
+        arch = "armv8-a";
+      };
+    };
+  };
+  
   
   selectedCrossSystem =
     if toolsArch == "armv5tel" then sheevaplugCrossSystem else
     if toolsArch == "armv6l" then raspberrypiCrossSystem else
-    if toolsArch == "armv7l" then armv7l-hf-multiplatform-crossSystem else null;
+    if toolsArch == "armv7l" then armv7l-hf-multiplatform-crossSystem else
+    if toolsArch == "armv8-a" then armv8-a-hf-crossSystem else
+    null;
 
   pkgs = pkgsFun ({inherit system;} // selectedCrossSystem);
 
@@ -252,4 +282,5 @@ rec {
     armv5tel = buildFor "armv5tel";
     armv6l = buildFor "armv6l";
     armv7l = buildFor "armv7l";
+    armv8-a = buildFor "armv8-a";
 }
