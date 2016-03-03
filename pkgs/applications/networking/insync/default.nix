@@ -11,18 +11,23 @@ stdenv.mkDerivation rec {
 
   buildInputs = [ dpkg makeWrapper ];
 
-  unpackPhase = "true";
+  unpackPhase = ''
+    dpkg -x $src unpacked
+  '';
 
   installPhase =
     ''
-      dpkg-deb -x $src $out
-      mv $out/usr/* $out/
-      rm -rf $out/usr
+      mkdir -p $out
+      cp -r unpacked/* $out/
+      mv -vi $out/usr/bin $out/bin
+      substituteInPlace $out/bin/insync --replace /usr/lib/insync $out/usr/lib/insync
+      substituteInPlace $out/bin/insync-headless --replace /usr/lib/insync $out/usr/lib/insync
+      patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/usr/lib/insync/insync
     '';
 
   meta = {
-    homepage = http://insync.com/;
-    license = stdenv.lib.licenses.gpl2Plus;
-    description = "Console-based network statistics utility for Linux";
+    homepage = https://www.insynchq.com/;
+    license = stdenv.lib.licenses.unfree;
+    description = "Google Drive client that extends Drive's web functionality to your desktop";
   };
 }
