@@ -639,6 +639,8 @@ let
 
   install_name_tool = callPackage ../os-specific/darwin/install_name_tool { };
 
+  insync = callPackage ../applications/networking/insync { };
+
   xcodeenv = callPackage ../development/mobile/xcodeenv { };
 
   titaniumenv = callPackage ../development/mobile/titaniumenv {
