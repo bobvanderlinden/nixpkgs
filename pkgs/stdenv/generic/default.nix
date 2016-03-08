@@ -302,7 +302,7 @@ let
       isArm = system == "armv5tel-linux"
            || system == "armv6l-linux"
            || system == "armv7l-linux";
-      isAarch64 = system == "aarch64-linux";
+      isAarch64 = true; # system == "aarch64-linux";
       isBigEndian = system == "powerpc-linux";
 
       # Whether we should run paxctl to pax-mark binaries.
