@@ -6,6 +6,23 @@
 
 with lib;
 
+let
+
+  cerana.Ramdisk = pkgs.makeInitrd {
+    inherit (config.boot.initrd) compressor prepend;
+
+    contents =
+      [ { object = config.system.build.bootStage1;
+          symlink = "/init";
+        }
+        { object = config.system.build.squashfsStore;
+          symlink = "/nix-store.squashfs";
+        }
+      ];
+  };
+
+in
+
 {
   options = {
 
@@ -77,29 +94,13 @@ with lib;
     };
 
 
-  system.build.initialRamdisk = pkgs.makeInitrd {
-    inherit (config.boot.initrd) compressor prepend;
-
-    contents =
-      [ { object = system.build.bootStage1;
-          symlink = "/init";
-        }
-        { object = config.system.build.squashfsStore;
-          target = "/nix-store.squashfs";
-        }
-      ];
-  };
-
     # Individual files to be included
     cerana.contents =
       [ { source = config.boot.kernelPackages.kernel + "/bzImage";
           target = "/boot/bzImage";
         }
-        { source = config.system.build.initialRamdisk + "/initrd";
+        { source = cerana.Ramdisk + "/initrd";
           target = "/boot/initrd";
-        }
-        { source = config.system.build.squashfsStore;
-          target = "/nix-store.squashfs";
         }
       ];
 
@@ -110,7 +111,6 @@ with lib;
 
       inherit (config.cerana) contents;
     };
-
 
     boot.loader.timeout = 10;
 
