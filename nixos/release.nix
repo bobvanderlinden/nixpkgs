@@ -42,6 +42,16 @@ let
     };
 
 
+  makeCerana =
+    { module, type, maintainers ? ["nshalman"], system }:
+
+    with import nixpkgs { inherit system; };
+
+    hydraJob ((import lib/eval-config.nix {
+      inherit system;
+      modules = [ module versionModule { } ];
+    }).config.system.build.cerana);
+
   makeIso =
     { module, type, maintainers ? ["eelco"], system }:
 
@@ -103,6 +113,12 @@ in rec {
   # Build the initial ramdisk so Hydra can keep track of its size over time.
   initialRamdisk = buildFromConfig ({ pkgs, ... }: { }) (config: config.system.build.initialRamdisk);
 
+
+  cerana_minimal = genAttrs [ "x86_64-linux" ] (system: makeCerana {
+    module = ./modules/installer/cd-dvd/cerana-minimal.nix;
+    type = "minimal";
+    inherit system;
+  });
 
   iso_minimal = forAllSystems (system: makeIso {
     module = ./modules/installer/cd-dvd/installation-cd-minimal.nix;
