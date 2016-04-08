@@ -76,6 +76,20 @@ with lib;
       storeContents = config.cerana.storeContents;
     };
 
+
+  system.build.initialRamdisk = pkgs.makeInitrd {
+    inherit (config.boot.initrd) compressor prepend;
+
+    contents =
+      [ { object = system.build.bootStage1;
+          symlink = "/init";
+        }
+        { object = config.system.build.squashfsStore;
+          target = "/nix-store.squashfs";
+        }
+      ];
+  };
+
     # Individual files to be included
     cerana.contents =
       [ { source = config.boot.kernelPackages.kernel + "/bzImage";
