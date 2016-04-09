@@ -40,6 +40,13 @@ with lib;
     # here and it causes a cyclic dependency.
     boot.loader.grub.enable = false;
 
+    boot.initrd.postMountCommands = ''
+      mkdir -p /mnt-root/mnt/initrd
+      mount --bind / /mnt-root/mnt/initrd
+      mkdir -p /mnt-root/nix
+      mount -t squashfs /nix-store.squashfs /mnt-root/nix
+    '';
+
     # !!! Hack - attributes expected by other modules.
     system.boot.loader.kernelFile = "bzImage";
     environment.systemPackages = [ pkgs.grub2 pkgs.grub2_efi pkgs.syslinux ];
@@ -49,14 +56,6 @@ with lib;
     fileSystems."/" =
       { fsType = "tmpfs";
         options = [ "mode=0755" ];
-      };
-
-    # In stage 1, mount /nix/store (the squashfs image).
-    fileSystems."/nix" =
-      { fsType = "squashfs";
-        device = "/nix-store.squashfs";
-        options = [ "loop" ];
-        neededForBoot = true;
       };
 
     boot.initrd.availableKernelModules = [ "squashfs" ];
