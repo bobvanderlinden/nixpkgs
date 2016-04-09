@@ -41,14 +41,8 @@ with lib;
     boot.loader.grub.enable = false;
 
     boot.initrd.postMountCommands = ''
-      mkdir -p /mnt-root/mnt/initrd
-      mount --bind / /mnt-root/mnt/initrd
-      mkdir -p /mnt-root/nix
-      mount -t squashfs /nix-store.squashfs /mnt-root/nix
-
-      echo "Starting bash..."
-      echo "Press Ctrl+D to continue booting."
-      ${pkgs.bash}/bin/bash
+      mkdir -p /mnt-root/nix/store
+      mount -t squashfs /nix-store.squashfs /mnt-root/nix/store
     '';
 
     # !!! Hack - attributes expected by other modules.
