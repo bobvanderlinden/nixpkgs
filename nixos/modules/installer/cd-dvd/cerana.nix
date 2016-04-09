@@ -45,6 +45,10 @@ with lib;
       mount --bind / /mnt-root/mnt/initrd
       mkdir -p /mnt-root/nix
       mount -t squashfs /nix-store.squashfs /mnt-root/nix
+
+      echo "Starting bash..."
+      echo "Press Ctrl+D to continue booting."
+      ${pkgs.bash}/bin/bash
     '';
 
     # !!! Hack - attributes expected by other modules.
