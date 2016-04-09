@@ -114,11 +114,19 @@ in rec {
   initialRamdisk = buildFromConfig ({ pkgs, ... }: { }) (config: config.system.build.initialRamdisk);
 
 
-  cerana_minimal = genAttrs [ "x86_64-linux" ] (system: makeCerana {
-    module = ./modules/installer/cd-dvd/cerana-minimal.nix;
-    type = "minimal";
-    inherit system;
-  });
+  cerana_minimal = let build = (import lib/eval-config.nix {
+      system = "x86_64-linux";
+      modules = [
+        ./modules/installer/cd-dvd/cerana-minimal.nix
+        versionModule
+      ];
+    }).config.system.build;
+  in
+    pkgs.symlinkJoin "cerana" [
+      build.myramdisk
+      build.kernel
+      build.kernelAppend
+    ];
 
   iso_minimal = forAllSystems (system: makeIso {
     module = ./modules/installer/cd-dvd/installation-cd-minimal.nix;

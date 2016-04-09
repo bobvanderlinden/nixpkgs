@@ -6,23 +6,6 @@
 
 with lib;
 
-let
-
-  cerana.Ramdisk = pkgs.makeInitrd {
-    inherit (config.boot.initrd) compressor prepend;
-
-    contents =
-      [ { object = config.system.build.bootStage1;
-          symlink = "/init";
-        }
-        { object = config.system.build.squashfsStore;
-          symlink = "/nix-store.squashfs";
-        }
-      ];
-  };
-
-in
-
 {
   options = {
 
@@ -111,6 +94,21 @@ in
 
       inherit (config.cerana) contents;
     };
+
+    system.build.myramdisk = pkgs.makeInitrd {
+      inherit (config.boot.initrd) compressor prepend;
+
+      contents =
+        [ { object = config.system.build.bootStage1;
+            symlink = "/init";
+          }
+          { object = config.system.build.squashfsStore;
+            symlink = "/nix-store.squashfs";
+          }
+        ];
+    };
+
+    system.build.kernelAppend = pkgs.writeTextDir "kernelAppend" "init=${config.system.build.toplevel}/init ${toString config.boot.kernelParams}";
 
     boot.loader.timeout = 10;
 
