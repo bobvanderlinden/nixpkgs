@@ -225,35 +225,12 @@ let
     '';
   };
 
-
   # The closure of the init script of boot stage 1 is what we put in
   # the initial RAM disk.
   initialRamdisk = pkgs.makeInitrd {
     inherit (config.boot.initrd) compressor prepend;
 
-    contents =
-      [ { object = bootStage1;
-          symlink = "/init";
-        }
-        { object = pkgs.writeText "mdadm.conf" config.boot.initrd.mdadmConf;
-          symlink = "/etc/mdadm.conf";
-        }
-        { object = pkgs.stdenv.mkDerivation {
-            name = "initrd-kmod-blacklist-ubuntu";
-            builder = pkgs.writeText "builder.sh" ''
-              source $stdenv/setup
-              target=$out
-
-              ${pkgs.perl}/bin/perl -0pe 's/## file: iwlwifi.conf(.+?)##/##/s;' $src > $out
-            '';
-            src = "${pkgs.kmod-blacklist-ubuntu}/modprobe.conf";
-          };
-          symlink = "/etc/modprobe.d/ubuntu.conf";
-        }
-        { object = pkgs.kmod-debian-aliases;
-          symlink = "/etc/modprobe.d/debian.conf";
-        }
-      ];
+    contents = config.boot.initrd.contents;
   };
 
 in
@@ -279,6 +256,14 @@ in
       type = types.listOf types.str;
       description = ''
         Other initrd files to prepend to the final initrd we are building.
+      '';
+    };
+
+    boot.initrd.contents = mkOption {
+      default = [ ];
+      type = types.listOf types.unspecified;
+      description = ''
+        Files to include in initrd.
       '';
     };
 
@@ -408,6 +393,30 @@ in
           resumeDevice == "" || builtins.substring 0 1 resumeDevice == "/";
         message = "boot.resumeDevice has to be an absolute path."
           + " Old \"x:y\" style is no longer supported.";
+      }
+    ];
+
+    boot.initrd.contents = [
+      { object = bootStage1;
+        symlink = "/init";
+      }
+      { object = pkgs.writeText "mdadm.conf" config.boot.initrd.mdadmConf;
+        symlink = "/etc/mdadm.conf";
+      }
+      { object = pkgs.stdenv.mkDerivation {
+          name = "initrd-kmod-blacklist-ubuntu";
+          builder = pkgs.writeText "builder.sh" ''
+            source $stdenv/setup
+            target=$out
+
+            ${pkgs.perl}/bin/perl -0pe 's/## file: iwlwifi.conf(.+?)##/##/s;' $src > $out
+          '';
+          src = "${pkgs.kmod-blacklist-ubuntu}/modprobe.conf";
+        };
+        symlink = "/etc/modprobe.d/ubuntu.conf";
+      }
+      { object = pkgs.kmod-debian-aliases;
+        symlink = "/etc/modprobe.d/debian.conf";
       }
     ];
 
