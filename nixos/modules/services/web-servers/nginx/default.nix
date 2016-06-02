@@ -5,7 +5,7 @@ with lib;
 let
   cfg = config.services.nginx;
   nginx = cfg.package;
-  configFile = pkgs.writeText "nginx.conf" ''
+  uncheckedConfigFile = pkgs.writeText "nginx.conf" ''
     user ${cfg.user} ${cfg.group};
     daemon off;
 
@@ -19,6 +19,17 @@ let
     ''}
     ${cfg.appendConfig}
   '';
+  checkedConfigFile = pkgs.stdenv.mkDerivation ({
+      __noChroot = true;
+      name = "check-nginx.conf";
+      buildCommand = ''
+        ${nginx}/bin/nginx -t -c ${uncheckedConfigFile} -p ${cfg.stateDir}
+        cp ${uncheckedConfigFile} $out
+      '';
+      preferLocalBuild = false;
+    });
+
+  configFile = if cfg.checkConfiguration then checkedConfigFile else uncheckedConfigFile;
 in
 
 {
@@ -84,6 +95,14 @@ in
         type = types.str;
         default = "nginx";
         description = "Group account under which nginx runs.";
+      };
+
+      checkConfiguration = mkOption {
+        default = false;
+        type = types.bool;
+        description = "
+          Whether to check the Nginx configuration before switching.
+        ";
       };
 
     };
