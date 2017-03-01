@@ -19,6 +19,7 @@ stdenv.mkDerivation rec {
     sed -i 's|lex isdn_cdb.lex|${flex}/bin/flex isdn_cdb.lex|g' src/isdn/cdb/Makefile
     sed -i 's|/sbin|/bin|g' Makefile
     sed -i 's|/usr/|/|g' Makefile
+    sed -i "s|/usr/share|$out/share|g" src/isdn/cdb/cdb_hwdb.h
   '';
 
   installPhase = ''
