@@ -369,6 +369,8 @@ with pkgs;
 
   abduco = callPackage ../tools/misc/abduco { };
 
+  abootimg = callPackage ../development/mobile/abootimg { };
+
   acbuild = callPackage ../applications/misc/acbuild { };
 
   acct = callPackage ../tools/system/acct { };
