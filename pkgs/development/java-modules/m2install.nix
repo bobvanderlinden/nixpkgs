@@ -13,8 +13,8 @@ in stdenv.mkDerivation rec {
   inherit name m2Path m2File src;
 
   installPhase = ''
-    mkdir -p $out/m2/$m2Path
-    cp $src $out/m2/$m2Path/$m2File
+    mkdir -p $out/share/maven-repo/$m2Path
+    cp $src $out/share/maven-repo/$m2Path/$m2File
   '';
 
   phases = "installPhase";

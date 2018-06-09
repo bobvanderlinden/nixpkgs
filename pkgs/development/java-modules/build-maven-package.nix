@@ -1,34 +1,83 @@
-{ stdenv, maven, pkgs }:
-{ mavenDeps, src, name, meta, m2Path, skipTests ? true, quiet ? true, ... }:
-
+{ stdenv, maven, pkgs, javaPackages,  writeText, buildEnv }:
 with builtins;
 with stdenv.lib;
+{ outputPaths ? if m2Path then [ m2Path ] else []
+, doCheck ? false
+, skipAnimalSniffer ? false
+, quiet ? true
+, debug ? false
+, batchMode ? true
+, mavenBuildGoals ? [ "install" ]
+, mavenCheckGoals ? [ "test" ]
+, mavenExtraArgs ? ""
+, mavenPackages ? [ ]
+, mavenSettings ? writeText "settings.xml" ''
+    <settings>
+      <mirrors>
+        <mirror>
+          <id>local-repository</id>
+          <url>file:///var/empty</url>
+          <mirrorOf>*</mirrorOf>
+        </mirror>
+      </mirrors>
+      <localRepository>''${env.MAVEN_LOCAL_REPOSITORY}</localRepository>
+      <offline>true</offline>
+    </settings>
+  ''
+, buildInputs ? [ maven jdk ]
 
+# Deprecated. Use `extraRepositoryPackages`
+, mavenDeps ? []
+
+# Deprecated. Use `outputPaths`.
+, m2Path ? null
+, ... } @ args:
 let
-  mavenMinimal = import ./maven-minimal.nix { inherit pkgs stdenv maven; };
-in stdenv.mkDerivation rec {
-  inherit mavenDeps src name meta m2Path;
+  derivationArgs = (builtins.removeAttrs args [
+    "mavenPackages"
+    "m2Path"
+    "mavenDeps"
+  ]);
+in
+# makeOverridable (
+  stdenv.mkDerivation (derivationArgs // rec {
+    inherit mavenBuildGoals mavenCheckGoals doCheck buildInputs;
 
-  flatDeps = unique (flatten (mavenDeps ++ mavenMinimal.mavenMinimal));
+    repositorySources = map (repositoryPackage: "${repositoryPackage}/share/maven-repo") mavenPackages;
 
-  propagatedBuildInput = [ maven ] ++ flatDeps;
+    configurePhase = args.configurePhase or ''
+      runHook preConfigure
+      export MAVEN_HOME="$PWD/.m2"
+      export MAVEN_LOCAL_REPOSITORY="$MAVEN_HOME/repository"
+      export MAVEN_ARGS="--settings=${mavenSettings} ${optionalString (batchMode) "--batch-mode"} ${optionalString (quiet) "--quiet"} ${optionalString (debug) "--debug"} -Danimal.sniffer.skip=${boolToString skipAnimalSniffer} ${mavenExtraArgs}"
 
-  find = ''find ${concatStringsSep " " (map (x: x + "/m2") flatDeps)} -type d -printf '%P\n' | xargs -I {} mkdir -p $out/m2/{}'';
-  copy = ''cp -rsfu ${concatStringsSep " " (map (x: x + "/m2/*") flatDeps)} $out/m2'';
+      mkdir -p $MAVEN_LOCAL_REPOSITORY
 
-  phases = [ "unpackPhase" "buildPhase" ];
+      ${./build-maven-repository.sh} "$MAVEN_LOCAL_REPOSITORY" $repositorySources
 
-  buildPhase = ''
-    mkdir -p $out/target
-    mkdir -p $out/m2/${m2Path}
-    ${optionalString (length flatDeps > 0) find}
-    ${optionalString (length flatDeps > 0) copy}
-    if [ -f $out/m2/settings.xml ]; then rm $out/m2/settings.xml; fi
-    echo "<settings><mirrors>\
-      <mirror><id>tmpm2</id><url>file://$out/m2</url><mirrorOf>*</mirrorOf></mirror></mirrors>\
-      <localRepository>$out/m2/</localRepository></settings>" >> $out/m2/settings.xml
-    ${maven}/bin/mvn ${optionalString (quiet) "-q"} clean package -Dmaven.test.skip=${boolToString skipTests} -Danimal.sniffer.skip=true -gs $out/m2/settings.xml
-    cp ./target/*.jar $out/m2/${m2Path}
-    cp -v ./target/*.jar $out/target/
-  '';
-}
+      runHook postConfigure
+    '';
+
+    buildPhase = args.buildPhase or ''
+      runHook preBuild
+      mvn $MAVEN_ARGS -Dmaven.test.skip=true $mavenBuildGoals
+      runHook postBuild
+    '';
+
+    checkPhase = args.checkPhase or ''
+      runHook preCheck
+      mvn $MAVEN_ARGS $mavenCheckGoals
+      runHook postCheck
+    '';
+
+    installPhase = args.installPhase or ''
+      runHook preInstall
+      for outputPath in $outputPaths
+      do
+        mkdir -p "$out/share/maven-repo/$outputPath"
+        cp -r "$MAVEN_LOCAL_REPOSITORY/$outputPath"/* $out/share/maven-repo/$outputPath/
+      done
+      runHook postInstall
+    '';
+  })
+# )

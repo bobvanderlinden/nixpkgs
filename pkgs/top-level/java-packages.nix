@@ -7,6 +7,7 @@ let
   fetchMaven = callPackage ../development/java-modules/m2install.nix { };
 in {
   inherit mavenbuild fetchMaven;
+  buildMavenRepository = callPackage ../development/java-modules/build-maven-repository.nix { };
 
   mavenPlugins = recurseIntoAttrs (callPackage ../development/java-modules/mavenPlugins.nix { });
 
@@ -249,7 +250,8 @@ in {
     plexusCompilerManager_2_2;
 
   inherit (callPackage ../development/java-modules/plexus/component-annotations.nix { inherit fetchMaven; })
-    plexusComponentAnnotations_1_5_5;
+    plexusComponentAnnotations_1_5_5
+    plexusComponentAnnotations_1_6;
 
   inherit (callPackage ../development/java-modules/plexus/container-default.nix { inherit fetchMaven; })
     plexusContainerDefault_1_0_alpha9
