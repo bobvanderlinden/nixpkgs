@@ -7,6 +7,7 @@ with stdenv.lib;
 , quiet ? true
 , debug ? false
 , batchMode ? true
+, pomPath ? "pom.xml"
 , mavenBuildGoals ? [ "install" ]
 , mavenCheckGoals ? [ "test" ]
 , mavenExtraArgs ? ""
@@ -41,7 +42,7 @@ let
 in
 # makeOverridable (
   stdenv.mkDerivation (derivationArgs // rec {
-    inherit mavenBuildGoals mavenCheckGoals doCheck buildInputs;
+    inherit pomPath mavenBuildGoals mavenCheckGoals doCheck buildInputs;
 
     repositorySources = map (repositoryPackage: "${repositoryPackage}/share/maven-repo") mavenPackages;
 
@@ -49,24 +50,24 @@ in
       runHook preConfigure
       export MAVEN_HOME="$PWD/.m2"
       export MAVEN_LOCAL_REPOSITORY="$MAVEN_HOME/repository"
-      export MAVEN_ARGS="--settings=${mavenSettings} ${optionalString (batchMode) "--batch-mode"} ${optionalString (quiet) "--quiet"} ${optionalString (debug) "--debug"} -Danimal.sniffer.skip=${boolToString skipAnimalSniffer} ${mavenExtraArgs}"
+      export MAVEN_ARGS="--settings=${mavenSettings} ${optionalString (batchMode) "--batch-mode"} ${optionalString (debug) "--debug"} -Danimal.sniffer.skip=${boolToString skipAnimalSniffer} ${mavenExtraArgs}"
 
       mkdir -p $MAVEN_LOCAL_REPOSITORY
 
-      ${./build-maven-repository.sh} "$MAVEN_LOCAL_REPOSITORY" $repositorySources
+      ${./build-local-maven-repository.sh} "$MAVEN_LOCAL_REPOSITORY" $repositorySources
 
       runHook postConfigure
     '';
 
     buildPhase = args.buildPhase or ''
       runHook preBuild
-      mvn $MAVEN_ARGS -Dmaven.test.skip=true $mavenBuildGoals
+      mvn $MAVEN_ARGS --file "$pomPath" -Dmaven.test.skip=true $mavenBuildGoals
       runHook postBuild
     '';
 
     checkPhase = args.checkPhase or ''
       runHook preCheck
-      mvn $MAVEN_ARGS $mavenCheckGoals
+      mvn $MAVEN_ARGS --file "$pomPath" $mavenCheckGoals
       runHook postCheck
     '';
 

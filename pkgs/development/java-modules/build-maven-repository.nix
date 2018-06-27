@@ -2,11 +2,11 @@
 with builtins;
 with lib;
 { name ? "maven-repository"
-, projectInfoFile
+, artifactsFile
 }:
 let
   fetchurlBoot = import <nix/fetchurl.nix>;
-  artifacts = lib.importJSON projectInfoFile;
+  artifacts = lib.importJSON artifactsFile;
   linkFarm = name: entries: runCommand name { preferLocalBuild = true; }
     ("mkdir -p $out/share/maven-repo; cd $out/share/maven-repo; \n" +
       (lib.concatMapStrings ({ source, directory, filename }: "mkdir -p ${directory}; ln -sf '${source}' '${directory}/${filename}';\n") entries));
