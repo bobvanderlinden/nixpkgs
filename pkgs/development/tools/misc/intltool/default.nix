@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, fetchpatch, gettext, perl, perlXMLParser }:
+{ stdenv, gnugrep, fetchurl, fetchpatch, gettext, perl, perlXMLParser }:
 
 stdenv.mkDerivation rec {
   name = "intltool-${version}";
@@ -18,6 +18,7 @@ stdenv.mkDerivation rec {
   })];
 
   propagatedBuildInputs = [ gettext perl perlXMLParser ];
+  nativeBuildInputs = [ perlXMLParser gnugrep ];
 
   meta = with stdenv.lib; {
     description = "Translation helper tool";

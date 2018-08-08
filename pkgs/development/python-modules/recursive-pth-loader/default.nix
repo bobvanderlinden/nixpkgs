@@ -1,4 +1,4 @@
-{ stdenv, python }:
+{ stdenv, python, buildPackages }:
 
 stdenv.mkDerivation rec {
   pname = "python-recursive-pth-loader";
@@ -11,7 +11,7 @@ stdenv.mkDerivation rec {
 
   patchPhase = "cat ${./sitecustomize.py} > sitecustomize.py";
 
-  buildPhase = "${python}/bin/${python.executable} -m compileall .";
+  buildPhase = "${buildPackages.python3}/bin/${python.executable} -m compileall .";
 
   installPhase =
     ''

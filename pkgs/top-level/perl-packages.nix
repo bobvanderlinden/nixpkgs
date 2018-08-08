@@ -5,7 +5,7 @@
    for each package in a separate file: the call to the function would
    be almost as much code as the function itself. */
 
-{config, pkgs, fetchurl, fetchFromGitHub, stdenv, gnused, perl, overrides}:
+{config, pkgs, fetchurl, fetchFromGitHub, stdenv, gnused, perl, overrides, buildPackages}:
 
 let self = _self // overrides; _self = with self; {
 
@@ -8865,6 +8865,10 @@ let self = _self // overrides; _self = with self; {
       platforms = platforms.unix;
     };
     buildInputs = [ TestFatal TestRequiresInternet ];
+    nativeBuildInputs = [ perl ];
+    postFixup = ''
+      mv $out/lib/perl5/site_perl/*/x86_64-linux-thread-multi
+    '';
   };
 
   LWPAuthenOAuth = buildPerlPackage rec {
@@ -17509,6 +17513,12 @@ let self = _self // overrides; _self = with self; {
       sed -i"" -e "s@my \$compiler = File::Spec->catfile(\$path, \$cc\[0\]) \. \$Config{_exe};@my \$compiler = File::Spec->catfile(\$path, \$cc\[0\]) \. (\$^O eq 'cygwin' ? \"\" : \$Config{_exe});@" inc/Devel/CheckLib.pm
     '' else null;
     makeMakerFlags = "EXPATLIBPATH=${pkgs.expat.out}/lib EXPATINCPATH=${pkgs.expat.dev}/include";
+    depsBuildBuild = [ buildPackages.stdenv.cc ];
+
+    # XML::Parser doesn't run its tests correctly when doing cross-compile
+    AUTOMATED_TESTING = false;
+    doCheck = false;
+
     propagatedBuildInputs = [ LWP ];
   };
 
@@ -17668,6 +17678,7 @@ let self = _self // overrides; _self = with self; {
       sha256 = "1bc0hrz4jp6199hi29sdxmb9gyy45whla9hd19yqfasgq8k5ixzy";
     };
     propagatedBuildInputs = [ XMLParser ];
+    nativeBuildInputs = [ perl ];
     doCheck = false;  # requires lots of extra packages
   };
 
