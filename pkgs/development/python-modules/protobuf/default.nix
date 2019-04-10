@@ -18,7 +18,7 @@ buildPythonPackage rec {
   nativeBuildInputs = [ google_apputils pyext ];
   buildInputs = [ protobuf ];
 
-  patches = optional isPy37
+  patches = optional (isPy37 && (versionOlder protobuf.version "3.7.0"))
     # Python 3.7 compatibility (remove when protobuf 3.7 is released)
     (fetchpatch {
       url = "https://github.com/protocolbuffers/protobuf/commit/0a59054c30e4f0ba10f10acfc1d7f3814c63e1a7.patch";
