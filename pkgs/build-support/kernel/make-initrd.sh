@@ -12,6 +12,8 @@ mkdir root
 mkdir root/dev
 mkdir root/sys
 mkdir root/proc
+mkdir root/var
+ln -s /run root/var/run
 
 
 for ((n = 0; n < ${#objects[*]}; n++)); do

@@ -535,7 +535,7 @@ while read -u 3 mountPoint; do
         echo "Timed out waiting for device $device, trying to mount anyway."
     fi
 
-    # Wait once more for the udev queue to empty, just in case it's
+    # Wait once moreudevadm trigger --action=add for the udev queue to empty, just in case it's
     # doing something with $device right now.
     udevadm settle
 

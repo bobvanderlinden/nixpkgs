@@ -6,8 +6,115 @@
 { config, lib, utils, pkgs, ... }:
 
 with lib;
+with import ./systemd-lib.nix { inherit config lib pkgs; };
 
 let
+
+  postDeviceCommandsScript = pkgs.buildPackages.writeShellScript "post-device-commands.sh" ''
+    ${config.boot.initrd.postDeviceCommands}
+  '';
+
+  upstreamSystemUnits = [
+    "tmp.mount"
+    # "plymouth-start.service"
+    # "syslog.service"
+    "systemd-hwdb-update.service"
+    "systemd-remount-fs.service"
+    # "systemd-sysusers.service"
+    "systemd-tmpfiles-setup.service"
+    "systemd-udev-settle.service"
+    "systemd-udev-trigger.service"
+    "systemd-update-done.service"
+    "systemd-journald-audit.socket"
+    "shutdown.target"
+    "slices.target"
+
+    "cryptsetup.target"
+    "remote-fs-pre.target"
+    "local-fs-pre.target"
+    "swap.target"
+    "remote-cryptsetup.target"
+    "remote-fs.target"
+    "local-fs.target"
+    "sysinit.target"
+    "timers.target"
+    "paths.target"
+    "sockets.target"
+    "rescue.service"
+    "basic.target"
+    "rescue.target"
+    "emergency.service"
+    "initrd-root-device.target"
+    "emergency.target"
+    "initrd-root-fs.target"
+    "initrd-parse-etc.service"
+    "initrd-fs.target"
+    "initrd.target"
+    "initrd-cleanup.service"
+    "initrd-udevadm-cleanup-db.service"
+    "initrd-switch-root.target"
+    "initrd-switch-root.service"
+    "multi-user.target"
+
+    # Journal
+    "systemd-journald.socket"
+    "systemd-journald.service"
+    "systemd-journal-flush.service"
+    "systemd-journal-catalog-update.service"
+    "systemd-journald-dev-log.socket"
+    "syslog.socket"
+
+    # udev
+    "systemd-udevd.service"
+    "systemd-udevd-control.socket"
+    "systemd-udevd-kernel.socket"
+
+    "systemd-modules-load.service"
+  ];
+
+  upstreamSystemWants = [
+    "sysinit.target.wants"
+    "sockets.target.wants"
+    "local-fs.target.wants"
+    "multi-user.target.wants"
+    "timers.target.wants"
+  ];
+
+  systemUnits = {
+    "nixos-post-device-commands.service" = {
+      wantedBy = [ "initrd.target" ];
+      unit = makeUnit "nixos-post-device-commands.service" {
+        enable = true;
+        text = ''
+          [Unit]
+
+          [Service]
+          ExecStart=${extraUtils}/bin/ash ${postDeviceCommandsScript}
+        '';
+      };
+    }
+    # "sysroot.mount" = {
+    #   aliases = [ ];
+    #   wantedBy = [ "initrd.target" ];
+    #   requiredBy = [ ];
+    #   unit = makeUnit "sysroot.mount" {
+    #     enable = true;
+    #     text = ''
+    #       [Unit]
+    #       Description=Mount sysroot
+    #       ConditionPathExists=/etc/initrd-release
+    #       DefaultDependencies=no
+    #       Before=initrd.target
+
+    #       [Mount]
+    #       What=/dev/vda1
+    #       Where=/sysroot
+    #       Type=9p
+    #       Options=defaults
+    #     '';
+    #   };
+    # };
+  };
 
   udev = config.systemd.package;
 
@@ -321,26 +428,35 @@ let
 
     contents = [
       {
-        object = bootStage1;
+        object = "${pkgs.systemdMinimal}/bin/init";
         symlink = "/init";
       }
       {
-        object = pkgs.writeText "mdadm.conf" config.boot.initrd.mdadmConf;
-        symlink = "/etc/mdadm.conf";
+        object = "${extraUtils}/bin";
+        symlink = "/bin";
       }
       {
-        object = pkgs.runCommand "initrd-kmod-blacklist-ubuntu" {
-          src = "${pkgs.kmod-blacklist-ubuntu}/modprobe.conf";
-          preferLocalBuild = true;
-        } ''
-          target=$out
-          ${pkgs.buildPackages.perl}/bin/perl -0pe 's/## file: iwlwifi.conf(.+?)##/##/s;' $src > $out
+        object = "${modulesClosure}/lib/modules";
+        symlink = "/lib/modules";
+      }
+      {
+        object = "${modulesClosure}/lib/firmware";
+        symlink = "/lib/firmware";
+      }
+      {
+        object = pkgs.writeText "passwd" ''
+          root::0:0:System administrator:/root:/bin/sh
         '';
-        symlink = "/etc/modprobe.d/ubuntu.conf";
+        symlink = "/etc/passwd";
       }
       {
-        object = pkgs.kmod-debian-aliases;
-        symlink = "/etc/modprobe.d/debian.conf";
+        object = generateUnits "system" systemUnits upstreamSystemUnits
+          upstreamSystemWants;
+        symlink = "/etc/systemd/system";
+      }
+      {
+        object = pkgs.writeText "initrd-release" "";
+        symlink = "/etc/initrd-release";
       }
     ];
   };
