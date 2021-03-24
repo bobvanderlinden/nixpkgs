@@ -6,9 +6,16 @@
 { config, lib, utils, pkgs, ... }:
 
 with lib;
-with import ./systemd-lib.nix { inherit config lib pkgs; };
 
 let
+
+  systemd = config.systemd.package;
+  systemdLibConfig = lib.recursiveUpdate config {
+    systemd.defaultUnit = "initrd.target";
+  };
+  systemdLib = import ./systemd-lib.nix { inherit lib pkgs; config = systemdLibConfig; };
+  udev = systemd;
+
 
   postDeviceCommandsScript = pkgs.buildPackages.writeShellScript "post-device-commands.sh" ''
     ${config.boot.initrd.postDeviceCommands}
@@ -82,32 +89,44 @@ let
 
   systemUnits = {
     "nixos-post-device-commands.service" = {
+      aliases = [];
       wantedBy = [ "initrd.target" ];
-      unit = makeUnit "nixos-post-device-commands.service" {
+      requiredBy = [];
+      unit = systemdLib.makeUnit "nixos-post-device-commands.service" {
         enable = true;
         text = ''
           [Unit]
+          After=initrd-root-device.target
+          Before=initrd-root-fs.target
 
           [Service]
-          ExecStart=${extraUtils}/bin/ash ${postDeviceCommandsScript}
+          ExecStart=${extraUtils}/bin/ash -x ${postDeviceCommandsScript}
+          Environment="PATH=${extraUtils}/bin"
+          Environment="LD_LIBRARY_PATH=${extraUtils}/lib"
+
+          [Install]
+          WantedBy=initrd.target
         '';
       };
-    }
+    };
     # "sysroot.mount" = {
     #   aliases = [ ];
     #   wantedBy = [ "initrd.target" ];
     #   requiredBy = [ ];
-    #   unit = makeUnit "sysroot.mount" {
+    #   unit = systemdLib.makeUnit "sysroot.mount" {
     #     enable = true;
     #     text = ''
     #       [Unit]
     #       Description=Mount sysroot
     #       ConditionPathExists=/etc/initrd-release
     #       DefaultDependencies=no
+    #       After=initrd-root-device.target
+    #       After=dev-vda.device
     #       Before=initrd.target
+    #       Before=initrd-root-fs.target
 
     #       [Mount]
-    #       What=/dev/vda1
+    #       What=/dev/vda
     #       Where=/sysroot
     #       Type=9p
     #       Options=defaults
@@ -115,8 +134,6 @@ let
     #   };
     # };
   };
-
-  udev = config.systemd.package;
 
   kernel-name = config.boot.kernelPackages.kernel.name or "kernel";
 
@@ -428,12 +445,38 @@ let
 
     contents = [
       {
-        object = "${pkgs.systemdMinimal}/bin/init";
+        object = "${systemd}/bin/init";
         symlink = "/init";
+      }
+      {
+        object = udevRules;
+        symlink = "/etc/udev/rules.d";
+      }
+      {
+        object = linkUnits;
+        symlink = "/etc/systemd/network";
+      }
+      {
+        object = pkgs.writeText "journald.conf" ''
+          [Journal]
+          Storage=volatile
+        '';
+        symlink = "/etc/systemd/journald.conf";
+      }
+      {
+        object = pkgs.writeText "system.conf" ''
+          [Manager]
+          DefaultEnvironment=PATH=${extraUtils}/bin:${systemd}/bin LD_LIBRARY_PATH=${extraUtils}/lib:${systemd}/lib
+        '';
+        symlink = "/etc/systemd/system.conf";
       }
       {
         object = "${extraUtils}/bin";
         symlink = "/bin";
+      }
+      {
+        object = "${extraUtils}/bin";
+        symlink = "/sbin";
       }
       {
         object = "${modulesClosure}/lib/modules";
@@ -450,7 +493,28 @@ let
         symlink = "/etc/passwd";
       }
       {
-        object = generateUnits "system" systemUnits upstreamSystemUnits
+        object = pkgs.writeText "group" ''
+          root:x:0:
+          wheel:x:1:
+          kmem:x:2:
+          tty:x:3:
+          messagebus:x:4:
+          disk:x:6:
+          audio:x:17:
+          floppy:x:18:
+          uucp:x:19:
+          lp:x:20:
+          cdrom:x:24:
+          tape:x:25:
+          video:x:26:
+          dialout:x:27:
+          utmp:x:29:
+          systemd-journal:x:62:
+        '';
+        symlink = "/etc/group";
+      }
+      {
+        object = systemdLib.generateUnits "system" systemUnits upstreamSystemUnits
           upstreamSystemWants;
         symlink = "/etc/systemd/system";
       }

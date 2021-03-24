@@ -13,11 +13,13 @@
   # virtualisation.useBootLoader = true;
   # virtualisation.useEFIBoot = true;
   boot.kernelParams = [
+    "root=/dev/vda"
     # "systemd.log_level=debug"
     "systemd.log_target=console"
     # "console=ttyS0,38400"
     "console=ttyS0"
   ];
+  boot.initrd.verbose = true;
 
   # services.xserver = {
   #   enable = true;

@@ -1,13 +1,12 @@
 #! @shell@
 
-targetRoot=/mnt-root
+set -x
+
+targetRoot=/sysroot
 console=tty1
-verbose="@verbose@"
 
 info() {
-    if [[ -n "$verbose" ]]; then
-        echo "$@"
-    fi
+    echo "$@"
 }
 
 extraUtils="@extraUtils@"
@@ -354,10 +353,10 @@ mountFS() {
 
     # Filter out x- options, which busybox doesn't do yet.
     local optionsFiltered="$(IFS=,; for i in $options; do if [ "${i:0:2}" != "x-" ]; then echo -n $i,; fi; done)"
-    # Prefix (lower|upper|work)dir with /mnt-root (overlayfs)
-    local optionsPrefixed="$( echo "$optionsFiltered" | sed -E 's#\<(lowerdir|upperdir|workdir)=#\1=/mnt-root#g' )"
+    # Prefix (lower|upper|work)dir with /sysroot (overlayfs)
+    local optionsPrefixed="$( echo "$optionsFiltered" | sed -E 's#\<(lowerdir|upperdir|workdir)=#\1=/sysroot#g' )"
 
-    echo "$device /mnt-root$mountPoint $fsType $optionsPrefixed" >> /etc/fstab
+    echo "$device /sysroot$mountPoint $fsType $optionsPrefixed" >> /etc/fstab
 
     checkFS "$device" "$fsType"
 
@@ -387,13 +386,13 @@ mountFS() {
 
     info "mounting $device on $mountPoint..."
 
-    mkdir -p "/mnt-root$mountPoint"
+    mkdir -p "/sysroot$mountPoint"
 
     # For ZFS and CIFS mounts, retry a few times before giving up.
     # We do this for ZFS as a workaround for issue NixOS/nixpkgs#25383.
     local n=0
     while true; do
-        mount "/mnt-root$mountPoint" && break
+        mount "/sysroot$mountPoint" && break
         if [ \( "$fsType" != cifs -a "$fsType" != zfs \) -o "$n" -ge 10 ]; then fail; break; fi
         echo "retrying..."
         sleep 1
@@ -401,8 +400,8 @@ mountFS() {
     done
 
     [ "$mountPoint" == "/" ] &&
-        [ -f "/mnt-root/etc/NIXOS_LUSTRATE" ] &&
-        lustrateRoot "/mnt-root"
+        [ -f "/sysroot/etc/NIXOS_LUSTRATE" ] &&
+        lustrateRoot "/sysroot"
 
     true
 }
@@ -507,7 +506,7 @@ while read -u 3 mountPoint; do
     read -u 3 options
 
     # !!! Really quick hack to support bind mounts, i.e., where the
-    # "device" should be taken relative to /mnt-root, not /.  Assume
+    # "device" should be taken relative to /sysroot, not /.  Assume
     # that every device that starts with / but doesn't start with /dev
     # is a bind mount.
     pseudoDevice=
@@ -519,7 +518,7 @@ while read -u 3 mountPoint; do
             pseudoDevice=1
             ;;
         /*)
-            device=/mnt-root$device
+            device=/sysroot$device
             ;;
         *)
             # Not an absolute path; assume that it's a pseudo-device
@@ -548,7 +547,7 @@ while read -u 3 mountPoint; do
       mount -t "$fsType" /dev/root /tmp-iso
       mountFS tmpfs /iso size="$fsSize" tmpfs
 
-      cp -r /tmp-iso/* /mnt-root/iso/
+      cp -r /tmp-iso/* /sysroot/iso/
 
       umount /tmp-iso
       rmdir /tmp-iso
@@ -573,8 +572,8 @@ exec 3>&-
 
 
 # Emit a udev rule for /dev/root to prevent systemd from complaining.
-if [ -e /mnt-root/iso ]; then
-    eval $(udevadm info --export --export-prefix=ROOT_ --device-id-of-file=/mnt-root/iso)
+if [ -e /sysroot/iso ]; then
+    eval $(udevadm info --export --export-prefix=ROOT_ --device-id-of-file=/sysroot/iso)
 else
     eval $(udevadm info --export --export-prefix=ROOT_ --device-id-of-file=$targetRoot)
 fi
