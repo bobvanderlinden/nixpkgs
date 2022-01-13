@@ -2425,6 +2425,11 @@ with pkgs;
     python = python3;
     boost = boost.override { enablePython = true; python = python3; };
   };
+  calamares-nixos = hiPrio (calamares.override { nixos-extensions = true; });
+  calamares-nixos-extensions = libsForQt515.callPackage ../tools/misc/calamares-nixos-extensions {
+    python = python3;
+    boost = boost.override { enablePython = true; python = python3; };
+  };
 
   calendar-cli = callPackage ../tools/networking/calendar-cli { };
 
