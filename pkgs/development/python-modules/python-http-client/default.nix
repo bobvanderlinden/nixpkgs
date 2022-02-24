@@ -8,7 +8,7 @@
 
 buildPythonPackage rec {
   pname = "python_http_client";
-  version = "3.3.4";
+  version = "3.3.6";
   format = "setuptools";
 
   disabled = pythonOlder "3.8";
@@ -17,18 +17,12 @@ buildPythonPackage rec {
     owner = "sendgrid";
     repo = "python-http-client";
     rev = version;
-    sha256 = "sha256-wTXHq+tC+rfvmDZIWvcGhQZqm6DxOmx50BsX0c6asec=";
+    sha256 = "sha256-Xchf/jVkQ7SYOzI9f81iS/G72k//6wkl2bMvHprOP9Y=";
   };
 
   checkInputs = [
     mock
     pytestCheckHook
-  ];
-
-  disabledTests = [
-    # Test is failing as the test is dynamic
-    # https://github.com/sendgrid/python-http-client/issues/153
-    "test__daterange"
   ];
 
   pythonImportsCheck = [

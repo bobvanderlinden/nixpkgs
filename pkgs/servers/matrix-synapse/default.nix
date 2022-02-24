@@ -11,12 +11,18 @@ in
 with python3.pkgs;
 buildPythonApplication rec {
   pname = "matrix-synapse";
-  version = "1.49.2";
+  version = "1.52.0";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "7b795ecfc36e3f57eb7cffbc5ef9da1745b777536416c31509b3e6220c39ca4d";
+    sha256 = "091z3rwd10n59andfy1pfjrf6q3n3yrjqrws13lqc02w23aaxzin";
   };
+
+  # frozendict version constraint is to avoid a debian issue we don't have
+  postPatch = ''
+    substituteInPlace synapse/python_dependencies.py \
+      --replace '"frozendict' '"frozendict", #'
+  '';
 
   buildInputs = [ openssl ];
 
@@ -31,6 +37,7 @@ buildPythonApplication rec {
     jinja2
     jsonschema
     lxml
+    matrix-common
     msgpack
     netaddr
     phonenumbers

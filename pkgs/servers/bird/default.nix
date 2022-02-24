@@ -1,4 +1,4 @@
-{ lib, stdenv, fetchurl, fetchpatch, flex, bison, readline, libssh }:
+{ lib, stdenv, fetchurl, fetchpatch, flex, bison, readline, libssh, nixosTests }:
 
 with lib;
 
@@ -34,6 +34,8 @@ let
         "--localstatedir=/var"
       ] ++ optional enableIPv6 "--enable-ipv6";
 
+      passthru.tests = nixosTests.bird;
+
       meta = {
         description = "BIRD Internet Routing Daemon";
         homepage = "http://bird.network.cz";
@@ -58,7 +60,7 @@ in
   };
 
   bird2 = generic {
-    version = "2.0.8";
-    sha256 = "1xp7f0im1v8pqqx3xqyfkd1nsxk8vnbqgrdrwnwhg8r5xs1xxlhr";
+    version = "2.0.9";
+    sha256 = "sha256-dnhrvN7TBh4bsiGwEfLMACIewGPenNoASn2bBhoJbV4=";
   };
 }

@@ -10,7 +10,7 @@
 , substituteAll
 
   # Language dependencies
-, python
+, python2
 , python3
 , rustPlatform
 
@@ -34,6 +34,7 @@
 , statix
 , stylish-haskell
 , tabnine
+, tup
 , vim
 , which
 , xkb-switch
@@ -65,8 +66,16 @@
 , gobject-introspection
 , wrapGAppsHook
 
-  # vim-clap dependencies
+  # sniprun dependencies
+, bashInteractive
+, coreutils
 , curl
+, gnugrep
+, gnused
+, makeWrapper
+, procps
+
+  # vim-clap dependencies
 , libgit2
 , libiconv
 , openssl
@@ -76,7 +85,6 @@
 , asmfmt
 , delve
 , errcheck
-, gnused
 , go-motion
 , go-tools
 , gocode
@@ -184,7 +192,7 @@ self: super: {
   });
 
   ctrlp-cmatcher = super.ctrlp-cmatcher.overrideAttrs (old: {
-    buildInputs = [ python ];
+    buildInputs = [ python2 ];
     buildPhase = ''
       patchShebangs .
       ./install.sh
@@ -526,6 +534,11 @@ self: super: {
     dependencies = with self; [ nvim-treesitter plenary-nvim ];
   });
 
+  # needs  "http" and "json" treesitter grammars too
+  rest-nvim = super.rest-nvim.overrideAttrs (old: {
+    dependencies = with self; [ plenary-nvim ];
+  });
+
   skim = buildVimPluginFrom2Nix {
     pname = "skim";
     version = skim.version;
@@ -535,6 +548,43 @@ self: super: {
   skim-vim = super.skim-vim.overrideAttrs (old: {
     dependencies = with self; [ skim ];
   });
+
+  sniprun =
+    let
+      version = "1.1.2";
+      src = fetchFromGitHub {
+        owner = "michaelb";
+        repo = "sniprun";
+        rev = "v${version}";
+        sha256 = "sha256-WL0eXwiPhcndI74wtFox2tSnZn1siE86x2MLkfpxxT4=";
+      };
+      sniprun-bin = rustPlatform.buildRustPackage {
+        pname = "sniprun-bin";
+        inherit version src;
+
+        cargoSha256 = "sha256-1WbgnsjoFdvko6VRKY+IjafMNqvJvyIZCDk8I9GV3GM=";
+
+        nativeBuildInputs = [ makeWrapper ];
+
+        postInstall = ''
+          wrapProgram $out/bin/sniprun \
+            --prefix PATH ${lib.makeBinPath [ bashInteractive coreutils curl gnugrep gnused procps ]}
+        '';
+
+        doCheck = false;
+      };
+    in
+    buildVimPluginFrom2Nix {
+      pname = "sniprun";
+      inherit version src;
+
+      patches = [ ./patches/sniprun/fix-paths.patch ];
+      postPatch = ''
+        substituteInPlace lua/sniprun.lua --replace '@sniprun_bin@' ${sniprun-bin}
+      '';
+
+      propagatedBuildInputs = [ sniprun-bin ];
+    };
 
   sqlite-lua = super.sqlite-lua.overrideAttrs (old: {
     postPatch = let
@@ -642,6 +692,24 @@ self: super: {
   telescope-z-nvim = super.telescope-z-nvim.overrideAttrs (old: {
     dependencies = with self; [ telescope-nvim ];
   });
+
+  tup =
+    let
+      # Based on the comment at the top of https://github.com/gittup/tup/blob/master/contrib/syntax/tup.vim
+      ftdetect = builtins.toFile "tup.vim" ''
+        au BufNewFile,BufRead Tupfile,*.tup setf tup
+      '';
+    in
+    buildVimPluginFrom2Nix {
+      inherit (tup) pname version src;
+      preInstall = ''
+        mkdir -p vim-plugin/syntax vim-plugin/ftdetect
+        cp contrib/syntax/tup.vim vim-plugin/syntax/tup.vim
+        cp "${ftdetect}" vim-plugin/ftdetect/tup.vim
+        cd vim-plugin
+      '';
+      meta.maintainers = with lib.maintainers; [enderger];
+    };
 
   unicode-vim =
     let
@@ -752,7 +820,7 @@ self: super: {
             libiconv
           ];
 
-          cargoSha256 = "sha256-LSDtjQxmK+Qe0OJXoEbWeIAqP7NxU+UtVPdL86Hpv5Y=";
+          cargoSha256 = "sha256-JKi51kzCHMctUX6tT8K2Rq1slV3Ek67dCgbPjBkwPTE=";
         };
       in
       ''
@@ -862,7 +930,7 @@ self: super: {
   vim-isort = super.vim-isort.overrideAttrs (old: {
     postPatch = ''
       substituteInPlace ftplugin/python_vimisort.vim \
-        --replace 'import vim' 'import vim; import sys; sys.path.append("${python.pkgs.isort}/${python.sitePackages}")'
+        --replace 'import vim' 'import vim; import sys; sys.path.append("${python2.pkgs.isort}/${python2.sitePackages}")'
     '';
   });
 
@@ -871,7 +939,7 @@ self: super: {
       vim-markdown-composer-bin = rustPlatform.buildRustPackage rec {
         pname = "vim-markdown-composer-bin";
         inherit (super.vim-markdown-composer) src version;
-        cargoSha256 = "1cvnjsw5dd02wrm1q5xi8b033rsn44f7fkmw5j7lhskv5j286zrh";
+        cargoSha256 = "03d7kap6vha1jmyfrjqaja5439x6mhnvjjbz3rmxb3x4dpppbpj1";
       };
     in
     super.vim-markdown-composer.overrideAttrs (oldAttrs: rec {
@@ -916,7 +984,7 @@ self: super: {
   });
 
   vim-wakatime = super.vim-wakatime.overrideAttrs (old: {
-    buildInputs = [ python ];
+    buildInputs = [ python2 ];
   });
 
   vim-xdebug = super.vim-xdebug.overrideAttrs (old: {

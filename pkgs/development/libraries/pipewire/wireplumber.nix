@@ -1,6 +1,7 @@
 { lib
 , stdenv
 , fetchFromGitLab
+, fetchpatch
 , nix-update-script
 , # base build deps
   meson
@@ -26,7 +27,7 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "wireplumber";
-  version = "0.4.6";
+  version = "0.4.8";
 
   outputs = [ "out" "dev" ] ++ lib.optional enableDocs "doc";
 
@@ -35,7 +36,7 @@ stdenv.mkDerivation rec {
     owner = "pipewire";
     repo = "wireplumber";
     rev = version;
-    sha256 = "sha256-y+Gj9EZn67W3U81zXgp+6JAFxZSZTwwT0TB3Kueb/Tw=";
+    sha256 = "sha256-xwfggrjKHh5mZdvH6dKqQo6o1ltxuYdjoGYaWl31C/Y=";
   };
 
   nativeBuildInputs = [
