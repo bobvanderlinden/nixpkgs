@@ -2491,7 +2491,7 @@ with pkgs;
     python = python3;
     boost = boost.override { enablePython = true; python = python3; };
   };
-  
+
   calendar-cli = callPackage ../tools/networking/calendar-cli { };
 
   cameradar = callPackage ../tools/security/cameradar { };
