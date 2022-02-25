@@ -2486,6 +2486,11 @@ with pkgs;
     python = python3;
     boost = boost.override { enablePython = true; python = python3; };
   };
+  calamares-nixos = lowPrio (calamares.override { nixos-extensions = true; });
+  calamares-nixos-extensions = libsForQt515.callPackage ../tools/misc/calamares-nixos-extensions {
+    python = python3;
+    boost = boost.override { enablePython = true; python = python3; };
+  };
 
   calendar-cli = callPackage ../tools/networking/calendar-cli { };
 
@@ -15016,8 +15021,6 @@ with pkgs;
   gradle_6 = callPackage gradle-packages.gradle_6 { };
   gradle_7 = callPackage gradle-packages.gradle_7 { };
   gradle = gradle_7;
-
-  grcov = callPackage ../development/tools/misc/grcov { };
 
   gperf = callPackage ../development/tools/misc/gperf { };
   # 3.1 changed some parameters from int to size_t, leading to mismatches.
@@ -34001,11 +34004,12 @@ with pkgs;
 
   viewnior = callPackage ../applications/graphics/viewnior { };
 
-  vimUtils = callPackage ../applications/editors/vim/plugins/vim-utils.nix {
+
+  vimUtils = callPackage ../misc/vim-plugins/vim-utils.nix {
     inherit (lua51Packages) hasLuaModule;
   };
 
-  vimPlugins = recurseIntoAttrs (callPackage ../applications/editors/vim/plugins {
+  vimPlugins = recurseIntoAttrs (callPackage ../misc/vim-plugins {
     llvmPackages = llvmPackages_6;
     luaPackages = lua51Packages;
   });
