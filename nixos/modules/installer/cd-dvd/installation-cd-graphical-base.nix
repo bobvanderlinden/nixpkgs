@@ -35,7 +35,7 @@ with lib;
   # Enable sound in graphical iso's.
   hardware.pulseaudio.enable = true;
 
-  environment.systemPackages = [
+  environment.defaultPackages = [
     # Include gparted for partitioning disks.
     pkgs.gparted
 
