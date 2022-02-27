@@ -155,8 +155,31 @@ in rec {
     inherit system;
   });
 
+  calamaresInstaller = with import ./.. { system = "x86_64-linux"; };
+    import lib/eval-config.nix {
+      inherit system;
+      modules = [
+        configuration
+        versionModule
+        ./modules/virtualisation/qemu-vm.nix
+        ./modules/installer/cd-dvd/installation-cd-graphical-calamares-gnome.nix
+        {
+          documentation.enable = mkVMOverride false;
+          documentation.nixos.enable = mkVMOverride false;
+          environment.defaultPackages = mkVMOverride [ ];
+
+          virtualisation = {
+            qemu.options = [ "-vga virtio" ];
+            memorySize = 2048;
+            emptyDiskImages = [ (8 * 1024) ];
+          };
+        }
+      ];
+    };
+
+
   iso_gnome = forMatchingSystems [ "x86_64-linux" ] (system: makeIso {
-    module = ./modules/installer/cd-dvd/installation-cd-graphical-gnome.nix;
+    module = ./modules/installer/cd-dvd/installation-cd-graphical-calamares-gnome.nix;
     type = "gnome";
     inherit system;
   });
