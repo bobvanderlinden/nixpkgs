@@ -8,10 +8,9 @@ mkDerivation rec {
   pname = "calamares-nixos-extensions";
   version = "0.0.1";
 
-  # release including submodule
   src = fetchurl {
-    url = "https://github.com/vlinkz/${pname}/archive/refs/heads/calamares.tar.gz";
-    sha256 = "sha256-4O3TlPFtQViA7+tss5/6oRqMoqKz5vEP95UqD+apVkc=";
+    url = "https://github.com/vlinkz/${pname}/archive/refs/tags/${version}.tar.gz";
+    sha256 = "sha256-Ua7NJXwu9QsWrTzRKMPQnlkr7lECBNAKBRjD6bwCHa8=";
   };
 
   nativeBuildInputs = [ cmake extra-cmake-modules ];
@@ -32,7 +31,6 @@ mkDerivation rec {
   meta = with lib; {
     description = "Calamares modules for NixOS";
     license = with licenses; [ gpl3Plus bsd2 ];
-    #maintainers = with maintainers; [ manveru ];
     platforms = platforms.linux;
   };
 }

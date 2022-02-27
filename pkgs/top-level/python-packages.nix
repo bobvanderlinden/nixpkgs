@@ -760,6 +760,8 @@ in {
     inherit (pkgs) augeas;
   };
 
+  augmax = callPackage ../development/python-modules/augmax { };
+
   auroranoaa = callPackage ../development/python-modules/auroranoaa { };
 
   aurorapy = callPackage ../development/python-modules/aurorapy { };
@@ -1165,6 +1167,8 @@ in {
   beancount_docverif = callPackage ../development/python-modules/beancount_docverif { };
 
   beanstalkc = callPackage ../development/python-modules/beanstalkc { };
+
+  beartype = callPackage ../development/python-modules/beartype { };
 
   beautifulsoup4 = callPackage ../development/python-modules/beautifulsoup4 { };
 
@@ -1983,6 +1987,8 @@ in {
   daemonocle = callPackage ../development/python-modules/daemonocle { };
 
   daphne = callPackage ../development/python-modules/daphne { };
+
+  dasbus = callPackage ../development/python-modules/dasbus { };
 
   dash = callPackage ../development/python-modules/dash { };
 
@@ -2838,6 +2844,8 @@ in {
   ffmpeg-python = callPackage ../development/python-modules/ffmpeg-python { };
 
   ffmpeg-progress-yield = callPackage ../development/python-modules/ffmpeg-progress-yield { };
+
+  fiblary3-fork = callPackage ../development/python-modules/fiblary3-fork { };
 
   fido2 = callPackage ../development/python-modules/fido2 { };
 
@@ -7599,6 +7607,8 @@ in {
 
   pysideTools = callPackage ../development/python-modules/pyside/tools.nix { };
 
+  pysignalclirestapi = callPackage ../development/python-modules/pysignalclirestapi { };
+
   pysigset = callPackage ../development/python-modules/pysigset { };
 
   pysimplegui = callPackage ../development/python-modules/pysimplegui { };
@@ -10383,6 +10393,8 @@ in {
 
   veryprettytable = callPackage ../development/python-modules/veryprettytable { };
 
+  videocr = callPackage ../development/python-modules/videocr { };
+
   vidstab = callPackage ../development/python-modules/vidstab { };
 
   ViennaRNA = toPythonModule pkgs.ViennaRNA;
@@ -10424,6 +10436,8 @@ in {
   voluptuous = callPackage ../development/python-modules/voluptuous { };
 
   voluptuous-serialize = callPackage ../development/python-modules/voluptuous-serialize { };
+
+  volvooncall = callPackage ../development/python-modules/volvooncall { };
 
   vowpalwabbit = callPackage ../development/python-modules/vowpalwabbit { };
 

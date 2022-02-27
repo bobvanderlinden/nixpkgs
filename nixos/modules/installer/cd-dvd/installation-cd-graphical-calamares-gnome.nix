@@ -1,26 +1,30 @@
 # This module defines a NixOS installation CD that contains GNOME.
 
-{ pkgs, lib, ... }:
+{ lib, ... }:
 
 with lib;
 
 {
-  imports = [ ./installation-cd-graphical-calamares-base.nix ];
+  imports = [ ./installation-cd-graphical-calamares.nix ];
 
   isoImage.edition = "gnome";
+
   services.xserver.desktopManager.gnome = {
-    # Add firefox to favorite-apps
+    # Add Firefox and other tools useful for installation to the launcher
     favoriteAppsOverride = ''
       [org.gnome.shell]
-      favorite-apps=[ 'firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'calamares.desktop' ]
+      favorite-apps=[ 'firefox.desktop', 'nixos-manual.desktop', 'org.gnome.Terminal.desktop', 'org.gnome.Nautilus.desktop', 'gparted.desktop', 'calamares.desktop' ]
     '';
     enable = true;
   };
 
+  # Theme calamares with GNOME theme
   qt5 = {
+    enable = true;
     platformTheme = "gnome";
   };
 
+  # Session variable needed as calamares is launched as a superuser
   environment.sessionVariables = {
     "QT_QPA_PLATFORMTHEME" = "gnome";
   };
@@ -42,11 +46,10 @@ with lib;
     };
   };
 
-  # Override GNOME defaults
+  # Override GNOME defaults to disable GNOME tour
   services.xserver.desktopManager.gnome.extraGSettingsOverrides = ''
-  [org.gnome.desktop.interface]
-  gtk-theme='Adwaita-dark'
   [org.gnome.shell]
-  welcome-dialog-last-shown-version='4294967295'
+  welcome-dialog-last-shown-version='9999999999'
   '';
+
 }
