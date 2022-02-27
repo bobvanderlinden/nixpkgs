@@ -1,10 +1,7 @@
-{ lib, fetchurl, boost, cmake, extra-cmake-modules, kparts, kpmcore
-, kservice, libatasmart, libxcb, libyamlcpp, libpwquality, parted, polkit-qt, python, qtbase
-, qtquickcontrols, qtsvg, qttools, qtwebengine, util-linux, tzdata
-, ckbcomp, xkeyboard_config, mkDerivation, calamares-nixos
+{ stdenv, lib, fetchurl
 }:
 
-mkDerivation rec {
+stdenv.mkDerivation rec {
   pname = "calamares-nixos-extensions";
   version = "0.0.1";
 
@@ -13,20 +10,12 @@ mkDerivation rec {
     sha256 = "sha256-Ua7NJXwu9QsWrTzRKMPQnlkr7lECBNAKBRjD6bwCHa8=";
   };
 
-  nativeBuildInputs = [ cmake extra-cmake-modules ];
-  buildInputs = [
-    boost kparts.dev kpmcore.out kservice.dev
-    libatasmart libxcb libyamlcpp libpwquality parted polkit-qt python
-    qtbase qtquickcontrols qtsvg qttools qtwebengine.dev util-linux calamares-nixos
-  ];
-
-  cmakeFlags = [
-    "-DPYTHON_LIBRARY=${python}/lib/lib${python.libPrefix}.so"
-    "-DPYTHON_INCLUDE_DIR=${python}/include/${python.libPrefix}"
-    "-DCMAKE_VERBOSE_MAKEFILE=True"
-    "-DCMAKE_BUILD_TYPE=Release"
-    "-DWITH_PYTHONQT:BOOL=ON"
-  ];
+  installPhase = ''
+    mkdir -p $out/{lib,share}/calamares
+    cp -r modules $out/lib/calamares/
+    cp -r config/* $out/share/calamares/
+    cp -r branding $out/share/calamares/
+  '';
 
   meta = with lib; {
     description = "Calamares modules for NixOS";
