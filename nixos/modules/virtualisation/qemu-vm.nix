@@ -1015,6 +1015,10 @@ in
 
     networking.usePredictableInterfaceNames = false;
 
+    boot.initrd.kernelModules =
+      optionals cfg.writableStore [ "overlay" ] ++
+      optionals (cfg.sharedDirectories != {}) [ "9p" ];
+
     system.requiredKernelConfig = with config.lib.kernelConfig;
       [ (isEnabled "VIRTIO_BLK")
         (isEnabled "VIRTIO_PCI")

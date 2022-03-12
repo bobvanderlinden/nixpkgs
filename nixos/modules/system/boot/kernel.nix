@@ -253,6 +253,7 @@ in
 
         boot.initrd.kernelModules =
           optionals config.boot.initrd.includeDefaultModules [
+            "ext4"
             # For LVM.
             "dm_mod"
           ];
