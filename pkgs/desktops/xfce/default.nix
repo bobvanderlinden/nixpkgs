@@ -3,20 +3,18 @@
 lib.makeScope pkgs.newScope (self: with self; {
   #### NixOS support
 
-  updateScript = pkgs.genericUpdater;
+  genericUpdater = pkgs.genericUpdater;
 
-  gitLister = url:
-    "${pkgs.common-updater-scripts}/bin/list-git-tags ${url}";
-
-  archiveLister = category: name:
-    "${pkgs.common-updater-scripts}/bin/list-archive-two-level-versions https://archive.xfce.org/src/${category}/${name}";
+  archiveUpdater = { category, pname, version }:
+    pkgs.httpTwoLevelsUpdater {
+      inherit pname version;
+      attrPath = "xfce.${pname}";
+      url = "https://archive.xfce.org/src/${category}/${pname}";
+    };
 
   mkXfceDerivation = callPackage ./mkXfceDerivation.nix { };
 
   automakeAddFlags = pkgs.makeSetupHook { } ./automakeAddFlags.sh;
-
-  # Samba is a rather heavy dependency
-  gvfs = pkgs.gvfs.override { samba = null; };
 
   #### CORE
 
@@ -37,6 +35,8 @@ lib.makeScope pkgs.newScope (self: with self; {
   thunar-archive-plugin = callPackage ./thunar-plugins/archive { };
 
   thunar-dropbox-plugin = callPackage ./thunar-plugins/dropbox { };
+
+  thunar-media-tags-plugin = callPackage ./thunar-plugins/media-tags { };
 
   tumbler = callPackage ./core/tumbler { };
 
@@ -83,7 +83,7 @@ lib.makeScope pkgs.newScope (self: with self; {
   xfce4-terminal = callPackage ./applications/xfce4-terminal { };
 
   xfce4-screenshooter = callPackage ./applications/xfce4-screenshooter {
-    inherit (pkgs.gnome3) libsoup;
+    inherit (pkgs.gnome) libsoup;
   };
 
   xfdashboard = callPackage ./applications/xfdashboard {};
@@ -93,6 +93,8 @@ lib.makeScope pkgs.newScope (self: with self; {
   xfce4-notifyd = callPackage ./applications/xfce4-notifyd { };
 
   xfburn = callPackage ./applications/xfburn { };
+
+  xfce4-panel-profiles = callPackage ./applications/xfce4-panel-profiles { };
 
   #### ART
 
@@ -213,13 +215,13 @@ lib.makeScope pkgs.newScope (self: with self; {
   gtk = pkgs.gtk2;
   libxfcegui4 = throw "libxfcegui4 is the deprecated Xfce GUI library. It has been superseded by the libxfce4ui library";
   xinitrc = xfce4-session.xinitrc;
-  inherit (pkgs.gnome2) libglade;
-  inherit (pkgs.gnome3) vte gtksourceview;
+  libglade = throw "libglade has been removed";
+  inherit (pkgs.gnome) gtksourceview;
   xfce4-mixer-pulse = xfce4-mixer;
   thunar-bare = thunar.override {
     thunarPlugins = [];
   };
 
   # added 2019-11-30
-  inherit (pkgs) dconf;
+  inherit (pkgs) dconf vte;
 })

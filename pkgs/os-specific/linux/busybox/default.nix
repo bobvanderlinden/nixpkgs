@@ -1,6 +1,7 @@
 { stdenv, lib, buildPackages, fetchurl, fetchFromGitLab
 , enableStatic ? stdenv.hostPlatform.isStatic
 , enableMinimal ? false
+, enableAppletSymlinks ? true
 # Allow forcing musl without switching stdenv itself, e.g. for our bootstrapping:
 # nix build -f pkgs/top-level/release.nix stdenvBootstrapTools.x86_64-linux.dist
 , useMusl ? stdenv.hostPlatform.libc == "musl", musl
@@ -32,7 +33,7 @@ let
     CONFIG_FEATURE_WTMP n
   '';
 
-  # The debian version lacks behind the upstream version and also contains
+  # The debian version lags behind the upstream version and also contains
   # a debian-specific suffix. We only fetch the debian repository to get the
   # default.script
   debianVersion = "1.30.1-6";
@@ -49,14 +50,14 @@ in
 
 stdenv.mkDerivation rec {
   pname = "busybox";
-  version = "1.32.1";
+  version = "1.34.1";
 
   # Note to whoever is updating busybox: please verify that:
   # nix-build pkgs/stdenv/linux/make-bootstrap-tools.nix -A test
   # still builds after the update.
   src = fetchurl {
     url = "https://busybox.net/downloads/${pname}-${version}.tar.bz2";
-    sha256 = "1vhd59qmrdyrr1q7rvxmyl96z192mxl089hi87yl0hcp6fyw8mwx";
+    sha256 = "0jfm9fik7nv4w21zqdg830pddgkdjmplmna9yjn9ck1lwn4vsps1";
   };
 
   hardeningDisable = [ "format" "pie" ]
@@ -65,6 +66,8 @@ stdenv.mkDerivation rec {
   patches = [
     ./busybox-in-store.patch
   ] ++ lib.optional (stdenv.hostPlatform != stdenv.buildPlatform) ./clang-cross.patch;
+
+  separateDebugInfo = true;
 
   postPatch = "patchShebangs .";
 
@@ -81,8 +84,21 @@ stdenv.mkDerivation rec {
 
     CONFIG_LFS y
 
+    # More features for modprobe.
+    ${lib.optionalString (!enableMinimal) ''
+      CONFIG_FEATURE_MODPROBE_BLACKLIST y
+      CONFIG_FEATURE_MODUTILS_ALIAS y
+      CONFIG_FEATURE_MODUTILS_SYMBOLS y
+      CONFIG_MODPROBE_SMALL n
+    ''}
+
     ${lib.optionalString enableStatic ''
       CONFIG_STATIC y
+    ''}
+
+    ${lib.optionalString (!enableAppletSymlinks) ''
+      CONFIG_INSTALL_APPLET_DONT y
+      CONFIG_INSTALL_APPLET_SYMLINKS n
     ''}
 
     # Use the external mount.cifs program.
@@ -112,6 +128,8 @@ stdenv.mkDerivation rec {
     makeFlagsArray+=("CC=${stdenv.cc.targetPrefix}cc -isystem ${musl.dev}/include -B${musl}/lib -L${musl}/lib")
   '';
 
+  makeFlags = [ "SKIP_STRIP=y" ];
+
   postInstall = ''
     sed -e '
     1 a busybox() { '$out'/bin/busybox "$@"; }\
@@ -134,8 +152,8 @@ stdenv.mkDerivation rec {
   meta = with lib; {
     description = "Tiny versions of common UNIX utilities in a single small executable";
     homepage = "https://busybox.net/";
-    license = licenses.gpl2;
-    maintainers = with maintainers; [ TethysSvensson ];
+    license = licenses.gpl2Only;
+    maintainers = with maintainers; [ TethysSvensson qyliss ];
     platforms = platforms.linux;
     priority = 10;
   };

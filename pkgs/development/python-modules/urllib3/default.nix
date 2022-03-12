@@ -2,7 +2,7 @@
 , brotli
 , buildPythonPackage
 , cryptography
-, dateutil
+, python-dateutil
 , fetchPypi
 , idna
 , isPy27
@@ -12,18 +12,18 @@
 , pytest-freezegun
 , pytest-timeout
 , pytestCheckHook
-, pythonOlder
 , tornado
 , trustme
 }:
 
 buildPythonPackage rec {
   pname = "urllib3";
-  version = "1.26.4";
+  version = "1.26.8";
+  format = "setuptools";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "0dw9w9bs3hmr5dp3r3h43jyzzb1g1046ag7lj8pqf58i4kvj3c77";
+    hash = "sha256-Dnwz2aY+fd/LhngKrIe+/C+930bFjbtIfghV987sKDw=";
   };
 
   propagatedBuildInputs = [
@@ -36,7 +36,7 @@ buildPythonPackage rec {
   ];
 
   checkInputs = [
-    dateutil
+    python-dateutil
     mock
     pytest-freezegun
     pytest-timeout
@@ -62,7 +62,9 @@ buildPythonPackage rec {
     export CI # Increases LONG_TIMEOUT
   '';
 
-  pythonImportsCheck = [ "urllib3" ];
+  pythonImportsCheck = [
+    "urllib3"
+  ];
 
   meta = with lib; {
     description = "Powerful, sanity-friendly HTTP client for Python";

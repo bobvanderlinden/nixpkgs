@@ -15,15 +15,16 @@
 , lib
 , glibcLocales
 , setuptools
+, urllib3
 }:
 
 buildPythonPackage rec {
   pname = "internetarchive";
-  version = "2.0.2";
+  version = "2.3.0";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "515e6646a2b917c15f2241670d21f14a014b9c67dc509aef4d4aca5a59cdda65";
+    sha256 = "fa89dc4be3e0a0aee24810a4a754e24adfd07edf710c645b4f642422c6078b8d";
   };
 
   propagatedBuildInputs = [
@@ -36,6 +37,7 @@ buildPythonPackage rec {
     args
     schema
     setuptools
+    urllib3
   ] ++ lib.optionals (!isPy3k) [ backports_csv ];
 
   checkInputs = [ pytest responses glibcLocales ];

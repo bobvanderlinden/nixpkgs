@@ -13,8 +13,6 @@ let
     elem
     filter
     findFirst
-    flip
-    foldl
     foldl'
     getAttrFromPath
     head
@@ -23,6 +21,7 @@ let
     isAttrs
     isBool
     isFunction
+    isList
     isString
     length
     mapAttrs
@@ -37,7 +36,8 @@ let
     setAttrByPath
     toList
     types
-    warn
+    warnIf
+    zipAttrsWith
     ;
   inherit (lib.options)
     isOption
@@ -51,15 +51,43 @@ in
 
 rec {
 
-  /* Evaluate a set of modules.  The result is a set of two
-     attributes: ‘options’: the nested set of all option declarations,
-     and ‘config’: the nested set of all option values.
+  /*
+    Evaluate a set of modules.  The result is a set with the attributes:
+
+      ‘options’: The nested set of all option declarations,
+
+      ‘config’: The nested set of all option values.
+
+      ‘type’: A module system type representing the module set as a submodule,
+            to be extended by configuration from the containing module set.
+
+            This is also available as the module argument ‘moduleType’.
+
+      ‘extendModules’: A function similar to ‘evalModules’ but building on top
+            of the module set. Its arguments, ‘modules’ and ‘specialArgs’ are
+            added to the existing values.
+
+            Using ‘extendModules’ a few times has no performance impact as long
+            as you only reference the final ‘options’ and ‘config’.
+            If you do reference multiple ‘config’ (or ‘options’) from before and
+            after ‘extendModules’, performance is the same as with multiple
+            ‘evalModules’ invocations, because the new modules' ability to
+            override existing configuration fundamentally requires a new
+            fixpoint to be constructed.
+
+            This is also available as a module argument.
+
+      ‘_module’: A portion of the configuration tree which is elided from
+            ‘config’. It contains some values that are mostly internal to the
+            module system implementation.
+
      !!! Please think twice before adding to this argument list! The more
      that is specified here instead of in the modules themselves the harder
      it is to transparently move a set of modules to be a submodule of another
      config (as the proper arguments need to be replicated at each call to
      evalModules) and the less declarative the module set is. */
-  evalModules = { modules
+  evalModules = evalModulesArgs@
+                { modules
                 , prefix ? []
                 , # This should only be used for special arguments that need to be evaluated
                   # when resolving module structure (like in imports). For everything else,
@@ -72,9 +100,31 @@ rec {
                   check ? true
                 }:
     let
+      withWarnings = x:
+        lib.warnIf (evalModulesArgs?args) "The args argument to evalModules is deprecated. Please set config._module.args instead."
+        lib.warnIf (evalModulesArgs?check) "The check argument to evalModules is deprecated. Please set config._module.check instead."
+        x;
+
+      legacyModules =
+        optional (evalModulesArgs?args) {
+          config = {
+            _module.args = args;
+          };
+        }
+        ++ optional (evalModulesArgs?check) {
+          config = {
+            _module.check = mkDefault check;
+          };
+        };
+      regularModules = modules ++ legacyModules;
+
       # This internal module declare internal options under the `_module'
       # attribute.  These options are fragile, as they are used by the
       # module system to change the interpretation of modules.
+      #
+      # When extended with extendModules or moduleType, a fresh instance of
+      # this module is used, to avoid conflicts and allow chaining of
+      # extendModules.
       internalModule = rec {
         _file = ./modules.nix;
 
@@ -88,7 +138,7 @@ rec {
             # support for that, in turn it's lazy in its values. This means e.g.
             # a `_module.args.pkgs = import (fetchTarball { ... }) {}` won't
             # start a download when `pkgs` wasn't evaluated.
-            type = types.lazyAttrsOf types.unspecified;
+            type = types.lazyAttrsOf types.raw;
             internal = true;
             description = "Arguments passed to each module.";
           };
@@ -96,13 +146,12 @@ rec {
           _module.check = mkOption {
             type = types.bool;
             internal = true;
-            default = check;
+            default = true;
             description = "Whether to check whether all option definitions have matching declarations.";
           };
 
           _module.freeformType = mkOption {
-            # Disallow merging for now, but could be implemented nicely with a `types.optionType`
-            type = types.nullOr (types.uniq types.attrs);
+            type = types.nullOr types.optionType;
             internal = true;
             default = null;
             description = ''
@@ -119,15 +168,18 @@ rec {
         };
 
         config = {
-          _module.args = args;
+          _module.args = {
+            inherit extendModules;
+            moduleType = type;
+          };
         };
       };
 
       merged =
         let collected = collectModules
           (specialArgs.modulesPath or "")
-          (modules ++ [ internalModule ])
-          ({ inherit lib options config; } // specialArgs);
+          (regularModules ++ [ internalModule ])
+          ({ inherit lib options config specialArgs; } // specialArgs);
         in mergeModules prefix (reverseList collected);
 
       options = merged.matchedOptions;
@@ -161,20 +213,49 @@ rec {
             baseMsg = "The option `${showOption (prefix ++ firstDef.prefix)}' does not exist. Definition values:${showDefs [ firstDef ]}";
           in
             if attrNames options == [ "_module" ]
-              then throw ''
-                ${baseMsg}
+              then
+                let
+                  optionName = showOption prefix;
+                in
+                  if optionName == ""
+                    then throw ''
+                      ${baseMsg}
 
-                However there are no options defined in `${showOption prefix}'. Are you sure you've
-                declared your options properly? This can happen if you e.g. declared your options in `types.submodule'
-                under `config' rather than `options'.
-              ''
+                      It seems as if you're trying to declare an option by placing it into `config' rather than `options'!
+                    ''
+                  else
+                    throw ''
+                      ${baseMsg}
+
+                      However there are no options defined in `${showOption prefix}'. Are you sure you've
+                      declared your options properly? This can happen if you e.g. declared your options in `types.submodule'
+                      under `config' rather than `options'.
+                    ''
             else throw baseMsg
         else null;
 
-      result = builtins.seq checkUnmatched {
-        inherit options;
-        config = removeAttrs config [ "_module" ];
-        inherit (config) _module;
+      checked = builtins.seq checkUnmatched;
+
+      extendModules = extendArgs@{
+        modules ? [],
+        specialArgs ? {},
+        prefix ? [],
+        }:
+          evalModules (evalModulesArgs // {
+            modules = regularModules ++ modules;
+            specialArgs = evalModulesArgs.specialArgs or {} // specialArgs;
+            prefix = extendArgs.prefix or evalModulesArgs.prefix;
+          });
+
+      type = lib.types.submoduleWith {
+        inherit modules specialArgs;
+      };
+
+      result = withWarnings {
+        options = checked options;
+        config = checked (removeAttrs config [ "_module" ]);
+        _module = checked (config._module);
+        inherit extendModules type;
       };
     in result;
 
@@ -188,6 +269,9 @@ rec {
       loadModule = args: fallbackFile: fallbackKey: m:
         if isFunction m || isAttrs m then
           unifyModuleSyntax fallbackFile fallbackKey (applyIfFunction fallbackKey m args)
+        else if isList m then
+          let defs = [{ file = fallbackFile; value = m; }]; in
+          throw "Module imports can't be nested lists. Perhaps you meant to remove one level of lists? Definitions: ${showDefs defs}"
         else unifyModuleSyntax (toString m) (toString m) (applyIfFunction (toString m) (import m) args);
 
       /*
@@ -249,6 +333,10 @@ rec {
     in modulesPath: initialModules: args:
       filterModules modulesPath (collectStructuredModules unknownModule "" initialModules args);
 
+  /* Wrap a module with a default location for reporting errors. */
+  setDefaultModuleLocation = file: m:
+    { _file = file; imports = [ m ]; };
+
   /* Massage a module into canonical form, that is, a set consisting
      of ‘options’, ‘config’ and ‘imports’ attributes. */
   unifyModuleSyntax = file: key: m:
@@ -295,13 +383,11 @@ rec {
       # a module will resolve strictly the attributes used as argument but
       # not their values.  The values are forwarding the result of the
       # evaluation of the option.
-      requiredArgs = builtins.attrNames (lib.functionArgs f);
       context = name: ''while evaluating the module argument `${name}' in "${key}":'';
-      extraArgs = builtins.listToAttrs (map (name: {
-        inherit name;
-        value = builtins.addErrorContext (context name)
-          (args.${name} or config._module.args.${name});
-      }) requiredArgs);
+      extraArgs = builtins.mapAttrs (name: _:
+        builtins.addErrorContext (context name)
+          (args.${name} or config._module.args.${name})
+      ) (lib.functionArgs f);
 
       # Note: we append in the opposite order such that we can add an error
       # context on the explicited arguments of "args" too. This update
@@ -360,10 +446,11 @@ rec {
         }
       */
       byName = attr: f: modules:
-        foldl' (acc: module:
-              if !(builtins.isAttrs module.${attr}) then
+        zipAttrsWith (n: concatLists)
+          (map (module: let subtree = module.${attr}; in
+              if !(builtins.isAttrs subtree) then
                 throw ''
-                  You're trying to declare a value of type `${builtins.typeOf module.${attr}}'
+                  You're trying to declare a value of type `${builtins.typeOf subtree}'
                   rather than an attribute-set for the option
                   `${builtins.concatStringsSep "." prefix}'!
 
@@ -372,11 +459,8 @@ rec {
                   this option by e.g. referring to `man 5 configuration.nix'!
                 ''
               else
-                acc // (mapAttrs (n: v:
-                                   (acc.${n} or []) ++ f module v
-                                 ) module.${attr}
-                       )
-               ) {} modules;
+                mapAttrs (n: f module) subtree
+              ) modules);
       # an attrset 'name' => list of submodules that declare ‘name’.
       declsByName = byName "options" (module: option:
           [{ inherit (module) _file; options = option; }]
@@ -390,7 +474,7 @@ rec {
           [{ inherit (module) file; inherit value; }]
         ) configs;
 
-      resultsByName = flip mapAttrs declsByName (name: decls:
+      resultsByName = mapAttrs (name: decls:
         # We're descending into attribute ‘name’.
         let
           loc = prefix ++ [name];
@@ -411,7 +495,7 @@ rec {
             in
               throw "The option `${showOption loc}' in `${firstOption._file}' is a prefix of options in `${firstNonOption._file}'."
           else
-            mergeModules' loc decls defns);
+            mergeModules' loc decls defns) declsByName;
 
       matchedOptions = mapAttrs (n: v: v.matchedOptions) resultsByName;
 
@@ -425,12 +509,19 @@ rec {
       inherit matchedOptions;
 
       # Transforms unmatchedDefnsByName into a list of definitions
-      unmatchedDefns = concatLists (mapAttrsToList (name: defs:
-        map (def: def // {
-          # Set this so we know when the definition first left unmatched territory
-          prefix = [name] ++ (def.prefix or []);
-        }) defs
-      ) unmatchedDefnsByName);
+      unmatchedDefns =
+        if configs == []
+        then
+          # When no config values exist, there can be no unmatched config, so
+          # we short circuit and avoid evaluating more _options_ than necessary.
+          []
+        else
+          concatLists (mapAttrsToList (name: defs:
+            map (def: def // {
+              # Set this so we know when the definition first left unmatched territory
+              prefix = [name] ++ (def.prefix or []);
+            }) defs
+          ) unmatchedDefnsByName);
     };
 
   /* Merge multiple option declarations into a single declaration.  In
@@ -446,11 +537,9 @@ rec {
      correspond to the definition of 'loc' in 'opt.file'. */
   mergeOptionDecls =
    let
-    packSubmodule = file: m:
-      { _file = file; imports = [ m ]; };
     coerceOption = file: opt:
-      if isFunction opt then packSubmodule file opt
-      else packSubmodule file { options = opt; };
+      if isFunction opt then setDefaultModuleLocation file opt
+      else setDefaultModuleLocation file { options = opt; };
    in loc: opts:
     foldl' (res: opt:
       let t  = res.type;
@@ -480,7 +569,7 @@ rec {
 
           getSubModules = opt.options.type.getSubModules or null;
           submodules =
-            if getSubModules != null then map (packSubmodule opt._file) getSubModules ++ res.options
+            if getSubModules != null then map (setDefaultModuleLocation opt._file) getSubModules ++ res.options
             else if opt.options ? options then map (coerceOption opt._file) options' ++ res.options
             else res.options;
         in opt.options // res //
@@ -516,8 +605,8 @@ rec {
       value = if opt ? apply then opt.apply res.mergedValue else res.mergedValue;
 
       warnDeprecation =
-        if opt.type.deprecationMessage == null then id
-        else warn "The type `types.${opt.type.name}' of option `${showOption loc}' defined in ${showFiles opt.declarations} is deprecated. ${opt.type.deprecationMessage}";
+        warnIf (opt.type.deprecationMessage != null)
+          "The type `types.${opt.type.name}' of option `${showOption loc}' defined in ${showFiles opt.declarations} is deprecated. ${opt.type.deprecationMessage}";
 
     in warnDeprecation opt //
       { value = builtins.addErrorContext "while evaluating the option `${showOption loc}':" value;
@@ -525,6 +614,8 @@ rec {
         definitions = map (def: def.value) res.defsFinal;
         files = map (def: def.file) res.defsFinal;
         inherit (res) isDefined;
+        # This allows options to be correctly displayed using `${options.path.to.it}`
+        __toString = _: showOption loc;
       };
 
   # Merge definitions of a value of a given type.
@@ -708,12 +799,11 @@ rec {
 
   mkOptionDefault = mkOverride 1500; # priority of option defaults
   mkDefault = mkOverride 1000; # used in config sections of non-user modules to set a default
+  mkImageMediaOverride = mkOverride 60; # image media profiles can be derived by inclusion into host config, hence needing to override host config, but do allow user to mkForce
   mkForce = mkOverride 50;
   mkVMOverride = mkOverride 10; # used by ‘nixos-rebuild build-vm’
 
-  mkStrict = builtins.trace "`mkStrict' is obsolete; use `mkOverride 0' instead." (mkOverride 0);
-
-  mkFixStrictness = id; # obsolete, no-op
+  mkFixStrictness = lib.warn "lib.mkFixStrictness has no effect and will be removed. It returns its argument unmodified, so you can just remove any calls." id;
 
   mkOrder = priority: content:
     { _type = "order";
@@ -845,7 +935,7 @@ rec {
   mkMergedOptionModule = from: to: mergeFn:
     { config, options, ... }:
     {
-      options = foldl recursiveUpdate {} (map (path: setAttrByPath path (mkOption {
+      options = foldl' recursiveUpdate {} (map (path: setAttrByPath path (mkOption {
         visible = false;
         # To use the value in mergeFn without triggering errors
         default = "_mkMergedOptionModule";
@@ -900,6 +990,26 @@ rec {
     use = id;
   };
 
+  /* mkDerivedConfig : Option a -> (a -> Definition b) -> Definition b
+
+    Create config definitions with the same priority as the definition of another option.
+    This should be used for option definitions where one option sets the value of another as a convenience.
+    For instance a config file could be set with a `text` or `source` option, where text translates to a `source`
+    value using `mkDerivedConfig options.text (pkgs.writeText "filename.conf")`.
+
+    It takes care of setting the right priority using `mkOverride`.
+  */
+  # TODO: make the module system error message include information about `opt` in
+  # error messages about conflicts. E.g. introduce a variation of `mkOverride` which
+  # adds extra location context to the definition object. This will allow context to be added
+  # to all messages that report option locations "this value was derived from <full option name>
+  # which was defined in <locations>". It can provide a trace of options that contributed
+  # to definitions.
+  mkDerivedConfig = opt: f:
+    mkOverride
+      (opt.highestPrio or defaultPriority)
+      (f opt.value);
+
   doRename = { from, to, visible, warn, use, withPriority ? true }:
     { config, options, ... }:
     let
@@ -929,7 +1039,7 @@ rec {
 
   /* Use this function to import a JSON file as NixOS configuration.
 
-     importJSON -> path -> attrs
+     modules.importJSON :: path -> attrs
   */
   importJSON = file: {
     _file = file;
@@ -938,7 +1048,7 @@ rec {
 
   /* Use this function to import a TOML file as NixOS configuration.
 
-     importTOML -> path -> attrs
+     modules.importTOML :: path -> attrs
   */
   importTOML = file: {
     _file = file;

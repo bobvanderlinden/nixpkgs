@@ -11,14 +11,16 @@
 
 buildPythonPackage rec {
   pname = "xknx";
-  version = "0.18.0";
-  disabled = pythonOlder "3.7";
+  version = "0.19.2";
+  format = "setuptools";
+
+  disabled = pythonOlder "3.8";
 
   src = fetchFromGitHub {
     owner = "XKNX";
     repo = pname;
     rev = version;
-    sha256 = "sha256-8g8DrFvhecdPsfiw+uKnfJOrLQeuFUziK2Jl3xKmrf4=";
+    sha256 = "sha256-LJ7MmKCWx+n7caud0pN4+7f9H4XzwuAAn9u86X/FACo=";
   };
 
   propagatedBuildInputs = [
@@ -32,7 +34,9 @@ buildPythonPackage rec {
     pytestCheckHook
   ];
 
-  pythonImportsCheck = [ "xknx" ];
+  pythonImportsCheck = [
+    "xknx"
+  ];
 
   meta = with lib; {
     description = "KNX Library Written in Python";
@@ -43,5 +47,6 @@ buildPythonPackage rec {
     homepage = "https://github.com/XKNX/xknx";
     license = with licenses; [ mit ];
     maintainers = with maintainers; [ fab ];
+    platforms = platforms.linux;
   };
 }

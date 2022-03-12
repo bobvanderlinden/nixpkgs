@@ -1,17 +1,19 @@
-{ lib, rustPlatform, fetchFromGitHub }:
+{ lib, rustPlatform, fetchFromGitHub, stdenv, libiconv }:
 
 rustPlatform.buildRustPackage rec {
   pname = "cargo-feature";
-  version = "0.5.2";
+  version = "0.6.0";
 
   src = fetchFromGitHub {
     owner = "Riey";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0n5kzh756ghfs3cydlcn9mfvpgwy1cjg41h0nd9dbi5cr1fp9x1n";
+    sha256 = "sha256-9TP67YtvRtgLtsKACL5xjXq5kZtYpTWsTqQsbOKPwtY=";
   };
 
-  cargoSha256 = "0nvl5smibl81b826xcsrjx8p89lcfpj7wqdsvywnj7jd3p5ag03n";
+  cargoSha256 = "sha256-MkLsQebQdqfUuARIdQZg47kMPudstJUgRQgUuovoLes=";
+
+  buildInputs = lib.optional stdenv.isDarwin libiconv;
 
   meta = with lib; {
     description = "Allows conveniently modify features of crate";

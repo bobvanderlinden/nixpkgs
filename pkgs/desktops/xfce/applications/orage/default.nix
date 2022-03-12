@@ -13,7 +13,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://archive.xfce.org/src/apps/${pname}/${lib.versions.majorMinor version}/${pname}-${version}.tar.bz2";
-    sha256 = "0qlhvnl2m33vfxqlbkic2nmfpwyd4mq230jzhs48cg78392amy9w";
+    sha256 = "sha256-PPmqRBroPIaIhl+CIXAlzfPrqhUszkVxd3uMKqjdkGI=";
   };
 
   nativeBuildInputs = [ pkg-config intltool wrapGAppsHook ];
@@ -34,14 +34,13 @@ stdenv.mkDerivation rec {
     (fetchpatch {
       name = "fix-libical3.patch";
       url = "https://aur.archlinux.org/cgit/aur.git/plain/libical3.patch?h=orage-4.10";
-      sha256 = "1l8s106mcidmbx2p8c2pi8v9ngbv2x3fsgv36j8qk8wyd4qd1jbf";
+      sha256 = "sha256-bsnQMGmeo4mRNGM/7UYXez2bNopXMHRFX7VFVg0IGtE=";
     })
   ];
 
-  passthru.updateScript = xfce.updateScript {
+  passthru.updateScript = xfce.archiveUpdater {
+    category = "apps";
     inherit pname version;
-    attrPath = "xfce.${pname}";
-    versionLister = xfce.archiveLister "apps" pname;
   };
 
   meta = with lib; {
@@ -49,5 +48,6 @@ stdenv.mkDerivation rec {
     homepage = "https://git.xfce.org/archive/orage/";
     license = licenses.gpl2Plus;
     platforms = platforms.linux;
+    maintainers = with maintainers; [ ] ++ teams.xfce.members;
   };
 }

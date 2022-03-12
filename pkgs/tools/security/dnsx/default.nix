@@ -5,16 +5,16 @@
 
 buildGoModule rec {
   pname = "dnsx";
-  version = "1.0.2";
+  version = "1.0.9";
 
   src = fetchFromGitHub {
     owner = "projectdiscovery";
     repo = "dnsx";
     rev = "v${version}";
-    sha256 = "sha256-CjWFXYU34PE4I9xihQbPxVcxLyiMCYueuaB/LaXhHQg=";
+    sha256 = "sha256-8c9gDD/g5oP9GQV1ghb2UN9w5EccvxyDvJUAtgV8q7Y=";
   };
 
-  vendorSha256 = "sha256-vTXvlpXpFf78Cwxq/y6ysSeXM3g71kHBn9zd6c4mxlk=";
+  vendorSha256 = "sha256-uvquc0bWwYzeeTuKlYaQp9r+O23MMs1Ajz1DPJ2qrnE=";
 
   meta = with lib; {
     description = "Fast and multi-purpose DNS toolkit";

@@ -1,22 +1,33 @@
 { lib
 , buildGoModule
 , fetchFromGitHub
+, installShellFiles
 }:
 
 buildGoModule rec {
   pname = "qrcp";
-  version = "0.7.0";
+  version = "0.8.5";
 
   src = fetchFromGitHub {
     owner = "claudiodangelis";
     repo = "qrcp";
     rev = version;
-    sha256 = "0rx0pzy7p3dklayr2lkmyfdc00x9v4pd5xnzydbjx12hncnkpw4l";
+    sha256 = "sha256-UpSYJ/OXFObqhmGlIm73104tVfEVOjGt1r9GKLgrLtI=";
   };
 
-  vendorSha256 = "0iffy43x3njcahrxl99a71v8p7im102nzv8iqbvd5c6m14rsckqa";
+  vendorSha256 = "1hn8c72fvih6ws1y2c4963pww3ld64m0yh3pmx62hwcy83bhb0v4";
 
   subPackages = [ "." ];
+
+  nativeBuildInputs = [
+    installShellFiles
+  ];
+
+  postInstall = ''
+    installShellCompletion --bash --cmd qrcp <($out/bin/qrcp completion bash)
+    installShellCompletion --fish --cmd qrcp <($out/bin/qrcp completion fish)
+    installShellCompletion --zsh  --cmd qrcp <($out/bin/qrcp completion zsh)
+  '';
 
   meta = with lib; {
     homepage = "https://claudiodangelis.com/qrcp/";

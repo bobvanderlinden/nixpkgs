@@ -2,7 +2,7 @@
 
 stdenv.mkDerivation {
   pname = "raspberrypi-wireless-firmware";
-  version = "2021-01-28";
+  version = "2021-11-02";
 
   srcs = [
     (fetchFromGitHub {
@@ -16,8 +16,8 @@ stdenv.mkDerivation {
       name = "firmware-nonfree";
       owner = "RPi-Distro";
       repo = "firmware-nonfree";
-      rev = "83938f78ca2d5a0ffe0c223bb96d72ccc7b71ca5";
-      sha256 = "1l4zz86y2hjyvdwjy75abyjwh3wqknd71y3vh1iw5nd0hws8ranp";
+      rev = "54ffdd6e2ea6055d46656b78e148fe7def3ec9d8";
+      sha256 = "4WTrs/tUyOugufRrrh0qsEmhPclQD64ypYysxsnOyS8=";
     })
   ];
 
@@ -28,20 +28,23 @@ stdenv.mkDerivation {
   dontFixup = true;
 
   installPhase = ''
+    runHook preInstall
     mkdir -p "$out/lib/firmware/brcm"
 
     # Wifi firmware
-    for filename in firmware-nonfree/brcm/brcmfmac434??-sdio.*; do
+    shopt -s extglob
+    for filename in firmware-nonfree/brcm/brcmfmac434??{,s}-sdio.*; do
       cp "$filename" "$out/lib/firmware/brcm"
     done
 
     # Bluetooth firmware
     cp bluez-firmware/broadcom/*.hcd "$out/lib/firmware/brcm"
+    runHook postInstall
   '';
 
   outputHashMode = "recursive";
   outputHashAlgo = "sha256";
-  outputHash = "0a54gyrq6jfxxvimaa4yjfiyfwf7wv58v0a32l74yrzyarr3ldby";
+  outputHash = "l+7VOq7CV5QA8/FWjMBGDcxq8Qe7NFf6E2Y42htZEgE=";
 
   meta = with lib; {
     description = "Firmware for builtin Wifi/Bluetooth devices in the Raspberry Pi 3+ and Zero W";

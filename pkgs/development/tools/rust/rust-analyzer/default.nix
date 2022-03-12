@@ -1,4 +1,9 @@
-{ lib, stdenv, fetchFromGitHub, rustPlatform, CoreServices, cmake
+{ lib
+, stdenv
+, fetchFromGitHub
+, rustPlatform
+, CoreServices
+, cmake
 , libiconv
 , useMimalloc ? false
 , doCheck ? true
@@ -6,19 +11,23 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "rust-analyzer-unwrapped";
-  version = "2021-04-12";
-  cargoSha256 = "1mnx0mnfkvz6gmzy2jcl0wrdwd1mgfnrny4xf9wkd5vd4ks4k338";
+  version = "2022-02-28";
+  cargoSha256 = "sha256-dTw6xp99uGtGp6YuqAX3r3GDD6Wto3KHTaO2DUUE2FA=";
 
   src = fetchFromGitHub {
     owner = "rust-analyzer";
     repo = "rust-analyzer";
     rev = version;
-    sha256 = "1rg20aswbh9palwr3qfcnscsvzmbmhghn4k0nl11m9j7z6hva6bg";
+    sha256 = "sha256-GQ1cPO4povnozLl0MTFs0ZXpmBn+AZeFWQVnxHHWf9g=";
   };
 
-  buildAndTestSubdir = "crates/rust-analyzer";
+  patches = [
+    # Code format and git history check require more dependencies but don't really matter for packaging.
+    # So just ignore them.
+    ./ignore-git-and-rustfmt-tests.patch
+  ];
 
-  cargoBuildFlags = lib.optional useMimalloc "--features=mimalloc";
+  buildAndTestSubdir = "crates/rust-analyzer";
 
   nativeBuildInputs = lib.optional useMimalloc cmake;
 
@@ -26,6 +35,8 @@ rustPlatform.buildRustPackage rec {
     CoreServices
     libiconv
   ];
+
+  buildFeatures = lib.optional useMimalloc "mimalloc";
 
   RUST_ANALYZER_REV = version;
 
@@ -46,8 +57,8 @@ rustPlatform.buildRustPackage rec {
   passthru.updateScript = ./update.sh;
 
   meta = with lib; {
-    description = "An experimental modular compiler frontend for the Rust language";
-    homepage = "https://github.com/rust-analyzer/rust-analyzer";
+    description = "A modular compiler frontend for the Rust language";
+    homepage = "https://rust-analyzer.github.io";
     license = with licenses; [ mit asl20 ];
     maintainers = with maintainers; [ oxalica ];
   };

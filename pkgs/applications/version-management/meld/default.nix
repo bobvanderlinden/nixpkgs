@@ -12,19 +12,19 @@
 , gobject-introspection
 , gtk3
 , gtksourceview4
-, gnome3
+, gnome
 , gsettings-desktop-schemas
 }:
 
 python3.pkgs.buildPythonApplication rec {
   pname = "meld";
-  version = "3.21.0";
+  version = "3.21.1";
 
   format = "other";
 
   src = fetchurl {
     url = "mirror://gnome/sources/${pname}/${lib.versions.majorMinor version}/${pname}-${version}.tar.xz";
-    sha256 = "toARTVq3kzJFSf1Y9OsgLY4oDAYzoLdl7ebfs0FgqBs=";
+    sha256 = "cP6Y65Ms4h1nFw47D2pzF+gT6GLemJM+pROYLpoDMgI=";
   };
 
   nativeBuildInputs = [
@@ -44,7 +44,7 @@ python3.pkgs.buildPythonApplication rec {
     gtk3
     gtksourceview4
     gsettings-desktop-schemas
-    gnome3.adwaita-icon-theme
+    gnome.adwaita-icon-theme
   ];
 
   propagatedBuildInputs = with python3.pkgs; [
@@ -57,8 +57,9 @@ python3.pkgs.buildPythonApplication rec {
   strictDeps = false;
 
   passthru = {
-    updateScript = gnome3.updateScript {
+    updateScript = gnome.updateScript {
       packageName = pname;
+      versionPolicy = "none"; # should be odd-unstable but we are tracking unstable versions for now
     };
   };
 

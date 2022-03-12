@@ -1,20 +1,21 @@
-{ lib, stdenv, fetchFromGitHub, pkg-config, cmake, ninja, yasm
-, libjpeg, openssl, libopus, ffmpeg, alsaLib, libpulseaudio, protobuf
-, xorg, libXtst
+{ lib, stdenv, fetchFromGitHub
+, pkg-config, cmake, ninja, yasm
+, libjpeg, openssl, libopus, ffmpeg, alsa-lib, libpulseaudio, protobuf
+, openh264, usrsctp, libevent, libvpx
+, libX11, libXtst, libXcomposite, libXdamage, libXext, libXrender, libXrandr, libXi
+, glib, abseil-cpp, pcre, util-linuxMinimal, libselinux, libsepol, pipewire
+, mesa, valgrind, libepoxy, libglvnd
 }:
 
-let
-  rev = "2d804d2c9c5d05324c8ab22f2e6ff8306521b3c3";
-  sha256 = "0kz0i381iwsgcc3yzsq7njx3gkqja4bb9fsgc24vhg0md540qhyn";
-
-in stdenv.mkDerivation {
+stdenv.mkDerivation {
   pname = "tg_owt";
-  version = "git-${rev}";
+  version = "unstable-2022-02-09";
 
   src = fetchFromGitHub {
     owner = "desktop-app";
     repo = "tg_owt";
-    inherit rev sha256;
+    rev = "4cba1acdd718b700bb33945c0258283689d4eac7";
+    sha256 = "0j201x9k38mvcyhf1wlyghyvdpv1l75xwgj9rl2l7r55afrpw4ca";
     fetchSubmodules = true;
   };
 
@@ -23,14 +24,25 @@ in stdenv.mkDerivation {
   nativeBuildInputs = [ pkg-config cmake ninja yasm ];
 
   buildInputs = [
-    libjpeg openssl libopus ffmpeg alsaLib libpulseaudio protobuf
-    xorg.libX11 libXtst
+    libjpeg openssl libopus ffmpeg alsa-lib libpulseaudio protobuf
+    openh264 usrsctp libevent libvpx
+    libX11 libXtst libXcomposite libXdamage libXext libXrender libXrandr libXi
+    glib abseil-cpp pcre util-linuxMinimal libselinux libsepol pipewire
+    mesa libepoxy libglvnd
   ];
 
   cmakeFlags = [
-    # Building as a shared library isn't officially supported and currently broken:
+    # Building as a shared library isn't officially supported and may break at any time.
     "-DBUILD_SHARED_LIBS=OFF"
   ];
 
-  meta.license = lib.licenses.bsd3;
+  propagatedBuildInputs = [
+    # Required for linking downstream binaries.
+    abseil-cpp openh264 usrsctp libevent libvpx
+  ];
+
+  meta = with lib; {
+    license = licenses.bsd3;
+    maintainers = with maintainers; [ oxalica ];
+  };
 }

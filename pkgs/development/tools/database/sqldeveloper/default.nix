@@ -10,7 +10,7 @@ let
     desktopName = "Oracle SQL Developer";
     genericName = "Oracle SQL Developer";
     comment = "Oracle's Oracle DB GUI client";
-    categories = "Development;";
+    categories = [ "Development" ];
   };
 in
   stdenv.mkDerivation {
@@ -79,6 +79,6 @@ in
     homepage = "http://www.oracle.com/technetwork/developer-tools/sql-developer/overview/";
     license = licenses.unfree;
     platforms = [ "x86_64-linux" ];
-    maintainers = with maintainers; [ ardumont ma27 ];
+    maintainers = with maintainers; [ ardumont ];
   };
 }

@@ -1,22 +1,23 @@
-{ lib, pkg-config, rustPlatform, fetchFromGitHub, openssl }:
+{ lib, stdenv, rustPlatform, fetchFromGitHub, pkg-config, curl, openssl, Security }:
 
 rustPlatform.buildRustPackage rec {
   pname = "cargo-tarpaulin";
-  version = "0.17.0";
+  version = "0.19.1";
 
   src = fetchFromGitHub {
     owner = "xd009642";
     repo = "tarpaulin";
     rev = version;
-    sha256 = "1z104cd3wg718x1d89znppx4h6f0c6icgmpcllyrd0d19lb71a2b";
+    sha256 = "sha256-H/EQTS+d317icCZdOWTvykzIFQC7ia7/jYFkImgogps=";
   };
 
   nativeBuildInputs = [
     pkg-config
   ];
-  buildInputs = [ openssl ];
+  buildInputs = [ openssl ]
+    ++ lib.optionals stdenv.isDarwin [ curl Security ];
 
-  cargoSha256 = "0pn9xgryfb7f0plx50v9i7hsv1wib87pi0fl43cv6hgqyrdb52ny";
+  cargoSha256 = "sha256-A3J5od6yT7eVU66WfvG/umne0RDBZCf8IvQpW6OTZSE=";
   #checkFlags = [ "--test-threads" "1" ];
   doCheck = false;
 
@@ -25,6 +26,5 @@ rustPlatform.buildRustPackage rec {
     homepage = "https://github.com/xd009642/tarpaulin";
     license = with licenses; [ mit /* or */ asl20 ];
     maintainers = with maintainers; [ hugoreeves ];
-    platforms = [ "x86_64-linux" ];
   };
 }

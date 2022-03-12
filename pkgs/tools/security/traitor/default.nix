@@ -5,13 +5,13 @@
 
 buildGoModule rec {
   pname = "traitor";
-  version = "0.0.3";
+  version = "0.0.14";
 
   src = fetchFromGitHub {
     owner = "liamg";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0mffh4k87ybl0mpglgi2yfwksygrh62mcmkcmfcbszlh5pagsch1";
+    sha256 = "sha256-LQfKdjZaTm5z8DUt6He/RJHbOUCUwP3CV3Fyt5rJIfU=";
   };
 
   vendorSha256 = null;

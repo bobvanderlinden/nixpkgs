@@ -4,8 +4,8 @@ with skawarePackages;
 
 buildPackage {
   pname = "mdevd";
-  version = "0.1.3.0";
-  sha256 = "0spvw27xxd0m6j8bl8xysmgsx18fl769smr6dsh25s2d5h3sp2dy";
+  version = "0.1.5.1";
+  sha256 = "1xch9sk3hklf2v9z3qlw0rfhhmikqp85zkij7qzwbs09g039bkll";
 
   description = "mdev-compatible Linux hotplug manager daemon";
   platforms = lib.platforms.linux;

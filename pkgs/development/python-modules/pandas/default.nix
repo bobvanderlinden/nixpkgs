@@ -3,16 +3,9 @@
 , buildPythonPackage
 , fetchPypi
 , python
-, isPy38
-, beautifulsoup4
-, bottleneck
 , cython
-, dateutil
-, html5lib
-, jinja2
-, lxml
-, numexpr
-, openpyxl
+, numpy
+, python-dateutil
 , pytz
 , scipy
 , sqlalchemy
@@ -22,6 +15,7 @@
 # Test inputs
 , glibcLocales
 , hypothesis
+, jinja2
 , pytestCheckHook
 , pytest-xdist
 , pytest-asyncio
@@ -33,11 +27,12 @@
 
 buildPythonPackage rec {
   pname = "pandas";
-  version = "1.2.3";
+  version = "1.3.5";
+  format = "setuptools";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "078b4nncn6778ymmqn80j2q6n7fcs4d6bbaraar5nypgbaw10vyz";
+    sha256 = "1e4285f5de1012de20ca46b188ccf33521bff61ba5c5ebd78b4fb28e5416a9f1";
   };
 
   nativeBuildInputs = [ cython ];
@@ -45,19 +40,9 @@ buildPythonPackage rec {
   buildInputs = lib.optional stdenv.isDarwin libcxx;
 
   propagatedBuildInputs = [
-    beautifulsoup4
-    bottleneck
-    dateutil
-    html5lib
-    numexpr
-    lxml
-    openpyxl
+    numpy
+    python-dateutil
     pytz
-    scipy
-    sqlalchemy
-    tables
-    xlrd
-    xlwt
   ];
 
   checkInputs = [
@@ -77,14 +62,14 @@ buildPythonPackage rec {
   # For OSX, we need to add a dependency on libcxx, which provides
   # `complex.h` and other libraries that pandas depends on to build.
   postPatch = lib.optionalString stdenv.isDarwin ''
-    cpp_sdk="${libcxx}/include/c++/v1";
+    cpp_sdk="${lib.getDev libcxx}/include/c++/v1";
     echo "Adding $cpp_sdk to the setup.py common_include variable"
     substituteInPlace setup.py \
       --replace "['pandas/src/klib', 'pandas/src']" \
                 "['pandas/src/klib', 'pandas/src', '$cpp_sdk']"
   '';
 
-  doCheck = !stdenv.isAarch64; # upstream doesn't test this architecture
+  doCheck = !stdenv.isAarch32 && !stdenv.isAarch64; # upstream doesn't test this architecture
 
   pytestFlagsArray = [
     "--skip-slow"
@@ -105,6 +90,10 @@ buildPythonPackage rec {
     "test_missing_required_dependency"
     # AssertionError with 1.2.3
     "test_from_coo"
+    # AssertionError: No common DType exists for the given inputs
+    "test_comparison_invalid"
+    # AssertionError: Regex pattern '"quotechar" must be string, not int'
+    "python-kwargs2"
   ] ++ lib.optionals stdenv.isDarwin [
     "test_locale"
     "test_clipboard"

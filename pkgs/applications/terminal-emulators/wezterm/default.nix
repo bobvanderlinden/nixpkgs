@@ -2,90 +2,94 @@
 , rustPlatform
 , lib
 , fetchFromGitHub
-, pkg-config
-, fontconfig
-, python3
-, openssl
+, ncurses
 , perl
-, dbus
+, pkg-config
+, python3
+, fontconfig
+, openssl
+, libGL
 , libX11
-, xcbutil
 , libxcb
+, libxkbcommon
+, xcbutil
 , xcbutilimage
 , xcbutilkeysyms
-, xcbutilwm # contains xcb-ewmh among others
-, libxkbcommon
-, libglvnd # libEGL.so.1
-, egl-wayland
+, xcbutilwm
 , wayland
-, libGLU
-, libGL
-, freetype
 , zlib
-  # Apple frameworks
 , CoreGraphics
 , Cocoa
 , Foundation
 , libiconv
 }:
-let
-  runtimeDeps = [
-    zlib
-    fontconfig
-    freetype
-  ] ++ lib.optionals (stdenv.isLinux) [
-    libX11
-    xcbutil
-    libxcb
-    xcbutilimage
-    xcbutilkeysyms
-    xcbutilwm
-    libxkbcommon
-    dbus
-    libglvnd
-    egl-wayland
-    wayland
-    libGLU
-    libGL
-    openssl
-  ] ++ lib.optionals (stdenv.isDarwin) [
-    Foundation
-    CoreGraphics
-    Cocoa
-    libiconv
-  ];
-in
 
 rustPlatform.buildRustPackage rec {
   pname = "wezterm";
-  version = "20210407-nightly";
+  version = "20220101-133340-7edc5b5a";
+
+  outputs = [ "out" "terminfo" ];
 
   src = fetchFromGitHub {
     owner = "wez";
     repo = pname;
-    rev = "d2419fb99e567e3b260980694cc840a1a3b86922";
-    sha256 = "4tVjrdDlrDPKzcbTYK9vRlzfC9tfvkD+D0aN19A8RWE=";
+    rev = version;
     fetchSubmodules = true;
+    sha256 = "sha256-UZCvKbZdZ7K4RtvVLmr44M612tqd4rkrjF2tys0JHNM=";
   };
 
   postPatch = ''
     echo ${version} > .tag
+
+    # tests are failing with: Unable to exchange encryption keys
+    rm -r wezterm-ssh/tests
   '';
 
-  cargoSha256 = "sha256-UaXeeuRuQk+CWF936mEAaWTjZuTSRPmxbQ/9E2oZIqg=";
+  cargoSha256 = "1imil15n9mf1r71qdp4cb4q7kzrrc2cspml0d54825yqaq8vjhsc";
 
   nativeBuildInputs = [
     pkg-config
     python3
-    perl
+    ncurses # tic for terminfo
+  ] ++ lib.optional stdenv.isDarwin perl;
+
+  buildInputs = [
+    fontconfig
+    zlib
+  ] ++ lib.optionals stdenv.isLinux [
+    libX11
+    libxcb
+    libxkbcommon
+    openssl
+    wayland
+    xcbutil
+    xcbutilimage
+    xcbutilkeysyms
+    xcbutilwm # contains xcb-ewmh among others
+  ] ++ lib.optionals stdenv.isDarwin [
+    Cocoa
+    CoreGraphics
+    Foundation
+    libiconv
   ];
 
-  buildInputs = runtimeDeps;
+  postInstall = ''
+    # terminfo
+    mkdir -p $terminfo/share/terminfo/w $out/nix-support
+    tic -x -o $terminfo/share/terminfo termwiz/data/wezterm.terminfo
+    echo "$terminfo" >> $out/nix-support/propagated-user-env-packages
+
+    # desktop icon
+    install -Dm644 assets/icon/terminal.png $out/share/icons/hicolor/128x128/apps/org.wezfurlong.wezterm.png
+    install -Dm644 assets/wezterm.desktop $out/share/applications/org.wezfurlong.wezterm.desktop
+    install -Dm644 assets/wezterm.appdata.xml $out/share/metainfo/org.wezfurlong.wezterm.appdata.xml
+
+    # helper scripts
+    install -Dm644 assets/shell-integration/wezterm.sh -t $out/etc/profile.d
+  '';
 
   preFixup = lib.optionalString stdenv.isLinux ''
-    for artifact in wezterm wezterm-gui wezterm-mux-server strip-ansi-escapes; do
-      patchelf --set-rpath "${lib.makeLibraryPath runtimeDeps}" $out/bin/$artifact
-    done
+    patchelf --add-needed "${libGL}/lib/libEGL.so.1" $out/bin/wezterm-gui
   '' + lib.optionalString stdenv.isDarwin ''
     mkdir -p "$out/Applications"
     OUT_APP="$out/Applications/WezTerm.app"
@@ -95,14 +99,13 @@ rustPlatform.buildRustPackage rec {
     ln -s $out/bin/{wezterm,wezterm-mux-server,wezterm-gui,strip-ansi-escapes} "$OUT_APP"
   '';
 
-  # prevent further changes to the RPATH
-  dontPatchELF = true;
-
   meta = with lib; {
     description = "A GPU-accelerated cross-platform terminal emulator and multiplexer written by @wez and implemented in Rust";
     homepage = "https://wezfurlong.org/wezterm";
     license = licenses.mit;
-    maintainers = with maintainers; [ steveej SuperSandro2000 ];
+    maintainers = with maintainers; [ SuperSandro2000 ];
     platforms = platforms.unix;
+    # Fails on missing UserNotifications framework while linking
+    broken = stdenv.isDarwin;
   };
 }

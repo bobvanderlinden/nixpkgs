@@ -9,11 +9,11 @@
 
 buildPythonPackage rec {
   pname = "fido2";
-  version = "0.9.1";
+  version = "0.9.3";
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-hoDuJSOOIwdZbrOQCg+MDZzJEYkUbtgDlUTxo6ad/m4=";
+    sha256 = "b45e89a6109cfcb7f1bb513776aa2d6408e95c4822f83a253918b944083466ec";
   };
 
   propagatedBuildInputs = [ six cryptography ];

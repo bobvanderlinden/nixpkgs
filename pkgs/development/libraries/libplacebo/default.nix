@@ -9,21 +9,22 @@
 , shaderc
 , glslang
 , lcms2
-, epoxy
+, libepoxy
 , libGL
 , xorg
+, libunwind
 }:
 
 stdenv.mkDerivation rec {
   pname = "libplacebo";
-  version = "3.120.1";
+  version = "4.192.1";
 
   src = fetchFromGitLab {
     domain = "code.videolan.org";
     owner = "videolan";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0x7jyzsdf884jrky4yci151pk4nzsz1w88wz8sk0cqing7bpaq16";
+    sha256 = "13z2f0vwf9fgfzqgkqzvqwa8c8nkymrg5hv7xslfx53dacjfidhy";
   };
 
   nativeBuildInputs = [
@@ -39,14 +40,16 @@ stdenv.mkDerivation rec {
     shaderc
     glslang
     lcms2
-    epoxy
+    libepoxy
     libGL
     xorg.libX11
+    libunwind
   ];
 
   mesonFlags = [
     "-Dvulkan-registry=${vulkan-headers}/share/vulkan/registry/vk.xml"
-    "-Ddemos=false"
+    "-Ddemos=false" # Don't build and install the demo programs
+    "-Dd3d11=disabled" # Disable the Direct3D 11 based renderer
   ];
 
   meta = with lib; {

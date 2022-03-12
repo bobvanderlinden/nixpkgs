@@ -6,18 +6,22 @@
 , pytest-vcr
 , pytestCheckHook
 , python-box
+, pythonOlder
 , requests
 }:
 
 buildPythonPackage rec {
   pname = "restfly";
-  version = "1.3.5";
+  version = "1.4.5";
+  format = "setuptools";
+
+  disabled = pythonOlder "3.7";
 
   src = fetchFromGitHub {
     owner = "stevemcgrath";
     repo = pname;
     rev = version;
-    sha256 = "0cq07wj6g3kg7i4qyjp3n3pv13k9p4p43rd6kn139wsn1mh8fr56";
+    hash = "sha256-wWFf8LFZkwzbHX545tA5w2sB3ClL7eFuF+jGX0fSiSc=";
   };
 
   propagatedBuildInputs = [
@@ -32,7 +36,14 @@ buildPythonPackage rec {
     pytestCheckHook
   ];
 
-  pythonImportsCheck = [ "restfly" ];
+  disabledTests = [
+    # Test requires network access
+    "test_session_ssl_error"
+  ];
+
+  pythonImportsCheck = [
+    "restfly"
+  ];
 
   meta = with lib; {
     description = "Python RESTfly API Library Framework";

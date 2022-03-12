@@ -1,5 +1,7 @@
-{ lib, stdenv
+{ stdenv
+, lib
 , fetchurl
+, fetchpatch
 , gettext
 , meson
 , ninja
@@ -7,7 +9,6 @@
 , asciidoc
 , gobject-introspection
 , python3
-, gtk-doc
 , docbook-xsl-nons
 , docbook_xml_dtd_45
 , libxml2
@@ -17,31 +18,39 @@
 , sqlite
 , libxslt
 , libstemmer
-, gnome3
+, gnome
 , icu
 , libuuid
 , libsoup
+, libsoup_3
 , json-glib
 , systemd
 , dbus
 , substituteAll
 }:
 
-stdenv.mkDerivation (rec {
+stdenv.mkDerivation rec {
   pname = "tracker";
-  version = "3.0.3";
+  version = "3.2.1";
 
   outputs = [ "out" "dev" "devdoc" ];
 
   src = fetchurl {
     url = "mirror://gnome/sources/${pname}/${lib.versions.majorMinor version}/${pname}-${version}.tar.xz";
-    sha256 = "sha256-b1yEqzvh7aUgUBsq7XIhYWoM8VKRDFN3V7U4vAXv/KM=";
+    sha256 = "GEfgiznm5h2EhzWqH5f32WwDggFlP6DXy56Bs365wDo=";
   };
 
   patches = [
     (substituteAll {
       src = ./fix-paths.patch;
       inherit asciidoc;
+    })
+
+    # Filter out hidden (wrapped) subcommands
+    # https://gitlab.gnome.org/GNOME/tracker/-/merge_requests/481
+    (fetchpatch {
+      url = "https://gitlab.gnome.org/GNOME/tracker/-/commit/8c28c24e447f13da8cf804cd7a00f9b909c5d3f9.patch";
+      sha256 = "EYo1nOtEr4semaPC5wk6A7bliRXu8qsBHaltd0DEI6Y=";
     })
   ];
 
@@ -55,13 +64,13 @@ stdenv.mkDerivation (rec {
     libxslt
     wrapGAppsNoGuiHook
     gobject-introspection
-    gtk-doc
     docbook-xsl-nons
     docbook_xml_dtd_45
     python3 # for data-generators
     systemd # used for checks to install systemd user service
     dbus # used for checks and pkg-config to install dbus service/s
-  ];
+  ] ++ checkInputs; # gi is in the main meson.build and checked regardless of
+                    # whether tests are enabled
 
   buildInputs = [
     glib
@@ -69,27 +78,28 @@ stdenv.mkDerivation (rec {
     sqlite
     icu
     libsoup
+    libsoup_3
     libuuid
     json-glib
     libstemmer
   ];
 
-  checkInputs = [
-    python3.pkgs.pygobject3
+  checkInputs = with python3.pkgs; [
+    pygobject3
   ];
 
   mesonFlags = [
     "-Ddocs=true"
   ];
 
-  # https://gitlab.gnome.org/GNOME/tracker/-/issues/292#note_1075369
-  doCheck = !stdenv.isi686;
+  doCheck = true;
 
   postPatch = ''
     patchShebangs utils/g-ir-merge/g-ir-merge
     patchShebangs utils/data-generators/cc/generate
     patchShebangs tests/functional-tests/test-runner.sh.in
     patchShebangs tests/functional-tests/*.py
+    patchShebangs examples/python/endpoint.py
   '';
 
   preCheck = ''
@@ -120,9 +130,8 @@ stdenv.mkDerivation (rec {
   '';
 
   passthru = {
-    updateScript = gnome3.updateScript {
+    updateScript = gnome.updateScript {
       packageName = pname;
-      versionPolicy = "none";
     };
   };
 
@@ -134,8 +143,3 @@ stdenv.mkDerivation (rec {
     platforms = platforms.linux;
   };
 }
-  // lib.optionalAttrs stdenv.isi686 {
-    # TMP: fatal error: libtracker-sparql/tracker-sparql-enum-types.h: No such file or directory
-    enableParallelBuilding = false;
-  }
-)

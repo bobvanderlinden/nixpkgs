@@ -15,7 +15,7 @@
 , pango
 , cairo
 , expat
-, alsaLib
+, alsa-lib
 , cups
 , dbus
 , atk
@@ -38,20 +38,20 @@ let
     icon = "minecraft-launcher";
     comment = "Official launcher for Minecraft, a sandbox-building game";
     desktopName = "Minecraft Launcher";
-    categories = "Game;";
+    categories = [ "Game" ];
   };
 
   envLibPath = lib.makeLibraryPath [
     curl
     libpulseaudio
     systemd
-    alsaLib # needed for narrator
+    alsa-lib # needed for narrator
     flite # needed for narrator
     libXxf86vm # needed only for versions <1.13
   ];
 
   libPath = lib.makeLibraryPath ([
-    alsaLib
+    alsa-lib
     atk
     cairo
     cups

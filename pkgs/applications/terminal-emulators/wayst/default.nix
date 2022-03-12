@@ -21,26 +21,23 @@ let
   desktopItem = makeDesktopItem {
     desktopName = "Wayst";
     name = "wayst";
+    genericName = "Terminal";
     exec = "wayst";
     icon = "wayst";
-    terminal = "false";
-    categories = "System;TerminalEmulator";
+    categories = [ "System" "TerminalEmulator" ];
+    keywords = [ "wayst" "terminal" ];
     comment = "A simple terminal emulator";
-    extraEntries = ''
-      GenericName=Terminal
-      Keywords=wayst;terminal;
-    '';
   };
 in
 stdenv.mkDerivation rec {
   pname = "wayst";
-  version = "unstable-2020-10-12";
+  version = "unstable-2021-04-05";
 
   src = fetchFromGitHub {
     owner = "91861";
     repo = pname;
-    rev = "b8c7ca00a785a748026ed1ba08bf3d19916ced18";
-    hash = "sha256-wHAU1yxukxApzhLLLctZ/AYqF7t21HQc5omPBZyxra0=";
+    rev = "e72ca78ef72c7b1e92473a98d435a3c85d7eab98";
+    hash = "sha256-UXAVSfVpk/8KSg4oMw2tVWImD6HqJ7gEioR2MqhUUoQ=";
   };
 
   makeFlags = [ "INSTALL_DIR=\${out}/bin" ];
@@ -83,6 +80,7 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "A simple terminal emulator";
+    mainProgram = "wayst";
     homepage = "https://github.com/91861/wayst";
     license = licenses.mit;
     platforms = platforms.linux;

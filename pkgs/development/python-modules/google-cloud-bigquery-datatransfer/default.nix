@@ -6,20 +6,35 @@
 , proto-plus
 , pytestCheckHook
 , pytest-asyncio
+, pytz
 , mock
+, pythonOlder
 }:
 
 buildPythonPackage rec {
   pname = "google-cloud-bigquery-datatransfer";
-  version = "3.1.0";
+  version = "3.6.1";
+  format = "setuptools";
 
+  disabled = pythonOlder "3.6";
+ 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "sha256-mAZSVxiTiLbMeXR4xLK9+G6ejNyspdFw3tAnZGREpYY=";
+    hash = "sha256-hR5qHucBpq1LS9pIZeovcPMiVbw3dhSeeJxkYH8xuMk=";
   };
 
-  propagatedBuildInputs = [ google-api-core libcst proto-plus ];
-  checkInputs = [ mock pytestCheckHook pytest-asyncio ];
+  propagatedBuildInputs = [
+    google-api-core
+    libcst
+    proto-plus
+    pytz
+  ];
+
+  checkInputs = [
+    mock
+    pytestCheckHook
+    pytest-asyncio
+  ];
 
   pythonImportsCheck = [
     "google.cloud.bigquery_datatransfer"

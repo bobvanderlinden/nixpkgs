@@ -2,7 +2,6 @@
 , stdenv
 , copyDesktopItems
 , fetchFromGitHub
-, fetchpatch
 , makeDesktopItem
 , makeWrapper
 , fontconfig
@@ -15,22 +14,24 @@
 , libXtst
 , zlib
 , maven
+, webkitgtk
+, glib-networking
 }:
 
 stdenv.mkDerivation rec {
-  pname = "dbeaver-ce";
-  version = "21.0.3"; # When updating also update fetchedMavenDeps.sha256
+  pname = "dbeaver";
+  version = "22.0.0"; # When updating also update fetchedMavenDeps.sha256
 
   src = fetchFromGitHub {
     owner = "dbeaver";
     repo = "dbeaver";
     rev = version;
-    sha256 = "sha256-ItM8t+gqE0ccuuimfEMUddykl+xt2eZIBd3MbpreRwA=";
+    sha256 = "sha256-LSEsaCEUoKViKC+IjJrV/w1VzOGi4EOr4LnAutOIyJU=";
   };
 
   fetchedMavenDeps = stdenv.mkDerivation {
     name = "dbeaver-${version}-maven-deps";
-    inherit src patches;
+    inherit src;
 
     buildInputs = [
       maven
@@ -51,17 +52,8 @@ stdenv.mkDerivation rec {
     dontFixup = true;
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
-    outputHash = "sha256-rsK/B39ogNu5nC41OfyAsLiwBz4gWyH+8Fj7E6+rOng=";
+    outputHash = "sha256-WAB15d4UvUOkBXT7K/hvAZWOE3V1Lpl/tr+AFNBM4FI=";
   };
-
-  patches = [
-    # Fix eclipse-color-theme URL (https://github.com/dbeaver/dbeaver/pull/12133)
-    # After April 15, 2021 eclipse-color-theme.github.com no longer redirects to eclipse-color-theme.github.io
-    (fetchpatch {
-      url = "https://github.com/dbeaver/dbeaver/commit/65d65e2c2c711cc87fddcec425a6915aa80f4ced.patch";
-      sha256 = "sha256-pxOcRYkV/5o+tHcRhHDZ1TmZSHMnKBmkNTVAlIf9nUE=";
-    })
-  ];
 
   nativeBuildInputs = [
     copyDesktopItems
@@ -79,6 +71,9 @@ stdenv.mkDerivation rec {
     libXrender
     libXtst
     zlib
+  ] ++ lib.optionals stdenv.isLinux [
+    webkitgtk
+    glib-networking
   ];
 
   desktopItems = [
@@ -89,7 +84,7 @@ stdenv.mkDerivation rec {
       desktopName = "dbeaver";
       comment = "SQL Integrated Development Environment";
       genericName = "SQL Integrated Development Environment";
-      categories = "Development;";
+      categories = [ "Development" ];
     })
   ];
 
@@ -140,7 +135,8 @@ stdenv.mkDerivation rec {
 
       makeWrapper $out/dbeaver/dbeaver $out/bin/dbeaver \
         --prefix PATH : ${jdk}/bin \
-        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath ([ glib gtk3 libXtst ])} \
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath ([ glib gtk3 libXtst webkitgtk glib-networking ])} \
+        --prefix GIO_EXTRA_MODULES : "${glib-networking}/lib/gio/modules" \
         --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH"
 
       mkdir -p $out/share/pixmaps
@@ -160,6 +156,6 @@ stdenv.mkDerivation rec {
     '';
     license = licenses.asl20;
     platforms = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" ];
-    maintainers = with maintainers; [ jojosch ];
+    maintainers = with maintainers; [ jojosch mkg20001 ];
   };
 }

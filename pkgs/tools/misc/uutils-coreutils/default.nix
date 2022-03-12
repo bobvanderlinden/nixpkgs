@@ -5,36 +5,31 @@
 , cargo
 , sphinx
 , Security
+, libiconv
 , prefix ? "uutils-"
 , buildMulticallBinary ? true
 }:
 
 stdenv.mkDerivation rec {
   pname = "uutils-coreutils";
-  version = "0.0.6";
+  version = "0.0.12";
 
   src = fetchFromGitHub {
     owner = "uutils";
     repo = "coreutils";
     rev = version;
-    sha256 = "sha256-dnswE/DU2jCfxWW10Ctjw8woktwWZqyd3E9IuKkle1M=";
+    sha256 = "01zwvadfd570vbsy52svp0vi5r2p873c33vn2h4mr7868myl6q9g";
   };
-
-  postPatch = ''
-    # can be removed after https://github.com/uutils/coreutils/pull/1815 is included
-    substituteInPlace GNUmakefile \
-      --replace uutils coreutils
-  '';
 
   cargoDeps = rustPlatform.fetchCargoTarball {
     inherit src;
     name = "${pname}-${version}";
-    hash = "sha256-92BHPSVIPZLn399AcaJJjRq2WkxzDm8knKN3FIdAxAA=";
+    hash = "sha256:19li3gmb5dmrmiiiy9ihr1rl68lz14j2gsgqpjcsn52rkcy17dzh";
   };
 
   nativeBuildInputs = [ rustPlatform.cargoSetupHook sphinx ];
 
-  buildInputs = lib.optional stdenv.isDarwin Security;
+  buildInputs = lib.optionals stdenv.isDarwin [ Security libiconv ];
 
   makeFlags = [
     "CARGO=${cargo}/bin/cargo"

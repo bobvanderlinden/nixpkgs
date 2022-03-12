@@ -21,7 +21,7 @@ in
       };
 
       port = mkOption {
-        type = types.int;
+        type = types.port;
         default = 8999;
         description = ''
           TCP port to bind to.
@@ -68,7 +68,7 @@ in
     systemd.services.syncplay = {
       description = "Syncplay Service";
       wantedBy    = [ "multi-user.target" ];
-      after       = [ "network-online.target "];
+      after       = [ "network-online.target" ];
 
       serviceConfig = {
         ExecStart = "${pkgs.syncplay}/bin/syncplay-server ${escapeShellArgs cmdArgs}";

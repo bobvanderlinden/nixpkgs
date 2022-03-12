@@ -32,8 +32,7 @@
 }:
 
 mkDerivation {
-  name = "discover";
-  meta.broken = lib.versionOlder qtbase.version "5.15.0";
+  pname = "discover";
   nativeBuildInputs = [ extra-cmake-modules gettext kdoctools python3 ];
   buildInputs = [
     # discount is needed for libmarkdown

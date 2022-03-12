@@ -1,5 +1,5 @@
-{
-lib, stdenv
+{ lib
+, stdenv
 , makeWrapper
 , makeDesktopItem
 , fetchurl
@@ -11,14 +11,21 @@ let
   generic = { version, sha256, platform ? "", jdk, ... }@attrs:
   let
     desktopItem = makeDesktopItem {
-      categories = "Network;Development;WebDevelopment;Java;";
+      categories = [ "Network" "Development" "WebDevelopment" "Java" ];
       desktopName = "Charles";
       exec = "charles %F";
       genericName  = "Web Debugging Proxy";
       icon = "charles-proxy";
-      mimeType = "application/x-charles-savedsession;application/x-charles-savedsession+xml;application/x-charles-savedsession+json;application/har+json;application/vnd.tcpdump.pcap;application/x-charles-trace";
+      mimeTypes = [
+        "application/x-charles-savedsession"
+        "application/x-charles-savedsession+xml"
+        "application/x-charles-savedsession+json"
+        "application/har+json"
+        "application/vnd.tcpdump.pcap"
+        "application/x-charles-trace"
+      ];
       name = "Charles";
-      startupNotify = "true";
+      startupNotify = true;
     };
 
   in stdenv.mkDerivation {
@@ -49,16 +56,16 @@ let
       meta = with lib; {
         description = "Web Debugging Proxy";
         homepage = "https://www.charlesproxy.com/";
-        maintainers = [ maintainers.kalbasit ];
-        license = lib.licenses.unfree;
-        platforms = lib.platforms.linux ++ lib.platforms.darwin;
+        maintainers = with maintainers; [ kalbasit ];
+        license = licenses.unfree;
+        platforms = platforms.unix;
       };
     };
 
 in {
   charles4 = (generic {
-    version = "4.6.1";
-    sha256 = "1kl83jjj5wjhdpj34gcj04vf1asxlqlfx9zi91ln4v90swlaaclv";
+    version = "4.6.2";
+    sha256 = "0r5rann7cq665ih0pa66k52081gylk85ashrwq1khbv2jf80yy52";
     platform = "_amd64";
     jdk = jdk11;
   });
@@ -68,4 +75,3 @@ in {
     jdk = jdk8.jre;
   });
 }
-

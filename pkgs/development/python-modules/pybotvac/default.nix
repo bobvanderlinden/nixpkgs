@@ -8,11 +8,11 @@
 
 buildPythonPackage rec {
   pname = "pybotvac";
-  version = "0.0.20";
+  version = "0.0.23";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "sha256-1NnTSO4vO3Ryt4vYD5ZTQGr241GqA2KsGRBVowSTCzM=";
+    sha256 = "54b4fe565c10000c54d5644d081e2de1f850daefbac39cea74cea649b47bfb12";
   };
 
   propagatedBuildInputs = [

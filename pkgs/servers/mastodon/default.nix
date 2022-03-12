@@ -1,5 +1,5 @@
-{ lib, stdenv, nodejs-slim, mkYarnPackage, fetchFromGitHub, bundlerEnv
-, yarn, callPackage, imagemagick, ffmpeg, file, ruby_2_7, writeShellScript
+{ lib, stdenv, nodejs-slim, mkYarnPackage, fetchFromGitHub, fetchpatch, bundlerEnv
+, yarn, callPackage, imagemagick, ffmpeg, file, ruby_3_0, writeShellScript
 
   # Allow building a fork or custom version of Mastodon:
 , pname ? "mastodon"
@@ -15,10 +15,18 @@ stdenv.mkDerivation rec {
   # Putting the callPackage up in the arguments list also does not work.
   src = if srcOverride != null then srcOverride else callPackage ./source.nix {};
 
+  patches = [
+    (fetchpatch {
+      name = "CVE-2022-0432.patch";
+      url = "https://github.com/mastodon/mastodon/commit/4d6d4b43c6186a13e67b92eaf70fe1b70ea24a09.patch";
+      sha256 = "sha256-C18X2ErBqP/dIEt8NrA7hdiqxUg5977clouuu7Lv4/E=";
+    })
+  ];
+
   mastodon-gems = bundlerEnv {
     name = "${pname}-gems-${version}";
     inherit version;
-    ruby = ruby_2_7;
+    ruby = ruby_3_0;
     gemdir = src;
     gemset = dependenciesDir + "/gemset.nix";
     # This fix (copied from https://github.com/NixOS/nixpkgs/pull/76765) replaces the gem
@@ -115,7 +123,7 @@ stdenv.mkDerivation rec {
     description = "Self-hosted, globally interconnected microblogging software based on ActivityPub";
     homepage = "https://joinmastodon.org";
     license = licenses.agpl3Plus;
-    platforms = [ "x86_64-linux" "i686-linux" ];
+    platforms = [ "x86_64-linux" "i686-linux" "aarch64-linux" ];
     maintainers = with maintainers; [ petabyteboy happy-river erictapen ];
   };
 }

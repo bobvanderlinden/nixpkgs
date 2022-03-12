@@ -1,13 +1,13 @@
 { lib, buildPythonPackage, fetchFromGitHub, pythonOlder
 , fonttools
 , lxml, fs # for fonttools extras
-, setuptools_scm
-, pytestCheckHook, pytestcov, pytest_xdist
+, setuptools-scm
+, pytestCheckHook, pytest-cov, pytest-xdist
 }:
 
 buildPythonPackage rec {
   pname = "psautohint";
-  version = "2.3.0";
+  version = "2.3.1";
 
   disabled = pythonOlder "3.6";
 
@@ -15,7 +15,7 @@ buildPythonPackage rec {
     owner = "adobe-type-tools";
     repo = pname;
     rev = "v${version}";
-    sha256 = "1y7mqc2myn1gfzg4h018f8xza0q535shnqg6snnaqynz20i8jcfh";
+    sha256 = "1knh428af0lvzijvd72i30jcvx9n6ga0hai69kxg8386jdpmmvkg";
     fetchSubmodules = true; # data dir for tests
   };
 
@@ -25,14 +25,14 @@ buildPythonPackage rec {
     sed -i '/setup(/a \     version="${version}",' setup.py
   '';
 
-  nativeBuildInputs = [ setuptools_scm ];
+  nativeBuildInputs = [ setuptools-scm ];
 
   propagatedBuildInputs = [ fonttools lxml fs ];
 
   checkInputs = [
     pytestCheckHook
-    pytestcov
-    pytest_xdist
+    pytest-cov
+    pytest-xdist
   ];
   disabledTests = [
     # Test that fails on pytest >= v6

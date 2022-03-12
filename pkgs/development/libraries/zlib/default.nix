@@ -22,13 +22,13 @@ assert shared || static;
 assert splitStaticOutput -> static;
 
 stdenv.mkDerivation (rec {
-  name = "zlib-${version}";
+  pname = "zlib";
   version = "1.2.11";
 
   src = fetchurl {
     urls =
-      [ "https://www.zlib.net/fossils/${name}.tar.gz"  # stable archive path
-        "mirror://sourceforge/libpng/zlib/${version}/${name}.tar.gz"
+      [ "https://www.zlib.net/fossils/zlib-${version}.tar.gz"  # stable archive path
+        "mirror://sourceforge/libpng/zlib/${version}/zlib-${version}.tar.gz"
       ];
     sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1";
   };
@@ -37,8 +37,8 @@ stdenv.mkDerivation (rec {
 
   postPatch = lib.optionalString stdenv.hostPlatform.isDarwin ''
     substituteInPlace configure \
-      --replace '/usr/bin/libtool' 'ar' \
-      --replace 'AR="libtool"' 'AR="ar"' \
+      --replace '/usr/bin/libtool' '${stdenv.cc.targetPrefix}ar' \
+      --replace 'AR="libtool"' 'AR="${stdenv.cc.targetPrefix}ar"' \
       --replace 'ARFLAGS="-o"' 'ARFLAGS="-r"'
   '';
 
@@ -57,11 +57,13 @@ stdenv.mkDerivation (rec {
   # and giving nothing builds both.
   # So we have 3 possible ways to build both:
   # `--static --shared`, `--shared` and giving nothing.
-  # Of these, we choose `--shared`, only because that's
-  # what we did in the past and we can avoid mass rebuilds this way.
-  # As a result, we pass `--static` only when we want just static.
-  configureFlags = lib.optional (static && !shared) "--static"
+  # Of these, we choose `--static --shared`, for clarity and simpler
+  # conditions.
+  configureFlags = lib.optional static "--static"
                    ++ lib.optional shared "--shared";
+  # We do the right thing manually, above, so don't need these.
+  dontDisableStatic = true;
+  dontAddStaticConfigureFlags = true;
 
   # Note we don't need to set `dontDisableStatic`, because static-disabling
   # works by grepping for `enable-static` in the `./configure` script
@@ -84,7 +86,7 @@ stdenv.mkDerivation (rec {
   ''
     # Non-typical naming confuses libtool which then refuses to use zlib's DLL
     # in some cases, e.g. when compiling libpng.
-  + lib.optionalString (stdenv.hostPlatform.libc == "msvcrt") ''
+  + lib.optionalString (stdenv.hostPlatform.libc == "msvcrt" && shared) ''
     ln -s zlib1.dll $out/bin/libz.dll
   '';
 

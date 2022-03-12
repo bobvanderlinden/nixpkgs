@@ -3,28 +3,34 @@
 , fetchFromGitLab
 , cmake
 , extra-cmake-modules
-, breeze-icons
+, applet-window-buttons
 , karchive
 , kcoreaddons
 , ki18n
 , kio
 , kirigami2
 , mauikit
+, mauikit-filebrowsing
 , qtmultimedia
 , qtquickcontrols2
 }:
 
 mkDerivation rec {
-  pname = "index";
-  version = "1.2.1";
+  pname = "index-fm";
+  version = "2.1.1";
 
   src = fetchFromGitLab {
     domain = "invent.kde.org";
     owner = "maui";
     repo = "index-fm";
     rev = "v${version}";
-    sha256 = "1v6z44c88cqgr3b758yq6l5d2zj1vhlnaq7v8rrhs7s5dsimzlx8";
+    hash = "sha256-F4qgewkPxkbAbeR+MaeRDiw9KIsd/Xx4C0cYEYDkPOE=";
   };
+
+  postPatch = ''
+    substituteInPlace CMakeLists.txt \
+      --replace "-Werror" ""
+  '';
 
   nativeBuildInputs = [
     cmake
@@ -32,13 +38,14 @@ mkDerivation rec {
   ];
 
   buildInputs = [
-    breeze-icons
+    applet-window-buttons
     karchive
     kcoreaddons
     ki18n
     kio
     kirigami2
     mauikit
+    mauikit-filebrowsing
     qtmultimedia
     qtquickcontrols2
   ];

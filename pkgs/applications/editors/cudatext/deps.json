@@ -6,52 +6,52 @@
   },
   "ATBinHex-Lazarus": {
     "owner": "Alexey-T",
-    "rev": "2021.02.13",
-    "sha256": "1p2r2q1al6rcsdbbg8ilm4xn6w48bj348khxdmpak7vfwx9741h8"
+    "rev": "2021.07.02",
+    "sha256": "sha256-XSt2XfHMiF/ZIf07M65u+k5FjacyToL0rWbpcflKcuY="
   },
   "ATFlatControls": {
     "owner": "Alexey-T",
-    "rev": "2021.04.01",
-    "sha256": "12sncivsv6pvwflzzy12rpn1fjiq64n2n3bcj7630xxlrbygkhxb"
+    "rev": "2021.11.11",
+    "sha256": "sha256-lbRRiA8CHWmosJefTHrP2cTgU8nlK1SmNcppG6Bl54I="
   },
   "ATSynEdit": {
     "owner": "Alexey-T",
-    "rev": "2021.04.09",
-    "sha256": "1ldr2z88zywn0ccgs17vfhq55ibihjcmfjjxcqsjifrbm0y6wipp"
+    "rev": "2022.02.19",
+    "sha256": "sha256-cq2dirFNPaWRmZJu0F+CFA//+SuFOOpTH3Q5zL4oPQo="
   },
   "ATSynEdit_Cmp": {
     "owner": "Alexey-T",
-    "rev": "2021.04.01",
-    "sha256": "1g6zp9d7vwjisad3y1mfnk1jcbjqxp3yimm0sh1655al6qwn886m"
+    "rev": "2022.01.21",
+    "sha256": "sha256-el5YtzewnHV0fRPgVhApZUVP7huSQseqrO2ibvm6Ctg="
   },
   "EControl": {
     "owner": "Alexey-T",
-    "rev": "2021.03.16",
-    "sha256": "159s1rpl829bmaa4bllqhjm8z0vji1ncsd6hw2s8z8hz28n905k8"
+    "rev": "2022.02.02",
+    "sha256": "sha256-T/6SQJHKzbv/PlObDyc9bcpC14krHgcLDQn0v2fNkLM="
   },
   "ATSynEdit_Ex": {
     "owner": "Alexey-T",
-    "rev": "2021.04.01",
-    "sha256": "1hq9hbv81mcymjcms97wcwcfqfpxis6h6v5m0syyih4r53khv0az"
+    "rev": "2022.02.01",
+    "sha256": "sha256-FAcq6ixmFPQFBAGG2gqB4T+YGYT+Rh/OlKdGcH/iL3g="
   },
   "Python-for-Lazarus": {
     "owner": "Alexey-T",
-    "rev": "2021.02.18",
-    "sha256": "0fy6bmpdcl2aa8pb7zban6midkfwdj99x14hdghrv7cp8l4gcsg5"
+    "rev": "2021.10.27",
+    "sha256": "sha256-ikXdDUMJ9MxRejEVAhwUsXYVh0URVFHzEpnXuN5NGpA="
   },
   "Emmet-Pascal": {
     "owner": "Alexey-T",
-    "rev": "2020.09.05",
-    "sha256": "0qfiirxnk5g3whx8y8hp54ch3h6gkkd01yf79m95bwar5qvdfybg"
+    "rev": "2022.01.17",
+    "sha256": "sha256-5yqxRW7xFJ4MwHjKnxYL8/HrCDLn30a1gyQRjGMx/qw="
   },
   "CudaText-lexers": {
     "owner": "Alexey-T",
-    "rev": "2021.02.01",
-    "sha256": "051jnrhfpl9n5pgrssf68lj732zxhvjbvna4746ngmdyxvw6dqfd"
+    "rev": "2021.07.09",
+    "sha256": "sha256-OyC85mTMi9m5kbtx8TAK2V4voL1i+J+TFoLVwxlHiD4="
   },
   "bgrabitmap": {
     "owner": "bgrabitmap",
-    "rev": "v11.3.1",
-    "sha256": "1f95rdpfwqy9fipzybi17nbhq46zj45yjps21p2hplhinrr49n2p"
+    "rev": "v11.4",
+    "sha256": "sha256-jZL8lzjua033E76IL0HIk/fihC73ifCb4LqMni7vvb0="
   }
 }

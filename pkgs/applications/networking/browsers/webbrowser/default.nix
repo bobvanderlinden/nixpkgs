@@ -5,7 +5,7 @@
 
 # Runtime
 , xorg, zip, freetype, fontconfig, glibc, libffi
-, dbus, dbus-glib, gtk2, alsaLib, jack2, ffmpeg
+, dbus, dbus-glib, gtk2, alsa-lib, jack2, ffmpeg
 }:
 
 let
@@ -29,8 +29,8 @@ in stdenv.mkDerivation rec {
     icon = "webbrowser";
     desktopName = "Web Browser";
     genericName = "Web Browser";
-    categories = "Network;WebBrowser;";
-    mimeType = lib.concatStringsSep ";" [
+    categories = [ "Network" "WebBrowser" ];
+    mimeTypes = [
       "text/html"
       "text/xml"
       "application/xhtml+xml"
@@ -45,7 +45,7 @@ in stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
-    alsaLib dbus dbus-glib ffmpeg fontconfig freetype yasm zip jack2 gtk2
+    alsa-lib dbus dbus-glib ffmpeg fontconfig freetype yasm zip jack2 gtk2
     gnome2.GConf xorg.libXt
   ];
 

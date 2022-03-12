@@ -1,20 +1,20 @@
 { lib, buildPythonPackage, fetchPypi, isPy27
 , requests
-, websocket_client
+, websocket-client
 }:
 
 buildPythonPackage rec {
   pname = "samsungtvws";
-  version = "1.6.0";
+  version = "2.3.0";
   disabled = isPy27;
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "09nls4n0lbnr8nj8105lagr9h2my8lb1s2k285kmsbli36ywd8lj";
+    sha256 = "sha256-2ly9lbnIHGHB55ml10jKE7dC5LdN1ToGW4GqfxTC5kI=";
   };
 
   propagatedBuildInputs = [
-    websocket_client
+    websocket-client
     requests
   ];
 

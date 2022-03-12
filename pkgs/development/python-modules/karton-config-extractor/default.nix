@@ -3,17 +3,21 @@
 , fetchFromGitHub
 , karton-core
 , malduck
+, pythonOlder
 }:
 
 buildPythonPackage rec {
   pname = "karton-config-extractor";
-  version = "1.0.0";
+  version = "2.0.2";
+  format = "setuptools";
+
+  disabled = pythonOlder "3.7";
 
   src = fetchFromGitHub {
     owner = "CERT-Polska";
     repo = pname;
     rev = "v${version}";
-    sha256 = "1v0zqa81yjz6hm17x9hp0iwkllymqzn84dd6r2yrhillbwnjg9bb";
+    sha256 = "sha256-r0WMtfau5zeVDSjxy2h96INQl8bm4EP0IAcgnGPhTtk=";
   };
 
   propagatedBuildInputs = [
@@ -23,12 +27,15 @@ buildPythonPackage rec {
 
   postPatch = ''
     substituteInPlace requirements.txt \
-      --replace "karton.core==4.0.5" "karton-core"
+      --replace "malduck==4.1.0" "malduck"
   '';
 
   # Project has no tests
   doCheck = false;
-  pythonImportsCheck = [ "karton.config_extractor" ];
+
+  pythonImportsCheck = [
+    "karton.config_extractor"
+  ];
 
   meta = with lib; {
     description = "Static configuration extractor for the Karton framework";

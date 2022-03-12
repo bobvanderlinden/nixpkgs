@@ -1,39 +1,37 @@
 { lib
 , buildPythonPackage
 , fetchPypi
+, fetchpatch
 , pythonOlder
 , click
 , click-default-group
+, python-dateutil
 , sqlite-fts4
 , tabulate
 , pytestCheckHook
-, pytestrunner
-, black
 , hypothesis
-, sqlite
 }:
 
 buildPythonPackage rec {
   pname = "sqlite-utils";
-  version = "3.6";
+  version = "3.25";
   disabled = pythonOlder "3.6";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "sha256-WCqbz0tssy7i76Sg2PeexjDollypPGnOqqfUJOHAFWA=";
+    sha256 = "sha256-OKlwuXwXGU2WBauE33SYAuHzvPBhNdwYB3nQo5V2sUI=";
   };
 
   propagatedBuildInputs = [
     click
     click-default-group
+    python-dateutil
     sqlite-fts4
     tabulate
   ];
 
   checkInputs = [
     pytestCheckHook
-    pytestrunner
-    black
     hypothesis
   ];
 
@@ -43,5 +41,4 @@ buildPythonPackage rec {
     license = licenses.asl20;
     maintainers = with maintainers; [ meatcar ];
   };
-
 }

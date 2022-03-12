@@ -5,20 +5,20 @@
 
 buildGoModule rec {
   pname = "dasel";
-  version = "1.14.1";
+  version = "1.22.1";
 
   src = fetchFromGitHub {
     owner = "TomWright";
-    repo = pname;
+    repo = "dasel";
     rev = "v${version}";
-    sha256 = "0nxdyd0zg4w1zr8p9z2x88h36vbn7ryk7160zszdiwh5qmdlv47v";
+    sha256 = "091s3hyz9p892garanm9zmkbsn6hn3bnnrz7h3dqsyi58806d5yr";
   };
 
-  vendorSha256 = "sha256-BdX4DO77mIf/+aBdkNVFUzClsIml1UMcgvikDbbdgcY=";
+  vendorSha256 = "1y0k03lg9dh3bpi10xzv03h7gq7h0hgggs304p78p3jkr8pmkqss";
 
-  buildFlagsArray = ''
-    -ldflags=-s -w -X github.com/tomwright/dasel/internal.Version=${version}
-  '';
+  ldflags = [
+    "-s" "-w" "-X github.com/tomwright/dasel/internal.Version=${version}"
+  ];
 
   doInstallCheck = true;
   installCheckPhase = ''
@@ -38,6 +38,7 @@ buildGoModule rec {
       Comparable to jq / yq, but supports JSON, YAML, TOML and XML with zero runtime dependencies.
     '';
     homepage = "https://github.com/TomWright/dasel";
+    changelog = "https://github.com/TomWright/dasel/blob/v${version}/CHANGELOG.md";
     license = licenses.mit;
     platforms = platforms.unix;
     maintainers = with maintainers; [ _0x4A6F ];

@@ -1,5 +1,5 @@
 { lib, stdenv, fetchurl, ocaml, findlib
-, lambdaTerm, cppo, makeWrapper, buildDunePackage
+, lambda-term, cppo, makeWrapper, buildDunePackage
 }:
 
 if !lib.versionAtLeast ocaml.version "4.03"
@@ -8,19 +8,18 @@ else
 
 buildDunePackage rec {
   pname = "utop";
-  version = "2.7.0";
+  version = "2.8.0";
 
   useDune2 = true;
 
   src = fetchurl {
     url = "https://github.com/ocaml-community/utop/releases/download/${version}/utop-${version}.tbz";
-    sha256 = "sha256-4GisU98mfDzA8vabvCBEBPA2LMTmRyofxUfjJqY8P90=";
+    sha256 = "0mi571ifjzq4wcjarn8q1b7yl8nxjm1jfx3afac224lqwn6bhb2d";
   };
 
-  nativeBuildInputs = [ makeWrapper ];
-  buildInputs = [ cppo ];
+  nativeBuildInputs = [ makeWrapper cppo ];
 
-  propagatedBuildInputs = [ lambdaTerm ];
+  propagatedBuildInputs = [ lambda-term ];
 
   postFixup =
    let
@@ -34,7 +33,7 @@ buildDunePackage rec {
 
        buildInputs = [ findlib ] ++ propagatedBuildInputs;
 
-       phases = [ "installPhase" ];
+       dontUnpack = true;
 
        installPhase = ''
          mkdir -p "$out"/${path}

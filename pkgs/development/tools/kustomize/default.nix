@@ -2,31 +2,30 @@
 
 buildGoModule rec {
   pname = "kustomize";
-  version = "4.0.5";
+  version = "4.5.2";
   # rev is the commit of the tag, mainly for kustomize version command output
-  rev = "9e8e7a7fe99ec9fbf801463e8607928322fc5245";
+  rev = "b2d65ddc98e09187a8e38adc27c30bab078c1dbf";
 
-  buildFlagsArray = let t = "sigs.k8s.io/kustomize/api/provenance"; in
-    ''
-      -ldflags=
-        -s -X ${t}.version=${version}
-           -X ${t}.gitCommit=${rev}
-    '';
+  ldflags = let t = "sigs.k8s.io/kustomize/api/provenance"; in
+    [
+      "-s"
+      "-X ${t}.version=${version}"
+      "-X ${t}.gitCommit=${rev}"
+    ];
 
   src = fetchFromGitHub {
     owner = "kubernetes-sigs";
     repo = pname;
     rev = "kustomize/v${version}";
-    sha256 = "sha256-rv65sDr6V6hEYgIRxS1OSu9txmW75F7/YGAy/zRXGyY=";
+    sha256 = "sha256-l24uKKcTt5b7V/IHjJNMtVce55CEGdZVYlCzjUnEp1A=";
   };
 
-  # TODO: Remove once https://github.com/kubernetes-sigs/kustomize/pull/3708 got merged.
-  doCheck = false;
+  doCheck = true;
 
   # avoid finding test and development commands
   sourceRoot = "source/kustomize";
 
-  vendorSha256 = "sha256-lLUi0vD7uyfDR4HjDiosoTU0NbfQTY7ewZGm38ZT9nU=";
+  vendorSha256 = "sha256-GR1ohesxjxpMl1B7hWtBUAWWU8X7wHPAKdMoGM5L/VQ=";
 
   meta = with lib; {
     description = "Customization of kubernetes YAML configurations";

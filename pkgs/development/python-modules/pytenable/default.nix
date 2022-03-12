@@ -1,4 +1,5 @@
 { lib
+, appdirs
 , buildPythonPackage
 , defusedxml
 , fetchFromGitHub
@@ -8,22 +9,27 @@
 , pytestCheckHook
 , python-box
 , python-dateutil
+, pythonOlder
 , requests
 , requests-pkcs12
 , responses
 , restfly
 , semver
+, typing-extensions
 }:
 
 buildPythonPackage rec {
   pname = "pytenable";
-  version = "1.2.8";
+  version = "1.4.4";
+  format = "setuptools";
+
+  disabled = pythonOlder "3.7";
 
   src = fetchFromGitHub {
     owner = "tenable";
     repo = "pyTenable";
     rev = version;
-    sha256 = "12x0w1c4blm73ixv07w90jkydl7d8dx5l27ih9vc1yv9v2zzb53k";
+    hash = "sha256-qp+e40z24RIOV5RfSw/nI/y1Z3972nCLN8DgQyLbDOc=";
   };
 
   propagatedBuildInputs = [
@@ -31,6 +37,7 @@ buildPythonPackage rec {
   ];
 
   buildInputs = [
+    appdirs
     defusedxml
     marshmallow
     python-box
@@ -38,6 +45,7 @@ buildPythonPackage rec {
     requests
     requests-pkcs12
     restfly
+    typing-extensions
   ];
 
   checkInputs = [
@@ -55,7 +63,9 @@ buildPythonPackage rec {
     "test_uploads_docker_push_cs_tag_typeerror"
   ];
 
-  pythonImportsCheck = [ "tenable" ];
+  pythonImportsCheck = [
+    "tenable"
+  ];
 
   meta = with lib; {
     description = "Python library for the Tenable.io and TenableSC API";

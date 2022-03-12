@@ -1,26 +1,27 @@
-{ lib, stdenv, fetchFromGitHub, rustPlatform, Security }:
+{ lib, stdenv, nixosTests, fetchFromGitHub, fetchpatch, rustPlatform, libiconv, Security }:
 
 rustPlatform.buildRustPackage rec {
   pname = "agate";
-  version = "3.0.2";
+  version = "3.2.3";
 
   src = fetchFromGitHub {
     owner = "mbrubeck";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-+X1ibnYAUB34u8+oNBSkjLtsArxlrg0Nq5zJrXi7Rfk=";
+    sha256 = "sha256-nkWk/0TIAHcYQjxbg0HnT+4S4Cinl22WfqHb9U6u5eI=";
   };
+  cargoSha256 = "sha256-aF86QpizJ+lMNmN9DQKA9o1QZWZObyQ3v3+HmT/s02g=";
 
-  cargoSha256 = "sha256-EOxklOiazxhhIIv6c+N4uuItY/oFMAG0r/ATZ3Anlko=";
-
-  buildInputs = lib.optionals stdenv.isDarwin [ Security ];
-
-  checkFlags = [
-    # Username and Password use the same ports and causes collision
-    # https://github.com/mbrubeck/agate/issues/50
-    "--skip username"
-    "--skip password"
+  patches = [
+    # https://github.com/mbrubeck/agate/pull/143
+    (fetchpatch {
+      name = "fix-port-collision.patch";
+      url = "https://github.com/mbrubeck/agate/commit/2f5d7878ec9d0dd51762c4c7680fc9f825d8ecd5.patch";
+      sha256 = "sha256-NEFmfb0y97O2W96YggD+MgcN7tlFEi9T4FNzLCND77s=";
+    })
   ];
+
+  buildInputs = lib.optionals stdenv.isDarwin [ libiconv Security ];
 
   doInstallCheck = true;
   installCheckPhase = ''
@@ -30,9 +31,11 @@ rustPlatform.buildRustPackage rec {
     runHook postInstallCheck
   '';
 
+  passthru.tests = { inherit (nixosTests) agate; };
+
   meta = with lib; {
-    homepage = "https://proxy.vulpes.one/gemini/qwertqwefsday.eu/agate.gmi";
-    changelog = "https://proxy.vulpes.one/gemini/qwertqwefsday.eu/agate.gmi";
+    homepage = "https://github.com/mbrubeck/agate";
+    changelog = "https://github.com/mbrubeck/agate/blob/master/CHANGELOG.md";
     description = "Very simple server for the Gemini hypertext protocol";
     longDescription = ''
       Agate is a server for the Gemini network protocol, built with the Rust

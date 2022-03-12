@@ -10,6 +10,10 @@
 , enableJemalloc ? false, jemalloc ? null
 , enableApp ? with stdenv.hostPlatform; !isWindows && !isStatic
 , enablePython ? false, python ? null, cython ? null, ncurses ? null, setuptools ? null
+
+# downstream dependencies, for testing
+, curl
+, libsoup
 }:
 
 # Note: this package is used for bootstrapping fetchurl, and thus
@@ -27,11 +31,11 @@ let inherit (lib) optional optionals optionalString; in
 
 stdenv.mkDerivation rec {
   pname = "nghttp2";
-  version = "1.41.0";
+  version = "1.43.0";
 
   src = fetchurl {
     url = "https://github.com/${pname}/${pname}/releases/download/v${version}/${pname}-${version}.tar.bz2";
-    sha256 = "0h12wz72paxnj8l9vv2qfgfbmj20c6pz6xbilb7ns9zcwxwa0p34";
+    sha256 = "0qhgyphzdv72dgdfxin2xbk9623za3jwbcvhhaxixiwp6djj8vsm";
   };
 
   outputs = [ "bin" "out" "dev" "lib" ]
@@ -72,6 +76,10 @@ stdenv.mkDerivation rec {
   '';
 
   #doCheck = true;  # requires CUnit ; currently failing at test_util_localtime_date in util_test.cc
+
+  passthru.tests = {
+    inherit curl libsoup;
+  };
 
   meta = with lib; {
     homepage = "https://nghttp2.org/";

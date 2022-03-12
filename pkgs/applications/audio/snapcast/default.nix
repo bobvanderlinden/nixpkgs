@@ -1,6 +1,9 @@
 { stdenv, lib, fetchFromGitHub, cmake, pkg-config
-, alsaLib, asio, avahi, boost170, flac, libogg, libvorbis, soxr
+, alsa-lib, asio, avahi, boost17x, flac, libogg, libvorbis, soxr
+, pulseaudioSupport ? false, libpulseaudio
 , nixosTests }:
+
+assert pulseaudioSupport -> libpulseaudio != null;
 
 let
 
@@ -34,22 +37,23 @@ in
 
 stdenv.mkDerivation rec {
   pname = "snapcast";
-  version = "0.24.0";
+  version = "0.26.0";
 
   src = fetchFromGitHub {
     owner  = "badaix";
     repo   = "snapcast";
     rev    = "v${version}";
-    sha256 = "13yz8alplnqwkcns3mcli01qbyy6l3h62xx0v71ygcrz371l4g9g";
+    sha256 = "sha256-CCifn9OEFM//Hk1PJj8T3MXIV8pXCTdBBXPsHuZwLyQ=";
   };
 
-  nativeBuildInputs = [ cmake pkg-config boost170.dev ];
+  nativeBuildInputs = [ cmake pkg-config ];
   # snapcast also supports building against tremor but as we have libogg, that's
   # not needed
   buildInputs = [
-    alsaLib asio avahi flac libogg libvorbis
+    boost17x
+    alsa-lib asio avahi flac libogg libvorbis
     aixlog popl soxr
-  ];
+  ] ++ lib.optional pulseaudioSupport libpulseaudio;
 
   # Upstream systemd unit files are pretty awful, so we provide our own in a
   # NixOS module. It might make sense to get that upstreamed...

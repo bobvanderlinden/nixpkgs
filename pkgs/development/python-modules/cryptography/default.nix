@@ -1,7 +1,6 @@
 { lib, stdenv
 , buildPythonPackage
 , fetchPypi
-, fetchpatch
 , rustPlatform
 , setuptools-rust
 , openssl
@@ -9,12 +8,12 @@
 , darwin
 , packaging
 , six
-, pythonOlder
 , isPyPy
 , cffi
 , pytest
 , pytest-subtests
 , pretend
+, libiconv
 , iso8601
 , pytz
 , hypothesis
@@ -22,18 +21,18 @@
 
 buildPythonPackage rec {
   pname = "cryptography";
-  version = "3.4.7"; # Also update the hash in vectors.nix
+  version = "36.0.0"; # Also update the hash in vectors.nix
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "04x7bhjkglxpllad10821vxddlmxdkd3gjvp35iljmnj2s0xw41x";
+    sha256 = "0zshc1jaavykdnic5ns8zax6gqganys6gp5f35bqcfggnkn6kxsj";
   };
 
   cargoDeps = rustPlatform.fetchCargoTarball {
     inherit src;
     sourceRoot = "${pname}-${version}/${cargoRoot}";
     name = "${pname}-${version}";
-    sha256 = "1wisxmq26b8ml144m2458sgcbk8jpv419j01qmffsrfy50x9i1yw";
+    sha256 = "1nbw4cfshyc125jwdivg9gxy52qcd1iz31lypl95ij9bn1dyx933";
   };
 
   cargoRoot = "src/rust";
@@ -48,7 +47,7 @@ buildPythonPackage rec {
   ] ++ (with rustPlatform; [ rust.cargo rust.rustc ]);
 
   buildInputs = [ openssl ]
-             ++ lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
+             ++ lib.optionals stdenv.isDarwin [ darwin.apple_sdk.frameworks.Security libiconv ];
   propagatedBuildInputs = [
     packaging
     six
@@ -66,13 +65,19 @@ buildPythonPackage rec {
     pytz
   ];
 
-  checkPhase = ''
-    py.test --disable-pytest-warnings tests
-  '';
+  pytestFlags = lib.concatStringsSep " " ([
+    "--disable-pytest-warnings"
+  ] ++
+    lib.optionals (stdenv.isDarwin && stdenv.isAarch64) [
+      # aarch64-darwin forbids W+X memory, but this tests depends on it:
+      # * https://cffi.readthedocs.io/en/latest/using.html#callbacks
+      "--ignore=tests/hazmat/backends/test_openssl_memleak.py"
+    ]
+  );
 
-  # IOKit's dependencies are inconsistent between OSX versions, so this is the best we
-  # can do until nix 1.11's release
-  __impureHostDeps = [ "/usr/lib" ];
+  checkPhase = ''
+    py.test ${pytestFlags} tests
+  '';
 
   meta = with lib; {
     description = "A package which provides cryptographic recipes and primitives";

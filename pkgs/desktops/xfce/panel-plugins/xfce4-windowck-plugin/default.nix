@@ -1,4 +1,4 @@
-{ lib, stdenv, fetchFromGitHub, pkg-config, intltool, python3, imagemagick, libwnck3, libxfce4ui, xfce4-panel, xfconf, xfce4-dev-tools, xfce }:
+{ lib, stdenv, fetchFromGitHub, pkg-config, intltool, python3, imagemagick, libwnck, libxfce4ui, xfce4-panel, xfconf, xfce4-dev-tools, xfce, gitUpdater }:
 
 stdenv.mkDerivation rec {
   pname  = "xfce4-windowck-plugin";
@@ -8,7 +8,7 @@ stdenv.mkDerivation rec {
     owner = "invidian";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0l066a174v2c7ly125v9x1fgbg5bnpwdwnjh69v9kp4plp791q4n";
+    sha256 = "sha256-luCQzqWX3Jl2MlBa3vi1q7z1XOhpFxE8PUxscoIyBlA=";
   };
 
   nativeBuildInputs = [
@@ -19,7 +19,7 @@ stdenv.mkDerivation rec {
   buildInputs = [
     python3
     imagemagick
-    libwnck3
+    libwnck
     libxfce4ui
     xfce4-panel
     xfconf
@@ -33,10 +33,9 @@ stdenv.mkDerivation rec {
 
   enableParallelBuilding = true;
 
-  passthru.updateScript = xfce.updateScript {
+  passthru.updateScript = gitUpdater {
     inherit pname version;
     attrPath = "xfce.${pname}";
-    versionLister = xfce.gitLister src.meta.homepage;
     rev-prefix = "v";
   };
 
@@ -45,6 +44,6 @@ stdenv.mkDerivation rec {
     description = "Xfce plugins which allows to put the maximized window title and buttons on the panel";
     license = licenses.gpl2Plus;
     platforms = platforms.unix;
-    maintainers = [ maintainers.volth ];
+    maintainers = with maintainers; [ volth ] ++ teams.xfce.members;
   };
 }

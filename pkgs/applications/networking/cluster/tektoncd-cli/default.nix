@@ -2,20 +2,18 @@
 
 buildGoModule rec {
   pname = "tektoncd-cli";
-  version = "0.17.2";
+  version = "0.23.0";
 
   src = fetchFromGitHub {
     owner = "tektoncd";
     repo = "cli";
     rev = "v${version}";
-    sha256 = "sha256-7VG9OFt1yVt4st8EM1aiRqLCHwjSqib28GoamoJHHnM=";
+    sha256 = "sha256-rzKEjLjX2bPqgNGJYdyTuu15+9bq9WnsrJtsBzL/oOo=";
   };
 
   vendorSha256 = null;
 
-  preBuild = ''
-    buildFlagsArray+=("-ldflags" "-s -w -X github.com/tektoncd/cli/pkg/cmd/version.clientVersion=${version}")
-  '';
+  ldflags = [ "-s" "-w" "-X github.com/tektoncd/cli/pkg/cmd/version.clientVersion=${version}" ];
 
   nativeBuildInputs = [ installShellFiles ];
 
@@ -24,8 +22,14 @@ buildGoModule rec {
   excludedPackages = "\\(third_party\\|cmd/docs\\)";
 
   preCheck = ''
-    # Change the golden files to match our desired version
-    sed -i "s/dev/${version}/" pkg/cmd/version/testdata/TestGetVersions-*.golden
+    # some tests try to write to the home dir
+    export HOME="$TMPDIR"
+
+    # the tests expect the clientVersion ldflag not to be set
+    unset ldflags
+
+    # remove tests with networking
+    rm pkg/cmd/version/version_test.go
   '';
 
   postInstall = ''
@@ -48,10 +52,12 @@ buildGoModule rec {
   meta = with lib; {
     homepage = "https://tekton.dev";
     changelog = "https://github.com/tektoncd/cli/releases/tag/v${version}";
-    description = "Provides a CLI for interacting with Tekton";
+    description = "Provides a CLI for interacting with Tekton - tkn";
     longDescription = ''
-      The Tekton Pipelines cli project provides a CLI for interacting with Tekton!
-      For your convenience, it is recommended that you install the Tekton CLI, tkn, together with the core component of Tekton, Tekton Pipelines.
+      The Tekton Pipelines cli project provides a CLI for interacting with
+      Tekton! For your convenience, it is recommended that you install the
+      Tekton CLI, tkn, together with the core component of Tekton, Tekton
+      Pipelines.
     '';
     license = licenses.asl20;
     maintainers = with maintainers; [ jk mstrangfeld vdemeester ];

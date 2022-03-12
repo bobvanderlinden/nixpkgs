@@ -1,8 +1,8 @@
 { lib
 , buildPythonPackage
 , fetchPypi
-, isPy27
-, setuptools_scm
+, pythonOlder
+, setuptools-scm
 , pytestCheckHook
 , filelock
 , execnet
@@ -13,15 +13,15 @@
 
 buildPythonPackage rec {
   pname = "pytest-xdist";
-  version = "2.2.1";
-  disabled = isPy27;
+  version = "2.5.0";
+  disabled = pythonOlder "3.6";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "718887296892f92683f6a51f25a3ae584993b06f7076ce1e1fd482e59a8220a2";
+    sha256 = "sha256-RYDeyj/wTdsqxT66Oddstd1e3qwFDLb7x2iw3XErTt8=";
   };
 
-  nativeBuildInputs = [ setuptools_scm ];
+  nativeBuildInputs = [ setuptools-scm ];
   buildInputs = [
     pytest
   ];
@@ -36,10 +36,12 @@ buildPythonPackage rec {
     "test_rsync_report"
     "test_init_rsync_roots"
     "test_rsyncignore"
+    # flakey
+    "test_internal_errors_propagate_to_controller"
   ];
 
   meta = with lib; {
-    description = "py.test xdist plugin for distributed testing and loop-on-failing modes";
+    description = "Pytest xdist plugin for distributed testing and loop-on-failing modes";
     homepage = "https://github.com/pytest-dev/pytest-xdist";
     license = licenses.mit;
     maintainers = with maintainers; [ dotlambda ];

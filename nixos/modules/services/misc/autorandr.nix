@@ -43,10 +43,11 @@ in {
         ExecStart = "${pkgs.autorandr}/bin/autorandr --batch --change --default ${cfg.defaultTarget}";
         Type = "oneshot";
         RemainAfterExit = false;
+        KillMode = "process";
       };
     };
 
   };
 
-  meta.maintainers = with maintainers; [ gnidorah ];
+  meta.maintainers = with maintainers; [ ];
 }

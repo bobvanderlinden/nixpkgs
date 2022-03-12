@@ -1,24 +1,24 @@
 { rust, rustPlatform, stdenv, lib, fetchFromGitHub, autoreconfHook, makeWrapper
-, cargo, pkg-config, curl, coreutils, boost174, db62, hexdump, libsodium
+, cargo, pkg-config, curl, coreutils, boost175, db62, hexdump, libsodium
 , libevent, utf8cpp, util-linux, withDaemon ? true, withMining ? true
 , withUtils ? true, withWallet ? true, withZmq ? true, zeromq
 }:
 
 rustPlatform.buildRustPackage.override { stdenv = stdenv; } rec {
   pname = "zcash";
-  version = "4.4.0";
+  version = "4.6.0-1";
 
   src = fetchFromGitHub {
     owner = "zcash";
     repo  = "zcash";
     rev = "v${version}";
-    sha256 = "19vhblyqkaf1lapx8s4v88xjpslqmrd1jnar46rschzcz0mm9sq4";
+    sha256 = "sha256-YJ5ufo+LYbOTr9SyiEzzp1pcSx6+cHSvDLBOIcx9X+4=";
   };
 
-  cargoSha256 = "1yiy1506ijndxb9bx79p7fkfvw1c5zdsljil4m55xz1mv8dzhbgm";
+  cargoSha256 = "sha256-m/SBHv3BNYKkSXxHnCdVng3blbHrTc/HxX/nEIa1DnM=";
 
   nativeBuildInputs = [ autoreconfHook cargo hexdump makeWrapper pkg-config ];
-  buildInputs = [ boost174 libevent libsodium utf8cpp ]
+  buildInputs = [ boost175 libevent libsodium utf8cpp ]
     ++ lib.optional withWallet db62
     ++ lib.optional withZmq zeromq;
 
@@ -37,7 +37,7 @@ rustPlatform.buildRustPackage.override { stdenv = stdenv; } rec {
 
   configureFlags = [
     "--disable-tests"
-    "--with-boost-libdir=${lib.getLib boost174}/lib"
+    "--with-boost-libdir=${lib.getLib boost175}/lib"
     "CXXFLAGS=-I${lib.getDev utf8cpp}/include/utf8cpp"
     "RUST_TARGET=${rust.toRustTargetSpec stdenv.hostPlatform}"
   ] ++ lib.optional (!withWallet) "--disable-wallet"

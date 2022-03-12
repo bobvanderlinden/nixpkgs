@@ -1,12 +1,14 @@
 { stdenv
 , lib
 , buildPythonPackage
-, fetchPypi
+, fetchFromGitHub
 , pythonOlder
 , installShellFiles
 , astroid
 , isort
+, GitPython
 , mccabe
+, platformdirs
 , toml
 , pytest-benchmark
 , pytest-xdist
@@ -15,13 +17,15 @@
 
 buildPythonPackage rec {
   pname = "pylint";
-  version = "2.7.1";
+  version = "2.12.2";
 
   disabled = pythonOlder "3.6";
 
-  src = fetchPypi {
-    inherit pname version;
-    sha256 = "10nrvzk1naf5ryawmi59wp99k31053sz37q3x9li2hj2cf7i1kl1";
+  src = fetchFromGitHub {
+    owner = "PyCQA";
+    repo = pname;
+    rev = "v${version}";
+    sha256 = "sha256-seBYBTB+8PLIovqxVohkoQEfDAZI1fehLgXuHeTx9Wo=";
   };
 
   nativeBuildInputs = [
@@ -32,6 +36,7 @@ buildPythonPackage rec {
     astroid
     isort
     mccabe
+    platformdirs
     toml
   ];
 
@@ -42,6 +47,7 @@ buildPythonPackage rec {
   '';
 
   checkInputs = [
+    GitPython
     pytest-benchmark
     pytest-xdist
     pytestCheckHook
@@ -52,10 +58,17 @@ buildPythonPackage rec {
   # calls executable in one of the tests
   preCheck = ''
     export PATH=$PATH:$out/bin
+    export HOME=$TEMPDIR
   '';
 
   pytestFlagsArray = [
     "-n auto"
+  ];
+
+  disabledTestPaths = [
+    # tests miss multiple input files
+    # FileNotFoundError: [Errno 2] No such file or directory
+    "tests/pyreverse/test_writer.py"
   ];
 
   disabledTests = lib.optionals stdenv.isDarwin [
@@ -67,6 +80,6 @@ buildPythonPackage rec {
     homepage = "https://pylint.pycqa.org/";
     description = "A bug and style checker for Python";
     license = licenses.gpl1Plus;
-    maintainers = with maintainers; [ nand0p ];
+    maintainers = with maintainers; [ ];
   };
 }

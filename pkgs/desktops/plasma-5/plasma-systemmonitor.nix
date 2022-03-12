@@ -15,8 +15,7 @@
 }:
 
 mkDerivation {
-  name = "plasma-systemmonitor";
-  meta.broken = lib.versionOlder qtbase.version "5.15.0";
+  pname = "plasma-systemmonitor";
   nativeBuildInputs = [ extra-cmake-modules kdoctools ];
   buildInputs = [
     qtquickcontrols2

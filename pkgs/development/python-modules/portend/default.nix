@@ -1,24 +1,24 @@
 { lib, buildPythonPackage, fetchPypi
-, pytest, setuptools_scm, tempora, pytest-black, pytestcov }:
+, pytest, setuptools-scm, tempora, pytest-black, pytest-cov }:
 
 buildPythonPackage rec {
   pname = "portend";
-  version = "2.7.1";
+  version = "3.1.0";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "986ed9a278e64a87b5b5f4c21e61c25bebdce9919a92238d9c14c37a7416482b";
+    sha256 = "239e3116045ea823f6df87d6168107ad75ccc0590e37242af0cc1e98c5d224e4";
   };
 
   postPatch = ''
     substituteInPlace pytest.ini --replace "--flake8" ""
   '';
 
-  nativeBuildInputs = [ setuptools_scm ];
+  nativeBuildInputs = [ setuptools-scm ];
 
   propagatedBuildInputs = [ tempora ];
 
-  checkInputs = [ pytest pytest-black pytestcov ];
+  checkInputs = [ pytest pytest-black pytest-cov ];
 
   checkPhase = ''
     py.test --deselect=test_portend.py::TestChecker::test_check_port_listening

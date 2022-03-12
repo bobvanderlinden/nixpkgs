@@ -17,14 +17,14 @@
 
 buildPythonPackage rec {
   pname = "gssapi";
-  version = "1.6.12";
+  version = "1.7.2";
   disabled = pythonOlder "3.6";
 
   src = fetchFromGitHub {
     owner = "pythongssapi";
     repo = "python-${pname}";
     rev = "v${version}";
-    sha256 = "sha256-x86/KMcXChPLzoCqR9xwemusWktf/seHLQmEKLco3GQ=";
+    sha256 = "1xdcnm66b07m7chf04pp58p3khvy547hns1fw1xffd4n51kl42pp";
   };
 
   # It's used to locate headers
@@ -67,7 +67,7 @@ buildPythonPackage rec {
     echo $'\ndel TestBaseUtilities.test_add_cred_impersonate_name' >> gssapi/tests/test_raw.py
 
     export PYTHONPATH="$out/${python.sitePackages}:$PYTHONPATH"
-    ${python.interpreter} setup.py nosetests -e 'ext_test_\d.*'
+    nosetests -e 'ext_test_\d.*'
   '';
   pythonImportsCheck = [ "gssapi" ];
 

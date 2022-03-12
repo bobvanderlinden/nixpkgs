@@ -14,12 +14,12 @@
 }:
 
 buildPythonPackage rec {
-  version = "0.12.4";
+  version = "0.14.0";
   pname = "pybids";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "830f3f518ab0d2e058e9ba6d6ff9a942792909c874433b3ad58a3339a23f46bf";
+    sha256 = "73c4d03aad333f2a7cb4405abe96f55a33cffa4b5a2d23fad6ac5767c45562ef";
   };
 
   propagatedBuildInputs = [
@@ -42,5 +42,8 @@ buildPythonPackage rec {
     homepage = "https://github.com/bids-standard/pybids";
     license = licenses.mit;
     maintainers = with maintainers; [ jonringer ];
+    # Doesn't support sqlalchemy >=1.4
+    # See https://github.com/bids-standard/pybids/issues/680
+    broken = true;
   };
 }

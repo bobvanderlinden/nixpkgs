@@ -2,8 +2,9 @@
 , odfpy
 , openpyxl
 , pandas
+, setuptools-scm
 , pytest
-, pytestcov
+, pytest-cov
 , pyyaml
 , unicodecsv
 , xlrd
@@ -12,16 +13,17 @@
 
 buildPythonPackage rec {
   pname = "tablib";
-  version = "2.0.0";
+  version = "3.2.0";
   disabled = isPy27;
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "1rvvdchdva7j9b29ay0sg8y33pjhpmzynl38wz2rl89pph8gmhlc";
+    sha256 = "12d8686454c721de88d8ca5adf07e1f419ef6dbcecedf65e8950d4a329daf3a0";
   };
 
+  nativeBuildInputs = [ setuptools-scm ];
   propagatedBuildInputs = [ xlwt openpyxl pyyaml xlrd odfpy ];
-  checkInputs = [ pytest pytestcov unicodecsv pandas ];
+  checkInputs = [ pytest pytest-cov unicodecsv pandas ];
 
   # test_tablib needs MarkupPy, which isn't packaged yet
   checkPhase = ''

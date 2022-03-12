@@ -1,33 +1,32 @@
 { config, stdenv, lib, fetchurl, fetchpatch
 , perl, pkg-config
-, libcap, libtool, libxml2, openssl, libuv
-, enablePython ? config.bind.enablePython or false, python3 ? null
-, enableSeccomp ? false, libseccomp ? null, buildPackages, nixosTests
+, libcap, libtool, libxml2, openssl, libuv, nghttp2, jemalloc
+, enableGSSAPI ? true, libkrb5
+, enablePython ? false, python3
+, enableSeccomp ? false, libseccomp
+, buildPackages, nixosTests
 }:
-
-assert enableSeccomp -> libseccomp != null;
-assert enablePython -> python3 != null;
 
 stdenv.mkDerivation rec {
   pname = "bind";
-  version = "9.16.13";
+  version = "9.18.0";
 
   src = fetchurl {
     url = "https://downloads.isc.org/isc/bind9/${version}/${pname}-${version}.tar.xz";
-    sha256 = "sha256-pUzHk/pbabNfYQ8glXYPgjjf9c/VJBn37hycIn2kzAg=";
+    sha256 = "sha256-VlJb9crwH9j9nZCRCIDMD4qQonqX0WkYfWUdTs8MQRw=";
   };
 
   outputs = [ "out" "lib" "dev" "man" "dnsutils" "host" ];
 
   patches = [
     ./dont-keep-configure-flags.patch
-    ./remove-mkdir-var.patch
   ];
 
   nativeBuildInputs = [ perl pkg-config ];
-  buildInputs = [ libtool libxml2 openssl libuv ]
+  buildInputs = [ libtool libxml2 openssl libuv nghttp2 jemalloc ]
     ++ lib.optional stdenv.isLinux libcap
     ++ lib.optional enableSeccomp libseccomp
+    ++ lib.optional enableGSSAPI libkrb5
     ++ lib.optional enablePython (python3.withPackages (ps: with ps; [ ply ]));
 
   depsBuildBuild = [ buildPackages.stdenv.cc ];
@@ -39,7 +38,6 @@ stdenv.mkDerivation rec {
     "--without-atf"
     "--without-dlopen"
     "--without-docbook-xsl"
-    "--without-gssapi"
     "--without-idn"
     "--without-idnlib"
     "--without-lmdb"
@@ -53,6 +51,7 @@ stdenv.mkDerivation rec {
     "--with-aes"
   ] ++ lib.optional stdenv.isLinux "--with-libcap=${libcap.dev}"
     ++ lib.optional enableSeccomp "--enable-seccomp"
+    ++ lib.optional enableGSSAPI "--with-gssapi=${libkrb5.dev}/bin/krb5-config"
     ++ lib.optional (stdenv.hostPlatform != stdenv.buildPlatform) "BUILD_CC=$(CC_FOR_BUILD)";
 
   postInstall = ''
@@ -75,11 +74,11 @@ stdenv.mkDerivation rec {
   passthru.tests = { inherit (nixosTests) bind; };
 
   meta = with lib; {
-    homepage = "https://www.isc.org/downloads/bind/";
+    homepage = "https://www.isc.org/bind/";
     description = "Domain name server";
     license = licenses.mpl20;
 
-    maintainers = with maintainers; [ peti globin ];
+    maintainers = with maintainers; [ globin ];
     platforms = platforms.unix;
 
     outputsToInstall = [ "out" "dnsutils" "host" ];

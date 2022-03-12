@@ -6,13 +6,13 @@
 
 buildPythonPackage rec {
   pname = "pypinyin";
-  version = "0.41.0";
+  version = "0.46.0";
 
   src = fetchFromGitHub {
     owner = "mozillazg";
     repo = "python-pinyin";
     rev = "v${version}";
-    sha256 = "1s01dd5n6cgjg24dmji0abxkyvr1yi18lx4rpm9z54v0q3wkccg9";
+    sha256 = "sha256-KPyFvO6TR0mg09xcraHFaWklJgzF5oqk3d8H+G4gh3I=";
   };
 
   postPatch = ''
@@ -33,6 +33,6 @@ buildPythonPackage rec {
     homepage = "https://github.com/mozillazg/python-pinyin";
     changelog = "https://github.com/mozillazg/python-pinyin/blob/master/CHANGELOG.rst";
     license = licenses.mit;
-    maintainers = with maintainers; [ hexa mic92 ];
+    maintainers = teams.tts.members;
   };
 }

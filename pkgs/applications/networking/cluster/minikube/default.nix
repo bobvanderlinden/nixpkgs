@@ -1,7 +1,7 @@
-{ lib, stdenv
+{ lib
+, stdenv
 , buildGoModule
 , fetchFromGitHub
-, go-bindata
 , installShellFiles
 , pkg-config
 , which
@@ -11,9 +11,9 @@
 
 buildGoModule rec {
   pname = "minikube";
-  version = "1.19.0";
+  version = "1.25.2";
 
-  vendorSha256 = "sha256-WGW2uz3YJIUjLsYQ6rXNvgJGLrZSIkEEk07llLzMVXA=";
+  vendorSha256 = "sha256-8QqRIWry15/xwBxEOexMEq57ol8riy+kW8WrQqr53Q8=";
 
   doCheck = false;
 
@@ -21,10 +21,10 @@ buildGoModule rec {
     owner = "kubernetes";
     repo = "minikube";
     rev = "v${version}";
-    sha256 = "sha256-F+nPSWX9gs/hvOR6g8MW4b+JW+w3ScDaaF/FLHbLspY=";
+    sha256 = "sha256-WIk4ibq7jcqao0Qiz3mz9yfHdxTUlvtPuEh4gApSDBg=";
   };
 
-  nativeBuildInputs = [ go-bindata installShellFiles pkg-config which ];
+  nativeBuildInputs = [ installShellFiles pkg-config which ];
 
   buildInputs = if stdenv.isDarwin then [ vmnet ] else if stdenv.isLinux then [ libvirt ] else null;
 

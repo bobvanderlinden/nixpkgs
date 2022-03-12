@@ -3,13 +3,18 @@
 buildPecl {
   pname = "xdebug";
 
-  version = "3.0.3";
-  sha256 = "sha256-5yZagVGOOX+XLcki50bRpIRTcXf/SJVDUWfRCeKTJDI=";
+  version = "3.1.3";
+  sha256 = "sha256-N9CmcBlV9bNAbGwye3cCvXwhRi5lbztMziSgUlgBPU4=";
 
   doCheck = true;
   checkTarget = "test";
 
   zendExtension = true;
 
-  meta.maintainers = lib.teams.php.members;
+  meta = with lib; {
+    description = "Provides functions for function traces and profiling";
+    license = licenses.php301;
+    homepage = "https://xdebug.org/";
+    maintainers = teams.php.members;
+  };
 }

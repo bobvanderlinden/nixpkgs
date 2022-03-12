@@ -3,6 +3,7 @@
 , async_generator
 , buildPythonPackage
 , fetchPypi
+, fetchpatch
 , hypothesis
 , lupa
 , pytest-asyncio
@@ -16,13 +17,28 @@
 
 buildPythonPackage rec {
   pname = "fakeredis";
-  version = "1.5.0";
-  disabled = pythonOlder "3.5";
+  version = "1.7.0";
+
+  format = "pyproject";
+
+  disabled = pythonOlder "3.7";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "1ac0cef767c37f51718874a33afb5413e69d132988cb6a80c6e6dbeddf8c7623";
+    sha256 = "sha256-yb0S5DAzbL0+GJ+uDpHrmZl7k+dtv91u1n+jUtxoTHE=";
   };
+
+  patches = [
+    (fetchpatch {
+      # redis 4.1.0 compatibility
+      # https://github.com/jamesls/fakeredis/pull/324
+      url = "https://github.com/jamesls/fakeredis/commit/8ef8dc6dacc9baf571d66a25ffbf0fadd7c70f78.patch";
+      sha256 = "sha256:03xlqmwq8nkzisrjk7y51j2jd6qdin8nbj5n9hc4wjabbvlgx4qr";
+      excludes = [
+        "setup.cfg"
+      ];
+    })
+  ];
 
   propagatedBuildInputs = [
     aioredis
@@ -40,7 +56,14 @@ buildPythonPackage rec {
     pytestCheckHook
   ];
 
-  pythonImportsCheck = [ "fakeredis" ];
+  pythonImportsCheck = [
+    "fakeredis"
+  ];
+
+  postPatch = ''
+    substituteInPlace setup.cfg \
+      --replace "redis<4.1.0" "redis"
+  '';
 
   meta = with lib; {
     description = "Fake implementation of Redis API";

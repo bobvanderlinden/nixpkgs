@@ -1,7 +1,8 @@
-{ stdenv, fetchurl, lib, makeWrapper, electron, makeDesktopItem, graphicsmagick
+{ stdenv, fetchurl, lib, makeWrapper, electron_16, makeDesktopItem, graphicsmagick
 , writeScript }:
 
 let
+  electron = electron_16;
   icon = fetchurl {
     url =
       "https://forum.obsidian.md/uploads/default/original/1X/bf119bd48f748f4fd2d65f2d1bb05d3c806883b5.png";
@@ -14,7 +15,7 @@ let
     comment = "Knowledge base";
     icon = "obsidian";
     exec = "obsidian";
-    categories = "Office";
+    categories = [ "Office" ];
   };
 
   updateScript = writeScript "obsidian-updater" ''
@@ -30,17 +31,18 @@ let
 
 in stdenv.mkDerivation rec {
   pname = "obsidian";
-  version = "0.11.13";
+  version = "0.13.30";
 
   src = fetchurl {
-    url =
-      "https://github.com/obsidianmd/obsidian-releases/releases/download/v${version}/obsidian-${version}.tar.gz";
-    sha256 = "0QL1rP37pmdIdGM9eHa7PfW1GVrvn2fX4bQPqQ8FOpI=";
+    url = "https://github.com/obsidianmd/obsidian-releases/releases/download/v${version}/obsidian-${version}.tar.gz";
+    sha256 = "ymdqdDD7WWfol/jLBsz8tEzcN7Ed1HSIrkuA51cvKKw=";
   };
 
   nativeBuildInputs = [ makeWrapper graphicsmagick ];
 
   installPhase = ''
+    runHook preInstall
+
     mkdir -p $out/bin
 
     makeWrapper ${electron}/bin/electron $out/bin/obsidian \
@@ -56,6 +58,8 @@ in stdenv.mkDerivation rec {
       mkdir -p $out/share/icons/hicolor/"$size"x"$size"/apps
       gm convert -resize "$size"x"$size" ${icon} $out/share/icons/hicolor/"$size"x"$size"/apps/obsidian.png
     done
+
+    runHook postInstall
   '';
 
   passthru.updateScript = updateScript;
@@ -64,6 +68,7 @@ in stdenv.mkDerivation rec {
     description =
       "A powerful knowledge base that works on top of a local folder of plain text Markdown files";
     homepage = "https://obsidian.md";
+    downloadPage = "https://github.com/obsidianmd/obsidian-releases/releases";
     license = licenses.obsidian;
     maintainers = with maintainers; [ conradmearns zaninime ];
     platforms = [ "x86_64-linux" ];

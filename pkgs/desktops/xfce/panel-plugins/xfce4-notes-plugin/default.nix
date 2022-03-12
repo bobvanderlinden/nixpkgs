@@ -17,7 +17,7 @@ in stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "mirror://xfce/src/${category}/${pname}/${lib.versions.majorMinor version}/${pname}-${version}.tar.bz2";
-    sha256 = "E/kJyUi2Oflt5kz3k+t0yxd5WJIB05M+/yFO6PNasIg=";
+    sha256 = "sha256-E/kJyUi2Oflt5kz3k+t0yxd5WJIB05M+/yFO6PNasIg=";
   };
 
   nativeBuildInputs = [
@@ -31,17 +31,13 @@ in stdenv.mkDerivation rec {
     xfconf
   ];
 
-  passthru.updateScript = xfce.updateScript {
-    inherit pname version;
-    attrPath = "xfce.${pname}";
-    versionLister = xfce.archiveLister category pname;
-  };
+  passthru.updateScript = xfce.archiveUpdater { inherit category pname version; };
 
   meta = with lib; {
     homepage = "https://docs.xfce.org/panel-plugins/xfce4-notes-plugin";
     description = "Sticky notes plugin for Xfce panel";
     license = licenses.gpl2Plus;
     platforms = platforms.linux;
-    maintainers = [ ];
+    maintainers = with maintainers; [ ] ++ teams.xfce.members;
   };
 }

@@ -1,7 +1,10 @@
 { version
 , srcName
-, sha256
+, hash ? null
+, sha256 ? null
 }:
+
+assert (hash != null) || (sha256 != null);
 
 { stdenv
 , lib
@@ -22,20 +25,25 @@ stdenv.mkDerivation {
   name = "cudatoolkit-${cudatoolkit.majorVersion}-cudnn-${version}";
 
   inherit version;
-  src = fetchurl {
+
+  src = let
+    hash_ = if hash != null then { inherit hash; } else { inherit sha256; };
+  in fetchurl ({
     # URL from NVIDIA docker containers: https://gitlab.com/nvidia/cuda/blob/centos7/7.0/runtime/cudnn4/Dockerfile
     url = "https://developer.download.nvidia.com/compute/redist/cudnn/v${version}/${srcName}";
-    inherit sha256;
-  };
+  } // hash_);
 
   nativeBuildInputs = [ addOpenGLRunpath ];
 
+  # Some cuDNN libraries depend on things in cudatoolkit, eg.
+  # libcudnn_ops_infer.so.8 tries to load libcublas.so.11. So we need to patch
+  # cudatoolkit into RPATH. See also https://github.com/NixOS/nixpkgs/blob/88a2ad974692a5c3638fcdc2c772e5770f3f7b21/pkgs/development/python-modules/jaxlib/bin.nix#L78-L98.
   installPhase = ''
     runHook preInstall
 
     function fixRunPath {
       p=$(patchelf --print-rpath $1)
-      patchelf --set-rpath "''${p:+$p:}${lib.makeLibraryPath [ stdenv.cc.cc ]}:\$ORIGIN/" $1
+      patchelf --set-rpath "''${p:+$p:}${lib.makeLibraryPath [ stdenv.cc.cc cudatoolkit.lib ]}:${cudatoolkit}/lib:\$ORIGIN/" $1
     }
 
     for lib in lib64/lib*.so; do

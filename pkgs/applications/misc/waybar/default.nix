@@ -10,34 +10,37 @@
 , gtkmm3
 , libsigcxx
 , jsoncpp
-, fmt
 , scdoc
 , spdlog
 , gtk-layer-shell
-, howard-hinnant-date, cmake
-, traySupport  ? true,  libdbusmenu-gtk3
-, pulseSupport ? true,  libpulseaudio
-, sndioSupport ? true,  sndio
-, nlSupport    ? true,  libnl
-, udevSupport  ? true,  udev
-, swaySupport  ? true,  sway
-, mpdSupport   ? true,  libmpdclient
+, howard-hinnant-date
+, libxkbcommon
+, runTests        ? true,  catch2
+, traySupport     ? true,  libdbusmenu-gtk3
+, pulseSupport    ? true,  libpulseaudio
+, sndioSupport    ? true,  sndio
+, nlSupport       ? true,  libnl
+, udevSupport     ? true,  udev
+, evdevSupport    ? true,  libevdev
+, swaySupport     ? true,  sway
+, mpdSupport      ? true,  libmpdclient
+, rfkillSupport   ? true
 , withMediaPlayer ? false, glib, gobject-introspection, python3, python38Packages, playerctl
 }:
 
 stdenv.mkDerivation rec {
   pname = "waybar";
-  version = "0.9.7";
+  version = "0.9.10";
 
   src = fetchFromGitHub {
     owner = "Alexays";
     repo = "Waybar";
     rev = version;
-    sha256 = "17cn4d3dx92v40jd9vl41smp8hh3gf5chd1j2f7l1lrpfpnllg5x";
+    sha256 = "sha256-KiRtU32h3AvThDWnCw55LnqbWVAZLXY/7fU1HxLMjLo=";
   };
 
   nativeBuildInputs = [
-    meson ninja pkg-config scdoc wrapGAppsHook cmake
+    meson ninja pkg-config scdoc wrapGAppsHook
   ] ++ lib.optional withMediaPlayer gobject-introspection;
 
   propagatedBuildInputs = lib.optionals withMediaPlayer [
@@ -48,14 +51,18 @@ stdenv.mkDerivation rec {
   strictDeps = false;
 
   buildInputs = with lib;
-    [ wayland wlroots gtkmm3 libsigcxx jsoncpp fmt spdlog gtk-layer-shell howard-hinnant-date ]
+    [ wayland wlroots gtkmm3 libsigcxx jsoncpp spdlog gtk-layer-shell howard-hinnant-date libxkbcommon ]
     ++ optional  traySupport  libdbusmenu-gtk3
     ++ optional  pulseSupport libpulseaudio
     ++ optional  sndioSupport sndio
     ++ optional  nlSupport    libnl
     ++ optional  udevSupport  udev
+    ++ optional  evdevSupport libevdev
     ++ optional  swaySupport  sway
     ++ optional  mpdSupport   libmpdclient;
+
+  checkInputs = [ catch2 ];
+  doCheck = runTests;
 
   mesonFlags = (lib.mapAttrsToList
     (option: enable: "-D${option}=${if enable then "enabled" else "disabled"}")
@@ -66,13 +73,16 @@ stdenv.mkDerivation rec {
       libnl = nlSupport;
       libudev = udevSupport;
       mpd = mpdSupport;
+      rfkill = rfkillSupport;
+      tests = runTests;
     }
   ) ++ [
-    "-Dout=${placeholder "out"}"
     "-Dsystemd=disabled"
+    "-Dgtk-layer-shell=enabled"
+    "-Dman-pages=enabled"
   ];
 
-  preFixup = lib.optional withMediaPlayer ''
+  preFixup = lib.optionalString withMediaPlayer ''
       cp $src/resources/custom_modules/mediaplayer.py $out/bin/waybar-mediaplayer.py
 
       wrapProgram $out/bin/waybar-mediaplayer.py \

@@ -2,8 +2,8 @@
 , replace, fetchurl, zip, unzip, jq, xdg-utils, writeText
 
 ## various stuff that can be plugged in
-, ffmpeg, xorg, alsaLib, libpulseaudio, libcanberra-gtk2, libglvnd, libnotify
-, gnome3/*.gnome-shell*/
+, ffmpeg, xorg, alsa-lib, libpulseaudio, libcanberra-gtk3, libglvnd, libnotify, opensc
+, gnome/*.gnome-shell*/
 , browserpass, chrome-gnome-shell, uget-integrator, plasma5Packages, bukubrow, pipewire
 , tridactyl-native
 , fx_cast_bridge
@@ -11,6 +11,7 @@
 , libkrb5
 , libva
 , mesa # firefox wants gbm for drm+dmabuf
+, cups
 }:
 
 ## configurability of the wrapper itself
@@ -19,37 +20,40 @@ browser:
 
 let
   wrapper =
-    { browserName ? browser.browserName or (lib.getName browser)
-    , pname ? browserName
+    { applicationName ? browser.applicationName or (lib.getName browser)
+    , pname ? applicationName
     , version ? lib.getVersion browser
-    , desktopName ? # browserName with first letter capitalized
-      (lib.toUpper (lib.substring 0 1 browserName) + lib.substring 1 (-1) browserName)
+    , desktopName ? # applicationName with first letter capitalized
+      (lib.toUpper (lib.substring 0 1 applicationName) + lib.substring 1 (-1) applicationName)
     , nameSuffix ? ""
-    , icon ? browserName
+    , icon ? applicationName
+    , wmClass ? null
     , extraNativeMessagingHosts ? []
     , pkcs11Modules ? []
     , forceWayland ? false
     , useGlvnd ? true
-    , cfg ? config.${browserName} or {}
+    , cfg ? config.${applicationName} or {}
 
     ## Following options are needed for extra prefs & policies
     # For more information about anti tracking (german website)
     # visit https://wiki.kairaven.de/open/app/firefox
     , extraPrefs ? ""
+    , extraPrefsFiles ? []
     # For more information about policies visit
     # https://github.com/mozilla/policy-templates#enterprisepoliciesenabled
     , extraPolicies ? {}
-    , firefoxLibName ? "firefox" # Important for tor package or the like
+    , extraPoliciesFiles ? []
+    , libName ? browser.libName or "firefox" # Important for tor package or the like
     , nixExtensions ? null
     }:
-
-    assert forceWayland -> (browser ? gtk3); # Can only use the wayland backend if gtk3 is being used
 
     let
       ffmpegSupport = browser.ffmpegSupport or false;
       gssSupport = browser.gssSupport or false;
       alsaSupport = browser.alsaSupport or false;
       pipewireSupport = browser.pipewireSupport or false;
+      # PCSC-Lite daemon (services.pcscd) also must be enabled for firefox to access smartcards
+      smartcardSupport = cfg.smartcardSupport or false;
 
       nativeMessagingHosts =
         ([ ]
@@ -62,17 +66,18 @@ let
           ++ lib.optional (cfg.enableFXCastBridge or false) fx_cast_bridge
           ++ extraNativeMessagingHosts
         );
-      libs =   lib.optionals stdenv.isLinux [ udev libva mesa libnotify xorg.libXScrnSaver ]
+      libs =   lib.optionals stdenv.isLinux [ udev libva mesa libnotify xorg.libXScrnSaver cups ]
             ++ lib.optional (pipewireSupport && lib.versionAtLeast version "83") pipewire
             ++ lib.optional ffmpegSupport ffmpeg
             ++ lib.optional gssSupport libkrb5
             ++ lib.optional useGlvnd libglvnd
             ++ lib.optionals (cfg.enableQuakeLive or false)
-            (with xorg; [ stdenv.cc libX11 libXxf86dga libXxf86vm libXext libXt alsaLib zlib ])
+            (with xorg; [ stdenv.cc libX11 libXxf86dga libXxf86vm libXext libXt alsa-lib zlib ])
             ++ lib.optional (config.pulseaudio or true) libpulseaudio
-            ++ lib.optional alsaSupport alsaLib
+            ++ lib.optional alsaSupport alsa-lib
+            ++ lib.optional smartcardSupport opensc
             ++ pkcs11Modules;
-      gtk_modules = [ libcanberra-gtk2 ];
+      gtk_modules = [ libcanberra-gtk3 ];
 
       #########################
       #                       #
@@ -89,6 +94,8 @@ let
       # and an extid attribute
       extensions = if nameArray != (lib.unique nameArray) then
         throw "Firefox addon name needs to be unique"
+      else if ! (lib.hasSuffix "esr" browser.name) then
+        throw "Nix addons are only supported in Firefox ESR"
       else builtins.map (a:
         if ! (builtins.hasAttr "extid" a) then
         throw "nixExtensions has an invalid entry. Missing extid attribute. Please use fetchfirefoxaddon"
@@ -98,7 +105,7 @@ let
 
       enterprisePolicies =
       {
-        policies = lib.optionalAttrs usesNixExtensions  {
+        policies = {
           DisableAppUpdate = true;
         } //
         lib.optionalAttrs usesNixExtensions {
@@ -121,6 +128,10 @@ let
                 ret ++ [ "${e.outPath}/${e.extid}.xpi" ]
                 ) [] extensions;
             };
+          } // lib.optionalAttrs smartcardSupport {
+            SecurityDevices = {
+              "OpenSC PKCS#11 Module" = "onepin-opensc-pkcs11.so";
+            };
           }
         // extraPolicies;
       };
@@ -142,35 +153,17 @@ let
       #                           #
       #############################
 
-      # TODO: remove this after the next release (21.03)
-      configPlugins = lib.filter (a: builtins.hasAttr a cfg) [
-        "enableAdobeFlash"
-        "enableAdobeReader"
-        "enableBluejeans"
-        "enableDjvu"
-        "enableFriBIDPlugin"
-        "enableGoogleTalkPlugin"
-        "enableMPlayer"
-        "enableVLC"
-        "icedtea"
-        "jre"
-      ];
-      pluginsError =
-        "Your configuration mentions ${lib.concatMapStringsSep ", " (p: browserName + "." + p) configPlugins}. All plugin related options have been removed, since Firefox from version 52 onwards no longer supports npapi plugins (see https://support.mozilla.org/en-US/kb/npapi-plugins).";
-
-    in if configPlugins != [] then throw pluginsError else
-      (stdenv.mkDerivation {
+    in stdenv.mkDerivation {
       inherit pname version;
 
       desktopItem = makeDesktopItem {
-        name = browserName;
-        exec = "${browserName}${nameSuffix} %U";
+        name = applicationName;
+        exec = "${applicationName}${nameSuffix} %U";
         inherit icon;
-        comment = "";
         desktopName = "${desktopName}${nameSuffix}${lib.optionalString forceWayland " (Wayland)"}";
         genericName = "Web Browser";
-        categories = "Network;WebBrowser;";
-        mimeType = lib.concatStringsSep ";" [
+        categories = [ "Network" "WebBrowser" ];
+        mimeTypes = [
           "text/html"
           "text/xml"
           "application/xhtml+xml"
@@ -179,20 +172,21 @@ let
           "x-scheme-handler/https"
           "x-scheme-handler/ftp"
         ];
+        startupWMClass = wmClass;
       };
 
-      nativeBuildInputs = [ makeWrapper lndir ];
-      buildInputs = lib.optional (browser ? gtk3) browser.gtk3;
+      nativeBuildInputs = [ makeWrapper lndir replace jq ];
+      buildInputs = [ browser.gtk3 ];
 
 
       buildCommand = lib.optionalString stdenv.isDarwin ''
         mkdir -p $out/Applications
-        cp -R --no-preserve=mode,ownership ${browser}/Applications/${browserName}.app $out/Applications
-        rm -f $out${browser.execdir or "/bin"}/${browserName}
+        cp -R --no-preserve=mode,ownership ${browser}/Applications/${applicationName}.app $out/Applications
+        rm -f $out${browser.execdir or "/bin"}/${applicationName}
       '' + ''
-        if [ ! -x "${browser}${browser.execdir or "/bin"}/${browserName}" ]
+        if [ ! -x "${browser}${browser.execdir or "/bin"}/${applicationName}" ]
         then
-            echo "cannot find executable file \`${browser}${browser.execdir or "/bin"}/${browserName}'"
+            echo "cannot find executable file \`${browser}${browser.execdir or "/bin"}/${applicationName}'"
             exit 1
         fi
 
@@ -207,10 +201,10 @@ let
         cd "${browser}"
         find . -type d -exec mkdir -p "$out"/{} \;
 
-        find . -type f \( -not -name "${browserName}" \) -exec ln -sT "${browser}"/{} "$out"/{} \;
+        find . -type f \( -not -name "${applicationName}" \) -exec ln -sT "${browser}"/{} "$out"/{} \;
 
-        find . -type f -name "${browserName}" -print0 | while read -d $'\0' f; do
-          cp -P --no-preserve=mode,ownership "${browser}/$f" "$out/$f"
+        find . -type f \( -name "${applicationName}" -o -name "${applicationName}-bin" \) -print0 | while read -d $'\0' f; do
+          cp -P --no-preserve=mode,ownership --remove-destination "${browser}/$f" "$out/$f"
           chmod a+rwx "$out/$f"
         done
 
@@ -218,23 +212,23 @@ let
         cd "${browser}"
 
         find . -type l -print0 | while read -d $'\0' l; do
-          target="$(readlink "$l" | ${replace}/bin/replace-literal -es -- "${browser}" "$out")"
+          target="$(readlink "$l" | replace-literal -es -- "${browser}" "$out")"
           ln -sfT "$target" "$out/$l"
         done
 
         # This will not patch binaries, only "text" files.
         # Its there for the wrapper mostly.
         cd "$out"
-        ${replace}/bin/replace-literal -esfR -- "${browser}" "$out"
+        replace-literal -esfR -- "${browser}" "$out"
 
         # create the wrapper
 
         executablePrefix="$out${browser.execdir or "/bin"}"
-        executablePath="$executablePrefix/${browserName}"
+        executablePath="$executablePrefix/${applicationName}"
 
         if [ ! -x "$executablePath" ]
         then
-            echo "cannot find executable file \`${browser}${browser.execdir or "/bin"}/${browserName}'"
+            echo "cannot find executable file \`${browser}${browser.execdir or "/bin"}/${applicationName}'"
             exit 1
         fi
 
@@ -243,36 +237,33 @@ let
           # Careful here, the file at executablePath may already be
           # a wrapper. That is why we postfix it with -old instead
           # of -wrapped.
-          oldExe="$executablePrefix"/".${browserName}"-old
+          oldExe="$executablePrefix"/".${applicationName}"-old
           mv "$executablePath" "$oldExe"
         else
           oldExe="$(readlink -v --canonicalize-existing "$executablePath")"
         fi
 
-        if [ ! -x "${browser}${browser.execdir or "/bin"}/${browserName}" ]
+        if [ ! -x "${browser}${browser.execdir or "/bin"}/${applicationName}" ]
         then
-            echo "cannot find executable file \`${browser}${browser.execdir or "/bin"}/${browserName}'"
+            echo "cannot find executable file \`${browser}${browser.execdir or "/bin"}/${applicationName}'"
             exit 1
         fi
 
         makeWrapper "$oldExe" \
-          "$out${browser.execdir or "/bin"}/${browserName}${nameSuffix}" \
-            --suffix LD_LIBRARY_PATH ':' "$libs" \
+          "$out${browser.execdir or "/bin"}/${applicationName}${nameSuffix}" \
+            --prefix LD_LIBRARY_PATH ':' "$libs" \
             --suffix-each GTK_PATH ':' "$gtk_modules" \
             --prefix PATH ':' "${xdg-utils}/bin" \
             --suffix PATH ':' "$out${browser.execdir or "/bin"}" \
-            --set MOZ_APP_LAUNCHER "${browserName}${nameSuffix}" \
+            --set MOZ_APP_LAUNCHER "${applicationName}${nameSuffix}" \
             --set MOZ_SYSTEM_DIR "$out/lib/mozilla" \
-            --set SNAP_NAME "firefox" \
             --set MOZ_LEGACY_PROFILES 1 \
             --set MOZ_ALLOW_DOWNGRADE 1 \
+            --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH" \
+            --suffix XDG_DATA_DIRS : '${gnome.adwaita-icon-theme}/share' \
             ${lib.optionalString forceWayland ''
               --set MOZ_ENABLE_WAYLAND "1" \
-            ''}${lib.optionalString (browser ? gtk3)
-                ''--prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH" \
-                  --suffix XDG_DATA_DIRS : '${gnome3.adwaita-icon-theme}/share'
-                ''
-            }
+            ''}
         #############################
         #                           #
         #   END EXTRA PREF CHANGES  #
@@ -285,9 +276,9 @@ let
         else
             for res in 16 32 48 64 128; do
             mkdir -p "$out/share/icons/hicolor/''${res}x''${res}/apps"
-            icon=( "${browser}/lib/"*"/browser/chrome/icons/default/default''${res}.png" )
+            icon=$( find "${browser}/lib/" -name "default''${res}.png" )
               if [ -e "$icon" ]; then ln -s "$icon" \
-                "$out/share/icons/hicolor/''${res}x''${res}/apps/${browserName}.png"
+                "$out/share/icons/hicolor/''${res}x''${res}/apps/${applicationName}.png"
               fi
             done
         fi
@@ -304,10 +295,6 @@ let
             ln -sLt $out/lib/mozilla/pkcs11-modules $ext/lib/mozilla/pkcs11-modules/*
         done
 
-        # For manpages, in case the program supplies them
-        mkdir -p $out/nix-support
-        echo ${browser} > $out/nix-support/propagated-user-env-packages
-
 
         #########################
         #                       #
@@ -315,24 +302,35 @@ let
         #                       #
         #########################
         # user customization
-        mkdir -p $out/lib/${firefoxLibName}
+        mkdir -p $out/lib/${libName}
 
         # creating policies.json
-        mkdir -p "$out/lib/${firefoxLibName}/distribution"
+        mkdir -p "$out/lib/${libName}/distribution"
 
-        POL_PATH="$out/lib/${firefoxLibName}/distribution/policies.json"
+        POL_PATH="$out/lib/${libName}/distribution/policies.json"
         rm -f "$POL_PATH"
         cat ${policiesJson} >> "$POL_PATH"
 
+        extraPoliciesFiles=(${builtins.toString extraPoliciesFiles})
+        for extraPoliciesFile in "''${extraPoliciesFiles[@]}"; do
+          jq -s '.[0] + .[1]' "$POL_PATH" $extraPoliciesFile > .tmp.json
+          mv .tmp.json "$POL_PATH"
+        done
+
         # preparing for autoconfig
-        mkdir -p "$out/lib/${firefoxLibName}/defaults/pref"
+        mkdir -p "$out/lib/${libName}/defaults/pref"
 
-        echo 'pref("general.config.filename", "mozilla.cfg");' > "$out/lib/${firefoxLibName}/defaults/pref/autoconfig.js"
-        echo 'pref("general.config.obscure_value", 0);' >> "$out/lib/${firefoxLibName}/defaults/pref/autoconfig.js"
+        echo 'pref("general.config.filename", "mozilla.cfg");' > "$out/lib/${libName}/defaults/pref/autoconfig.js"
+        echo 'pref("general.config.obscure_value", 0);' >> "$out/lib/${libName}/defaults/pref/autoconfig.js"
 
-        cat > "$out/lib/${firefoxLibName}/mozilla.cfg" < ${mozillaCfg}
+        cat > "$out/lib/${libName}/mozilla.cfg" < ${mozillaCfg}
 
-        mkdir -p $out/lib/${firefoxLibName}/distribution/extensions
+        extraPrefsFiles=(${builtins.toString extraPrefsFiles})
+        for extraPrefsFile in "''${extraPrefsFiles[@]}"; do
+          cat "$extraPrefsFile" >> "$out/lib/${libName}/mozilla.cfg"
+        done
+
+        mkdir -p $out/lib/${libName}/distribution/extensions
 
         #############################
         #                           #
@@ -355,5 +353,5 @@ let
         hydraPlatforms = [];
         priority = (browser.meta.priority or 0) - 1; # prefer wrapper over the package
       };
-    });
+    };
 in lib.makeOverridable wrapper

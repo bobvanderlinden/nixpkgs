@@ -4,15 +4,17 @@
 , nose
 , numpy
 , quantities
+, pythonOlder
 }:
 
 buildPythonPackage rec {
   pname = "neo";
-  version = "0.9.0";
+  version = "0.10.1";
+  disabled = pythonOlder "3.6";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "6e31c88d7c52174fa2512df589b2b5003e9471fde27fca9f315f4770ba3bd3cb";
+    sha256 = "sha256-RE/xUnjdz541d4IOh4z2ufQiDOFFvxATyPMFNs9gk5s=";
   };
 
   propagatedBuildInputs = [ numpy quantities ];

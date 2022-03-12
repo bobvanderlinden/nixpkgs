@@ -13,18 +13,21 @@
 
 buildPythonPackage rec {
   pname = "pywemo";
-  version = "0.6.4";
+  version = "0.8.0";
   format = "pyproject";
+
   disabled = pythonOlder "3.7";
 
   src = fetchFromGitHub {
     owner = pname;
     repo = pname;
     rev = version;
-    sha256 = "1hm1vs6m65vqar0lcjnynz0d9y9ri5s75fzhvp0yfjkcnp06gnfa";
+    hash = "sha256-bGoqhrjoRKUGPBNfmr2XP+1HL5mdRi6XoCi0BdvY9x8=";
   };
 
-  nativeBuildInputs = [ poetry-core ];
+  nativeBuildInputs = [
+    poetry-core
+  ];
 
   propagatedBuildInputs = [
     ifaddr
@@ -38,12 +41,9 @@ buildPythonPackage rec {
     pytestCheckHook
   ];
 
-  disabledTests = [
-    # https://github.com/pywemo/pywemo/issues/264
-    "test_rules_db_from_device"
+  pythonImportsCheck = [
+    "pywemo"
   ];
-
-  pythonImportsCheck = [ "pywemo" ];
 
   meta = with lib; {
     description = "Python module to discover and control WeMo devices";

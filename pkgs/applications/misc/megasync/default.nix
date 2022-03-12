@@ -7,7 +7,8 @@
 , curl
 , doxygen
 , fetchFromGitHub
-, ffmpeg_3
+, ffmpeg
+, freeimage
 , libmediainfo
 , libraw
 , libsodium
@@ -27,13 +28,13 @@
 }:
 mkDerivation rec {
   pname = "megasync";
-  version = "4.4.0.0";
+  version = "4.6.3.0";
 
   src = fetchFromGitHub {
     owner = "meganz";
     repo = "MEGAsync";
     rev = "v${version}_Linux";
-    sha256 = "1xggca7283943070mmpsfhh7c9avy809h0kgmf7497f4ca5zkg2y";
+    sha256 = "1j86vr8n2a17my61vkmx83cay1ibllzjprl5bfwaby5ibh4zclz4";
     fetchSubmodules = true;
   };
 
@@ -52,7 +53,8 @@ mkDerivation rec {
     c-ares
     cryptopp
     curl
-    ffmpeg_3
+    ffmpeg
+    freeimage
     libmediainfo
     libraw
     libsodium
@@ -70,6 +72,7 @@ mkDerivation rec {
     ./noinstall-distro-version.patch
     # megasync target is not part of the install rule thanks to a commented block
     ./install-megasync.patch
+    ./ffmpeg_44.patch
   ];
 
   postPatch = ''
@@ -95,7 +98,7 @@ mkDerivation rec {
     "--with-cryptopp"
     "--with-curl"
     "--with-ffmpeg"
-    "--without-freeimage" # unreferenced even when found
+    "--with-freeimage"
     "--without-readline"
     "--without-termcap"
     "--with-sodium"

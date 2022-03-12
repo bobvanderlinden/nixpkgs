@@ -8,12 +8,12 @@
 }:
 
 stdenv.mkDerivation rec {
-  version = "2.22";
+  version = "2.25";
   pname = "links2";
 
   src = fetchurl {
     url = "${meta.homepage}/download/links-${version}.tar.bz2";
-    sha256 = "sha256-A2SYazp/Ho4xcb6jYrU/ceHdM2CohC1m/cZVgOvCCE0=";
+    sha256 = "sha256-LdeFCGmOgnnvTwmjoqIelZUEARNALabFU5dEFPtJ3Sw=";
   };
 
   buildInputs = with lib;

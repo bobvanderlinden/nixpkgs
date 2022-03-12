@@ -8,8 +8,10 @@
 , python3
 , pkg-config
 , glib
-, libhandy_0
+, libhandy
 , gtk3
+, appstream-glib
+, desktop-file-utils
 , dbus
 , openssl
 , sqlite
@@ -19,20 +21,20 @@
 
 stdenv.mkDerivation rec {
   pname = "gnome-podcasts";
-  version = "0.4.8";
+  version = "0.5.1";
 
   src = fetchFromGitLab {
     domain = "gitlab.gnome.org";
     owner = "World";
     repo = "podcasts";
     rev = version;
-    sha256 = "0y2332zjq7vf1v38wzwz98fs19vpzy9kl7y0xbdzqr303l59hjb1";
+    sha256 = "00vy1qkkpn76jdpybsq9qp8s6fh1ih10j73p2x43sl97m5g8944h";
   };
 
   cargoDeps = rustPlatform.fetchCargoTarball {
     inherit src;
     name = "${pname}-${version}";
-    hash = "sha256-GInRA/V61r42spb/JYlM8+mATSkmOxdm2zHPRWaKcck=";
+    sha256 = "0y34b5rnr75h7dxbx93mafrmwsh187wq5js7fmkb1m1yyybj1v1x";
   };
 
   nativeBuildInputs = [
@@ -49,9 +51,11 @@ stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
+    appstream-glib
+    desktop-file-utils
     glib
     gtk3
-    libhandy_0
+    libhandy
     dbus
     openssl
     sqlite
@@ -75,5 +79,6 @@ stdenv.mkDerivation rec {
     license = licenses.gpl3Plus;
     maintainers = teams.gnome.members;
     platforms = platforms.unix;
+    broken = stdenv.isDarwin; # never built on Hydra https://hydra.nixos.org/job/nixpkgs/trunk/gnome-podcasts.x86_64-darwin
   };
 }

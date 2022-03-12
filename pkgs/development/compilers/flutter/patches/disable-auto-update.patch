@@ -1,8 +1,8 @@
 diff --git a/bin/internal/shared.sh b/bin/internal/shared.sh
-index c44f867746..c9eda34e26 100644
+index 05cba4393b..2a775bf24f 100644
 --- a/bin/internal/shared.sh
 +++ b/bin/internal/shared.sh
-@@ -218,8 +218,6 @@ function shared::execute() {
+@@ -217,8 +217,6 @@ function shared::execute() {
    # FLUTTER_TOOL_ARGS="--enable-asserts $FLUTTER_TOOL_ARGS"
    # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
  
@@ -12,18 +12,25 @@ index c44f867746..c9eda34e26 100644
    case "$BIN_NAME" in
      flutter*)
 diff --git a/packages/flutter_tools/lib/src/runner/flutter_command_runner.dart b/packages/flutter_tools/lib/src/runner/flutter_command_runner.dart
-index 3dc7929dd1..e65d70d55b 100644
+index 396756808e..d324a6df59 100644
 --- a/packages/flutter_tools/lib/src/runner/flutter_command_runner.dart
 +++ b/packages/flutter_tools/lib/src/runner/flutter_command_runner.dart
-@@ -246,11 +246,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
+@@ -241,7 +241,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
            globals.flutterUsage.suppressAnalytics = true;
          }
  
 -        globals.flutterVersion.ensureVersionFile();
-         final bool machineFlag = topLevelResults['machine'] as bool;
--        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
+         final bool machineFlag = topLevelResults['machine'] as bool? ?? false;
+         final bool ci = await globals.botDetector.isRunningOnBot;
+         final bool redirectedCompletion = !globals.stdio.hasTerminal &&
+@@ -250,10 +249,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
+         final bool versionCheckFlag = topLevelResults['version-check'] as bool? ?? false;
+         final bool explicitVersionCheckPassed = topLevelResults.wasParsed('version-check') && versionCheckFlag;
+ 
+-        if (topLevelResults.command?.name != 'upgrade' &&
+-            (explicitVersionCheckPassed || (versionCheckFlag && !isMachine))) {
 -          await globals.flutterVersion.checkFlutterVersionFreshness();
 -        }
  
          // See if the user specified a specific device.
-         globals.deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
+         globals.deviceManager?.specifiedDeviceId = topLevelResults['device-id'] as String?;

@@ -2,18 +2,20 @@
 
 buildGoModule rec {
   pname = "aws-iam-authenticator";
-  version = "0.5.2";
+  version = "0.5.5";
 
   src = fetchFromGitHub {
     owner = "kubernetes-sigs";
     repo = pname;
     rev = "v${version}";
-    sha256 = "1xfc3a0dik4930va30sbl6687v6i5irv96fwis9lrqh5rjqnblqp";
+    sha256 = "sha256-5QtNAcInp1mUE8SHUUMS8/XURbPx/q8xMsvEEo/rnCs=";
   };
 
+  # Upstream has inconsistent vendoring, see https://github.com/kubernetes-sigs/aws-iam-authenticator/issues/377
+  deleteVendor = true;
   vendorSha256 = null;
 
-  buildFlagsArray = [ "-ldflags=-s -w -X main.version=v${version}" ];
+  ldflags = [ "-s" "-w" "-X main.version=v${version}" ];
 
   subPackages = [ "cmd/aws-iam-authenticator" ];
 

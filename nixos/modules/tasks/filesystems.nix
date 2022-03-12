@@ -24,13 +24,15 @@ let
 
   specialFSTypes = [ "proc" "sysfs" "tmpfs" "ramfs" "devtmpfs" "devpts" ];
 
+  nonEmptyWithoutTrailingSlash = addCheckDesc "non-empty without trailing slash" types.str
+    (s: isNonEmpty s && (builtins.match ".+/" s) == null);
+
   coreFileSystemOpts = { name, config, ... }: {
 
     options = {
       mountPoint = mkOption {
         example = "/mnt/usb";
-        type = addCheckDesc "non-empty without trailing slash" types.str
-          (s: isNonEmpty s && (builtins.match ".+/" s) == null);
+        type = nonEmptyWithoutTrailingSlash;
         description = "Location of the mounted the file system.";
       };
 
@@ -53,6 +55,20 @@ let
         example = [ "data=journal" ];
         description = "Options used to mount the file system.";
         type = types.listOf nonEmptyStr;
+      };
+
+      depends = mkOption {
+        default = [ ];
+        example = [ "/persist" ];
+        type = types.listOf nonEmptyWithoutTrailingSlash;
+        description = ''
+          List of paths that should be mounted before this one. This filesystem's
+          <option>device</option> and <option>mountPoint</option> are always
+          checked and do not need to be included explicitly. If a path is added
+          to this list, any other filesystem whose mount point is a parent of
+          the path will be mounted before this filesystem. The paths do not need
+          to actually be the <option>mountPoint</option> of some other filesystem.
+        '';
       };
 
     };
@@ -150,7 +166,7 @@ in
 
     fileSystems = mkOption {
       default = {};
-      example = literalExample ''
+      example = literalExpression ''
         {
           "/".device = "/dev/hda1";
           "/data" = {
@@ -237,17 +253,22 @@ in
 
     environment.etc.fstab.text =
       let
-        fsToSkipCheck = [ "none" "bindfs" "btrfs" "zfs" "tmpfs" "nfs" "vboxsf" "glusterfs" ];
+        fsToSkipCheck = [ "none" "bindfs" "btrfs" "zfs" "tmpfs" "nfs" "vboxsf" "glusterfs" "apfs" ];
         skipCheck = fs: fs.noCheck || fs.device == "none" || builtins.elem fs.fsType fsToSkipCheck;
         # https://wiki.archlinux.org/index.php/fstab#Filepath_spaces
         escape = string: builtins.replaceStrings [ " " "\t" ] [ "\\040" "\\011" ] string;
-        swapOptions = sw: "defaults"
-          + optionalString (sw.priority != null) ",pri=${toString sw.priority}";
+        swapOptions = sw: concatStringsSep "," (
+          sw.options
+          ++ optional (sw.priority != null) "pri=${toString sw.priority}"
+          ++ optional (sw.discardPolicy != null) "discard${optionalString (sw.discardPolicy != "both") "=${toString sw.discardPolicy}"}"
+        );
       in ''
         # This is a generated file.  Do not edit!
         #
         # To make changes, edit the fileSystems and swapDevices NixOS options
         # in your /etc/nixos/configuration.nix file.
+        #
+        # <file system> <mount point>   <type>  <options>       <dump>  <pass>
 
         # Filesystems.
         ${concatMapStrings (fs:

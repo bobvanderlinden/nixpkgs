@@ -3,8 +3,8 @@ let
   src = fetchFromGitHub {
     owner = "matrix-org";
     repo = "matrix-appservice-slack";
-    rev = "1.7.0";
-    sha256 = "sha256-0BcnG/DGvc3uh/eP0KIB5gPSpXNPlaAl78D4bVCnLHg=";
+    rev = "1.10.0";
+    sha256 = "WnonduUhhrxCMuXOgLk8voNnn+f6R5CsJ7VKpEmGwzk=";
   };
 
   nodePackages = import ./node-composition.nix {
@@ -13,6 +13,8 @@ let
   };
 in
 nodePackages.package.override {
+  pname = "matrix-appservice-slack";
+
   inherit src;
 
   nativeBuildInputs = [ pkgs.makeWrapper ];

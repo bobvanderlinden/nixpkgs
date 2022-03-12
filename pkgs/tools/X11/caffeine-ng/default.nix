@@ -4,21 +4,21 @@
 
 python3Packages.buildPythonApplication rec {
   pname = "caffeine-ng";
-  version = "3.4.2";
+  version = "3.5.1";
 
   src = python3Packages.fetchPypi{
     inherit pname version;
-    sha256="05k8smjlfjcccgmp8qi04l7106k46fs4p8fl5bdqqjwv6pwl7y4w";
+    sha256="0akzldqvxnqngpj1s6y2phgj7ch8wfm02j6z2drqvsbvaadw0jbm";
   };
 
   nativeBuildInputs = [ wrapGAppsHook glib ];
   buildInputs = [
     gdk-pixbuf gobject-introspection libnotify gtk3
-    python3Packages.setuptools_scm
+    python3Packages.setuptools-scm
   ];
   pythonPath = with python3Packages; [
     dbus-python docopt ewmh pygobject3 pyxdg
-    setproctitle
+    setproctitle pulsectl
   ];
 
   doCheck = false; # There are no tests.
@@ -43,6 +43,7 @@ python3Packages.buildPythonApplication rec {
   '';
 
   meta = with lib; {
+    mainProgram = "caffeine";
     maintainers = with maintainers; [ marzipankaiser ];
     description = "Status bar application to temporarily inhibit screensaver and sleep mode";
     homepage = "https://github.com/caffeine-ng/caffeine-ng";

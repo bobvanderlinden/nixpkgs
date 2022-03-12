@@ -29,7 +29,7 @@ stdenv.mkDerivation rec {
     desktopName = "AssaultCube";
     comment = "A multiplayer, first-person shooter game, based on the CUBE engine. Fast, arcade gameplay.";
     genericName = "First-person shooter";
-    categories = "Game;ActionGame;Shooter";
+    categories = [ "Game" "ActionGame" "Shooter" ];
     icon = "assaultcube.png";
     exec = pname;
   };
@@ -67,6 +67,6 @@ stdenv.mkDerivation rec {
     homepage = "https://assault.cubers.net";
     maintainers = [ ];
     platforms = platforms.linux; # should work on darwin with a little effort.
-    license = lib.licenses.zlib;
+    license = lib.licenses.unfree;
   };
 }

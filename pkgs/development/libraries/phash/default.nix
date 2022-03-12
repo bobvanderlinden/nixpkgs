@@ -25,13 +25,11 @@ stdenv.mkDerivation rec {
   };
 
   meta = with lib; {
-    inherit version;
     description = "Compute the perceptual hash of an image";
     license = licenses.gpl3;
     maintainers = [maintainers.imalsogreg];
     platforms = platforms.all;
     homepage = "http://www.phash.org";
     downloadPage = "https://github.com/clearscene/pHash";
-    updateWalker = true;
   };
 }

@@ -1,4 +1,5 @@
-{ lib, stdenv
+{ stdenv
+, lib
 , fetchurl
 , meson
 , ninja
@@ -14,19 +15,29 @@
 , libsoup
 , libxml2
 , libuuid
-, gnome3
+, gnome
 }:
 
 stdenv.mkDerivation rec {
   pname = "gupnp";
-  version = "1.2.4";
+  version = "1.4.3";
 
-  outputs = [ "out" "dev" "devdoc" ];
+  outputs = [ "out" "dev" ]
+    ++ lib.optionals (stdenv.buildPlatform == stdenv.hostPlatform) [ "devdoc" ];
 
   src = fetchurl {
     url = "mirror://gnome/sources/gupnp/${lib.versions.majorMinor version}/${pname}-${version}.tar.xz";
-    sha256 = "sha256-96AwfqUfXkTRuDL0k92QRURKOk4hHvhd/Zql3W6up9E=";
+    sha256 = "sha256-FO2nd5NNot90PQckiZM72YETMre1v0Fia4Ay77KLM7o=";
   };
+
+  patches = [
+    # Bring .pc file in line with our patched pkg-config.
+    ./0001-pkg-config-Declare-header-dependencies-as-public.patch
+  ];
+
+  depsBuildBuild = [
+    pkg-config
+  ];
 
   nativeBuildInputs = [
     meson
@@ -52,13 +63,14 @@ stdenv.mkDerivation rec {
   ];
 
   mesonFlags = [
-    "-Dgtk_doc=true"
+    "-Dgtk_doc=${lib.boolToString (stdenv.buildPlatform == stdenv.hostPlatform)}"
+    "-Dintrospection=${lib.boolToString (stdenv.buildPlatform == stdenv.hostPlatform)}"
   ];
 
   doCheck = true;
 
   passthru = {
-    updateScript = gnome3.updateScript {
+    updateScript = gnome.updateScript {
       packageName = pname;
     };
   };

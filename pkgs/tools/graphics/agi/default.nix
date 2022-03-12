@@ -14,11 +14,11 @@
 
 stdenv.mkDerivation rec {
   pname = "agi";
-  version = "1.1.0-dev-20210413";
+  version = "2.2.0-dev-20220120";
 
   src = fetchzip {
     url = "https://github.com/google/agi-dev-releases/releases/download/v${version}/agi-${version}-linux.zip";
-    sha256 = "13i6n95d0cjrhx68qsich6xzk5f9ga0y3m19k4z2d58s164rnh0v";
+    sha256 = "sha256-0f17CAANxomtx1fvhj+mI6k4IqwIimmcTSTXZGbbWDY=";
   };
 
   nativeBuildInputs = [
@@ -52,11 +52,9 @@ stdenv.mkDerivation rec {
   desktopItems = [(makeDesktopItem {
     name = "agi";
     desktopName = "Android GPU Inspector";
-    exec = "$out/bin/agi";
+    exec = "agi";
     icon = "agi";
-    type = "Application";
-    categories = "Development;Debugger;Graphics;3DGraphics";
-    terminal = "false";
+    categories = [ "Development" "Debugger" "Graphics" "3DGraphics" ];
   })];
 
   meta = with lib; {

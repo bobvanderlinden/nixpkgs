@@ -26,23 +26,25 @@
 
 mkDerivation rec {
   pname = "jellyfin-media-player";
-  version = "1.3.1";
+  version = "1.6.1";
 
   src = fetchFromGitHub {
-    owner = "iwalton3";
+    owner = "jellyfin";
     repo = "jellyfin-media-player";
     rev = "v${version}";
-    sha256 = "sha256-rXW6vC0Ow8xFblXjGYaDExAZM8RgqLkDHiX7R8vAWjI=";
+    sha256 = "sha256-iqwOv95JFxQ1j/9B+oBFAp7mD1/1g2EJYvvUKbrDQes=";
   };
 
   jmpDist = fetchzip {
-    url = "https://github.com/iwalton3/jellyfin-web-jmp/releases/download/jwc-10.7.2/dist.zip";
-    sha256 = "sha256-EpNAN4nzINiwMrmg0e4x3uJRTy5ovx4ZkmP83Kbn4S0=";
+    url = "https://github.com/iwalton3/jellyfin-web-jmp/releases/download/jwc-10.7.3/dist.zip";
+    sha256 = "sha256-P7WEYbVvpaVLwMgqC2e8QtMOaJclg0bX78J1fdGzcCU=";
   };
 
   patches = [
     # the webclient-files are not copied in the regular build script. Copy them just like the linux build
     ./fix-osx-resources.patch
+    # disable update notifications since the end user can't simply download the release artifacts to update
+    ./disable-update-notifications.patch
   ];
 
   buildInputs = [
@@ -92,17 +94,15 @@ mkDerivation rec {
     mv $out/Resources/* "$out/Applications/Jellyfin Media Player.app/Contents/Resources/"
     rmdir $out/Resources
 
-    # fix 'Could not find the Qt platform plugin "cocoa" in ""' error
-    wrapQtApp "$out/Applications/Jellyfin Media Player.app/Contents/MacOS/Jellyfin Media Player"
-
     ln -s "$out/Applications/Jellyfin Media Player.app/Contents/MacOS/Jellyfin Media Player" $out/bin/jellyfinmediaplayer
   '';
 
   meta = with lib; {
-    homepage = "https://github.com/iwalton3/jellyfin-media-player";
+    homepage = "https://github.com/jellyfin/jellyfin-media-player";
     description = "Jellyfin Desktop Client based on Plex Media Player";
-    license = with licenses; [ gpl2Plus mit ];
+    license = with licenses; [ gpl2Only mit ];
     platforms = [ "x86_64-linux" "x86_64-darwin" ];
-    maintainers = with maintainers; [ jojosch ];
+    maintainers = with maintainers; [ jojosch kranzes ];
+    mainProgram = "jellyfinmediaplayer";
   };
 }

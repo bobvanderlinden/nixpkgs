@@ -1,20 +1,24 @@
 { buildGoPackage
 , fetchFromGitHub
 , lib
+, nixosTests
 }:
 
-let
-  version = "v2.3.0";
+buildGoPackage rec {
   pname = "pebble";
-in buildGoPackage {
-  inherit pname version;
+  version = "2.3.0";
+
   goPackagePath = "github.com/letsencrypt/${pname}";
 
   src = fetchFromGitHub {
     owner = "letsencrypt";
     repo = pname;
-    rev = version;
+    rev = "v${version}";
     sha256 = "1piwzzfqsdx6s2niczzp4mf4r3qn9nfdgpn7882g52cmmm0vzks2";
+  };
+
+  passthru.tests = {
+    smoke-test = nixosTests.acme;
   };
 
   meta = {

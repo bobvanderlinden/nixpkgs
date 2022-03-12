@@ -10,22 +10,22 @@
 , protobuf3-to-dict
 , smdebug-rulesconfig
 , pandas
+, pathos
 , packaging
+, pythonOlder
 }:
 
 buildPythonPackage rec {
   pname = "sagemaker";
-  version = "2.35.0";
+  version = "2.75.1";
+  format = "setuptools";
+
+  disabled = pythonOlder "3.7";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "sha256-12YYUZbctM6oRaC7Sr/hOghAM+s/Cdm5XWHaVU5Gg6Q=";
+    sha256 = "sha256-MN/F7TWaKsQpKMR7Pxx0Vam1+O+PFEJ/H5jLJh3zpe4=";
   };
-
-  pythonImportsCheck = [
-    "sagemaker"
-    "sagemaker.lineage.visualizer"
-  ];
 
   propagatedBuildInputs = [
     attrs
@@ -34,17 +34,23 @@ buildPythonPackage rec {
     importlib-metadata
     numpy
     packaging
+    pathos
     protobuf
     protobuf3-to-dict
     smdebug-rulesconfig
     pandas
   ];
 
-  doCheck = false;
-
   postFixup = ''
     [ "$($out/bin/sagemaker-upgrade-v2 --help 2>&1 | grep -cim1 'pandas failed to import')" -eq "0" ]
   '';
+
+  doCheck = false;
+
+  pythonImportsCheck = [
+    "sagemaker"
+    "sagemaker.lineage.visualizer"
+  ];
 
   meta = with lib; {
     description = "Library for training and deploying machine learning models on Amazon SageMaker";

@@ -1,9 +1,16 @@
-{ newScope }:
+{ pkgs, newScope }:
 
 let
   callPackage = newScope self;
 
   self = rec {
+
+    # Update script tailored to mate packages from git repository
+    mateUpdateScript = { pname, version, odd-unstable ? true, url ? "https://pub.mate-desktop.org/releases" }:
+      pkgs.httpTwoLevelsUpdater {
+        inherit pname version odd-unstable url;
+        attrPath = "mate.${pname}";
+      };
 
     atril = callPackage ./atril { };
     caja = callPackage ./caja { };
@@ -44,7 +51,7 @@ let
     mate-user-share = callPackage ./mate-user-share { };
     mate-utils = callPackage ./mate-utils { };
     mozo = callPackage ./mozo { };
-    pluma = callPackage ./pluma { };
+    pluma = callPackage ./pluma { inherit (pkgs.gnome) adwaita-icon-theme; };
     python-caja = callPackage ./python-caja { };
 
     basePackages = [

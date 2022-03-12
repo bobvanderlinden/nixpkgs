@@ -1,13 +1,13 @@
 { fetchurl, lib, stdenv, pkg-config, intltool, gettext, glib, libxml2, zlib, bzip2
-, perl, gdk-pixbuf, libiconv, libintl, gnome3 }:
+, perl, gdk-pixbuf, libiconv, libintl, gnome }:
 
 stdenv.mkDerivation rec {
   pname = "libgsf";
-  version = "1.14.47";
+  version = "1.14.48";
 
   src = fetchurl {
     url = "mirror://gnome/sources/${pname}/${lib.versions.majorMinor version}/${pname}-${version}.tar.xz";
-    sha256 = "0kbpp9ksl7977xiga37sk1gdw1r039v6zviqznl7alvvg39yp26i";
+    sha256 = "/4bX8dRt0Ovvt72DCnSkHbZDYrmHv4hT//arTBEyuDc=";
   };
 
   nativeBuildInputs = [ pkg-config intltool libintl ];
@@ -23,8 +23,9 @@ stdenv.mkDerivation rec {
   preCheck = "patchShebangs ./tests/";
 
   passthru = {
-    updateScript = gnome3.updateScript {
+    updateScript = gnome.updateScript {
       packageName = pname;
+      versionPolicy = "odd-unstable";
     };
   };
 

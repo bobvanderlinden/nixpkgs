@@ -1,21 +1,23 @@
 { lib
 , buildPythonPackage
-, chardet
 , fetchFromGitHub
 , karton-core
 , mwdblib
-, python
+, pythonOlder
 }:
 
 buildPythonPackage rec {
   pname = "karton-mwdb-reporter";
-  version = "1.0.0";
+  version = "unstable-2022-02-22";
+  format = "setuptools";
+
+  disabled = pythonOlder "3.7";
 
   src = fetchFromGitHub {
     owner = "CERT-Polska";
     repo = pname;
-    rev = "v${version}";
-    sha256 = "0ks8jrc4v87q6zhwqg40w6xv2wfkzslmnfmsmmkfjj8mak8nk70f";
+    rev = "1afa32251b4826eac4386596b4a20f295699faec";
+    hash = "sha256-dbtIjWSNIRMccrGJspZMOBUD2EzuvW7xESlEwiOhKfQ=";
   };
 
   propagatedBuildInputs = [
@@ -23,15 +25,12 @@ buildPythonPackage rec {
     mwdblib
   ];
 
-  postPatch = ''
-    substituteInPlace requirements.txt \
-      --replace "karton-core==4.0.4" "karton-core" \
-      --replace "mwdblib==3.3.1" "mwdblib"
-  '';
-
   # Project has no tests
   doCheck = false;
-  pythonImportsCheck = [ "karton.mwdb_reporter" ];
+
+  pythonImportsCheck = [
+    "karton.mwdb_reporter"
+  ];
 
   meta = with lib; {
     description = "Karton service that uploads analyzed artifacts and metadata to MWDB Core";

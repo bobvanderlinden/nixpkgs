@@ -1,29 +1,52 @@
-{ lib, buildPythonPackage, fetchPypi, pytest, isPy3k, isPy35, async_generator }:
+{ lib
+, buildPythonPackage
+, fetchFromGitHub
+, flaky
+, hypothesis
+, pytest
+, pytestCheckHook
+, pythonOlder
+, setuptools-scm
+}:
+
 buildPythonPackage rec {
   pname = "pytest-asyncio";
-  version = "0.14.0";
+  version = "0.17.2";
+  format = "setuptools";
 
-  disabled = !isPy3k;
+  disabled = pythonOlder "3.6";
 
-  src = fetchPypi {
-    inherit pname version;
-    sha256 = "9882c0c6b24429449f5f969a5158b528f39bde47dc32e85b9f0403965017e700";
+  src = fetchFromGitHub {
+    owner = "pytest-dev";
+    repo = pname;
+    rev = "v${version}";
+    sha256 = "sha256-4wDXvO6pDK0dQLnyfJTTa+GXf9Qtsi6ywYDUIdhkgGo=";
   };
 
-  buildInputs = [ pytest ]
-    ++ lib.optionals isPy35 [ async_generator ];
+  SETUPTOOLS_SCM_PRETEND_VERSION = version;
 
-  # No tests in archive
-  doCheck = false;
+  nativeBuildInputs = [
+    setuptools-scm
+  ];
 
-  # LICENSE file is not distributed. https://github.com/pytest-dev/pytest-asyncio/issues/92
-  postPatch = ''
-    substituteInPlace setup.cfg --replace "license_file = LICENSE" ""
-  '';
+  propagatedBuildInputs = [
+    pytest
+  ];
+
+  checkInputs = [
+    flaky
+    hypothesis
+    pytestCheckHook
+  ];
+
+  pythonImportsCheck = [
+    "pytest_asyncio"
+  ];
 
   meta = with lib; {
     description = "library for testing asyncio code with pytest";
-    license = licenses.asl20;
     homepage = "https://github.com/pytest-dev/pytest-asyncio";
+    license = licenses.asl20;
+    maintainers = with maintainers; [ ];
   };
 }

@@ -1,9 +1,7 @@
-{ stdenv
-, lib
+{ lib
 , buildPythonPackage
 , capstone
-, fetchpatch
-, fetchPypi
+, stdenv
 , setuptools
 }:
 
@@ -12,7 +10,7 @@ buildPythonPackage rec {
   version = lib.getVersion capstone;
 
   src = capstone.src;
-  sourceRoot = "${capstone.name}/bindings/python";
+  sourceRoot = "source/bindings/python";
 
   postPatch = ''
     ln -s ${capstone}/lib/libcapstone${stdenv.targetPlatform.extensions.sharedLibrary} prebuilt/

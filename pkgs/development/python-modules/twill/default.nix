@@ -1,15 +1,15 @@
-{ lib, buildPythonPackage, fetchPypi, isPy3k, nose
+{ lib, buildPythonPackage, fetchPypi, nose
 , lxml
 , requests
 , pyparsing
 }:
 buildPythonPackage rec {
   pname = "twill";
-  version = "2.0.2";
+  version = "3.0.1";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "fc694ac1cb0616cfba2f9db4720e9d354bf656c318e21ef604a7e3caaef83d10";
+    sha256 = "57cde4c3a2265f1a14d80007aa4f66c2135d509555499e9b156d2b4cf5048c2c";
   };
 
   checkInputs = [ nose ];

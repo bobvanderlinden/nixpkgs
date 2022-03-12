@@ -1,5 +1,6 @@
 { lib
 , python3
+, installShellFiles
 }:
 
 with python3.pkgs;
@@ -18,14 +19,16 @@ let
 
 in buildPythonApplication rec {
   pname = "pipenv";
-  version = "2020.11.15";
+  version = "2022.1.8";
 
   src = fetchPypi {
     inherit pname version;
-    sha256 = "8253fe6f9cfb3791a54da8a0571f73c918cb3457dd908684c1800a13a06ec4c1";
+    sha256 = "f84d7119239b22ab2ac2b8fbc7d619d83cf41135206d72a17c4f151cda529fd0";
   };
 
   LC_ALL = "en_US.UTF-8";
+
+  nativeBuildInputs = [ installShellFiles ];
 
   postPatch = ''
     # pipenv invokes python in a subprocess to create a virtualenv
@@ -37,6 +40,13 @@ in buildPythonApplication rec {
   '';
 
   propagatedBuildInputs = runtimeDeps python3.pkgs;
+
+  postInstall = ''
+    installShellCompletion --cmd pipenv \
+      --bash <(_PIPENV_COMPLETE=bash_source $out/bin/pipenv) \
+      --zsh <(_PIPENV_COMPLETE=zsh_source $out/bin/pipenv) \
+      --fish <(_PIPENV_COMPLETE=fish_source $out/bin/pipenv)
+  '';
 
   doCheck = true;
   checkPhase = ''
