@@ -35,7 +35,6 @@ let
   systemdUnits = pkgs.callPackage ./systemd-units.nix {
     inherit systemd;
     inherit (config.boot.initrd) extraUnits unitOverrides;
-    systemdPackages = config.boot.initrd.systemd.packages;
   };
 
   fstab = pkgs.writeText "fstab" (lib.concatMapStringsSep "\n"
