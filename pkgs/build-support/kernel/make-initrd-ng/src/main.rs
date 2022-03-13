@@ -1,10 +1,11 @@
 use std::collections::{HashSet, VecDeque};
 use std::ffi::OsStr;
 use std::fs;
+use std::str;
 use std::hash::Hash;
 use std::io::{BufReader, BufRead, Error, ErrorKind};
 use std::path::{Path, PathBuf, Component};
-use std::process::{Command, Stdio};
+use std::process::{Command};
 use std::io::{Read};
 use std::io;
 
@@ -91,12 +92,12 @@ fn patch_elf<S: AsRef<OsStr>, P: AsRef<OsStr>>(mode: S, path: P) -> Result<Strin
     let output = Command::new("patchelf")
         .arg(&mode)
         .arg(&path)
-        .stderr(Stdio::inherit())
         .output()?;
     if output.status.success() {
         Ok(String::from_utf8(output.stdout).expect("Failed to parse output"))
     } else {
-        Err(Error::new(ErrorKind::Other, format!("failed: patchelf {:?} {:?}", OsStr::new(&mode), OsStr::new(&path))))
+        let error = str::from_utf8(&output.stderr).unwrap_or("").trim();
+        Err(Error::new(ErrorKind::Other, format!("failed: patchelf {:?} {:?}: {}", OsStr::new(&mode), OsStr::new(&path), error)))
     }
 }
 
