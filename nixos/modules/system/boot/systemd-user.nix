@@ -27,29 +27,31 @@ with lib; let
     pathToUnit
     ;
 
-  upstreamUserUnits = [
-    "app.slice"
-    "background.slice"
-    "basic.target"
-    "bluetooth.target"
-    "default.target"
-    "exit.target"
-    "graphical-session-pre.target"
-    "graphical-session.target"
-    "paths.target"
-    "printer.target"
-    "session.slice"
-    "shutdown.target"
-    "smartcard.target"
-    "sockets.target"
-    "sound.target"
-    "systemd-exit.service"
-    "systemd-tmpfiles-clean.service"
-    "systemd-tmpfiles-clean.timer"
-    "systemd-tmpfiles-setup.service"
-    "timers.target"
-    "xdg-desktop-autostart.target"
-  ];
+  upstreamUserUnits =
+    [
+      "app.slice"
+      "background.slice"
+      "basic.target"
+      "bluetooth.target"
+      "default.target"
+      "exit.target"
+      "graphical-session-pre.target"
+      "graphical-session.target"
+      "paths.target"
+      "printer.target"
+      "session.slice"
+      "shutdown.target"
+      "smartcard.target"
+      "sockets.target"
+      "sound.target"
+      "systemd-exit.service"
+      "systemd-tmpfiles-clean.service"
+      "systemd-tmpfiles-clean.timer"
+      "systemd-tmpfiles-setup.service"
+      "timers.target"
+      "xdg-desktop-autostart.target"
+    ]
+    ++ cfg.additionalUpstreamUserUnits;
 in {
   options = {
     systemd.user.units = mkOption {
@@ -115,6 +117,15 @@ in {
         available options.
       '';
     };
+
+    systemd.additionalUpstreamUserUnits = mkOption {
+      default = [];
+      type = types.listOf types.str;
+      example = [];
+      description = ''
+        Additional user units shipped with systemd that shall be enabled.
+      '';
+    };
   };
 
   ###### implementation
@@ -125,7 +136,7 @@ in {
     ];
 
     environment.etc = {
-      "systemd/user".source = generateUnits "user" cfg.user.units upstreamUserUnits [];
+      "systemd/user".source = generateUnits "user" config.systemd.user.units upstreamUserUnits [];
 
       "systemd/user.conf".text = ''
         [Manager]
