@@ -1,7 +1,5 @@
 { config, lib, pkgs, utils, ... }:
 
-with utils;
-with systemdUtils.unitOptions;
 with lib;
 
 let
@@ -9,24 +7,6 @@ let
   cfg = config.systemd;
 
   systemd = cfg.package;
-
-  inherit (systemdUtils.lib)
-    makeUnit
-    generateUnits
-    makeJobScript
-    unitConfig
-    serviceConfig
-    mountConfig
-    automountConfig
-    commonUnitText
-    targetToUnit
-    serviceToUnit
-    socketToUnit
-    timerToUnit
-    pathToUnit
-    mountToUnit
-    automountToUnit
-    sliceToUnit;
 
   upstreamSystemUnits =
     [ # Targets.
@@ -182,79 +162,11 @@ in
       description = "The systemd package.";
     };
 
-    systemd.units = mkOption {
-      description = "Definition of systemd units.";
-      default = {};
-      type = with types; attrsOf (submodule (
-        { name, config, ... }:
-        { options = concreteUnitOptions;
-          config = {
-            unit = mkDefault (makeUnit name config);
-          };
-        }));
-    };
-
     systemd.packages = mkOption {
       default = [];
       type = types.listOf types.package;
       example = literalExpression "[ pkgs.systemd-cryptsetup-generator ]";
       description = "Packages providing systemd units and hooks.";
-    };
-
-    systemd.targets = mkOption {
-      default = {};
-      type = with types; attrsOf (submodule [ { options = targetOptions; } unitConfig] );
-      description = "Definition of systemd target units.";
-    };
-
-    systemd.services = mkOption {
-      default = {};
-      type = with types; attrsOf (submodule [ { options = serviceOptions; } unitConfig serviceConfig ]);
-      description = "Definition of systemd service units.";
-    };
-
-    systemd.sockets = mkOption {
-      default = {};
-      type = with types; attrsOf (submodule [ { options = socketOptions; } unitConfig ]);
-      description = "Definition of systemd socket units.";
-    };
-
-    systemd.timers = mkOption {
-      default = {};
-      type = with types; attrsOf (submodule [ { options = timerOptions; } unitConfig ]);
-      description = "Definition of systemd timer units.";
-    };
-
-    systemd.paths = mkOption {
-      default = {};
-      type = with types; attrsOf (submodule [ { options = pathOptions; } unitConfig ]);
-      description = "Definition of systemd path units.";
-    };
-
-    systemd.mounts = mkOption {
-      default = [];
-      type = with types; listOf (submodule [ { options = mountOptions; } unitConfig mountConfig ]);
-      description = ''
-        Definition of systemd mount units.
-        This is a list instead of an attrSet, because systemd mandates the names to be derived from
-        the 'where' attribute.
-      '';
-    };
-
-    systemd.automounts = mkOption {
-      default = [];
-      type = with types; listOf (submodule [ { options = automountOptions; } unitConfig automountConfig ]);
-      description = ''
-        Definition of systemd automount units.
-        This is a list instead of an attrSet, because systemd mandates the names to be derived from
-        the 'where' attribute.
-      '';
-    };
-
-    systemd.slices = mkOption {
-      default = {};
-      type = with types; attrsOf (submodule [ { options = sliceOptions; } unitConfig] );
-      description = "Definition of slice configurations.";
     };
 
     systemd.generators = mkOption {
@@ -467,11 +379,8 @@ in
         done
         ${concatStrings (mapAttrsToList (exec: target: "ln -s ${target} $out/${exec};\n") links)}
       '';
-
-      enabledUpstreamSystemUnits = filter (n: ! elem n cfg.suppressedSystemUnits) upstreamSystemUnits;
-      enabledUnits = filterAttrs (n: v: ! elem n cfg.suppressedSystemUnits) cfg.units;
     in ({
-      "systemd/system".source = generateUnits "system" enabledUnits enabledUpstreamSystemUnits upstreamSystemWants;
+      "systemd/system".source = cfg.unitsSource;
 
       "systemd/system.conf".text = ''
         [Manager]
@@ -527,20 +436,6 @@ in
       { description = "Security Keys";
         unitConfig.X-StopOnReconfiguration = true;
       };
-
-    systemd.units =
-         mapAttrs' (n: v: nameValuePair "${n}.path"    (pathToUnit    n v)) cfg.paths
-      // mapAttrs' (n: v: nameValuePair "${n}.service" (serviceToUnit n v)) cfg.services
-      // mapAttrs' (n: v: nameValuePair "${n}.slice"   (sliceToUnit   n v)) cfg.slices
-      // mapAttrs' (n: v: nameValuePair "${n}.socket"  (socketToUnit  n v)) cfg.sockets
-      // mapAttrs' (n: v: nameValuePair "${n}.target"  (targetToUnit  n v)) cfg.targets
-      // mapAttrs' (n: v: nameValuePair "${n}.timer"   (timerToUnit   n v)) cfg.timers
-      // listToAttrs (map
-                   (v: let n = escapeSystemdPath v.where;
-                       in nameValuePair "${n}.mount" (mountToUnit n v)) cfg.mounts)
-      // listToAttrs (map
-                   (v: let n = escapeSystemdPath v.where;
-                       in nameValuePair "${n}.automount" (automountToUnit n v)) cfg.automounts);
 
     system.requiredKernelConfig = map config.lib.kernelConfig.isEnabled
       [ "DEVTMPFS" "CGROUPS" "INOTIFY_USER" "SIGNALFD" "TIMERFD" "EPOLL" "NET"
@@ -611,7 +506,24 @@ in
 
   # FIXME: Remove these eventually.
   imports =
-    [ (mkRenamedOptionModule [ "boot" "systemd" "sockets" ] [ "systemd" "sockets" ])
+    (with (import ./../../../lib/systemd-submodules.nix { inherit config lib pkgs utils; }).mkModules {
+        title = "systemd";
+        type = "system";
+        upstreamUnits = upstreamSystemUnits;
+        upstreamWants = upstreamSystemWants;
+        mount = [ "systemd" ];
+      }; [
+        units
+        targets
+        services
+        sockets
+        timers
+        mounts
+        automounts
+        paths
+        slices
+    ]) ++ [
+      (mkRenamedOptionModule [ "boot" "systemd" "sockets" ] [ "systemd" "sockets" ])
       (mkRenamedOptionModule [ "boot" "systemd" "targets" ] [ "systemd" "targets" ])
       (mkRenamedOptionModule [ "boot" "systemd" "services" ] [ "systemd" "services" ])
       (mkRenamedOptionModule [ "jobs" ] [ "systemd" "services" ])
