@@ -63,10 +63,6 @@ let
       "printer.target"
       "smartcard.target"
 
-      # Coredumps.
-      "systemd-coredump.socket"
-      "systemd-coredump@.service"
-
       # Kernel module loading.
       "systemd-modules-load.service"
       "kmod-static-nodes.service"
@@ -538,26 +534,6 @@ in
       '';
     };
 
-    systemd.coredump.enable = mkOption {
-      default = true;
-      type = types.bool;
-      description = ''
-        Whether core dumps should be processed by
-        <command>systemd-coredump</command>. If disabled, core dumps
-        appear in the current directory of the crashing process.
-      '';
-    };
-
-    systemd.coredump.extraConfig = mkOption {
-      default = "";
-      type = types.lines;
-      example = "Storage=journal";
-      description = ''
-        Extra config options for systemd-coredump. See coredump.conf(5) man page
-        for available options.
-      '';
-    };
-
     systemd.extraConfig = mkOption {
       default = "";
       type = types.lines;
@@ -834,20 +810,10 @@ in
         ${config.systemd.user.extraConfig}
       '';
 
-      "systemd/coredump.conf".text =
-        ''
-          [Coredump]
-          ${config.systemd.coredump.extraConfig}
-        '';
-
       "systemd/sleep.conf".text = ''
         [Sleep]
         ${config.systemd.sleep.extraConfig}
       '';
-
-      # install provided sysctl snippets
-      "sysctl.d/50-coredump.conf".source = "${systemd}/example/sysctl.d/50-coredump.conf";
-      "sysctl.d/50-default.conf".source = "${systemd}/example/sysctl.d/50-default.conf";
 
       "tmpfiles.d".source = (pkgs.symlinkJoin {
         name = "tmpfiles.d";
@@ -870,11 +836,6 @@ in
 
     services.dbus.enable = true;
 
-    users.users.systemd-coredump = {
-      uid = config.ids.uids.systemd-coredump;
-      group = "systemd-coredump";
-    };
-    users.groups.systemd-coredump = {};
     users.users.systemd-network = {
       uid = config.ids.uids.systemd-network;
       group = "systemd-network";
@@ -996,8 +957,6 @@ in
     # Don't bother with certain units in containers.
     systemd.services.systemd-remount-fs.unitConfig.ConditionVirtualization = "!container";
     systemd.services.systemd-random-seed.unitConfig.ConditionVirtualization = "!container";
-
-    boot.kernel.sysctl."kernel.core_pattern" = mkIf (!cfg.coredump.enable) "core";
 
     # Increase numeric PID range (set directly instead of copying a one-line file from systemd)
     # https://github.com/systemd/systemd/pull/12226
