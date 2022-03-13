@@ -145,49 +145,31 @@ in
         };
 
         mounts = {config, ...}: {
-          options = {
-            mounts = mkOption {
-              default = [];
-              type = with types; listOf (submodule [{options = mountOptions;} unitConfig mountConfig]);
-              description = ''
-                Definition of ${title} mount units.
-                This is a list instead of an attrSet, because systemd mandates the names to be derived from
-                the 'where' attribute.
-              '';
-            };
+          options.mounts = mkOption {
+            default = [];
+            type = with types; listOf (submodule [{options = mountOptions;} unitConfig mountConfig]);
+            description = ''
+              Definition of ${title} mount units.
+              This is a list instead of an attrSet, because systemd mandates the names to be derived from
+              the 'where' attribute.
+            '';
           };
 
-          config = {
-            units = listToAttrs (map
-            (v: let
-              n = escapeSystemdPath v.where;
-            in
-              nameValuePair "${n}.mount" (mountToUnit n v))
-            config.mounts);
-          };
+          config.units = listToAttrs (map (v: let n = escapeSystemdPath v.where; in nameValuePair "${n}.mount" (mountToUnit n v)) config.mounts);
         };
 
         automounts = {config, ...}: {
-          options = {
-            automounts = mkOption {
-              default = [];
-              type = with types; listOf (submodule [{options = automountOptions;} unitConfig automountConfig]);
-              description = ''
-                Definition of ${title} automount units.
-                This is a list instead of an attrSet, because systemd mandates the names to be derived from
-                the 'where' attribute.
-              '';
-            };
+          options.automounts = mkOption {
+            default = [];
+            type = with types; listOf (submodule [{options = automountOptions;} unitConfig automountConfig]);
+            description = ''
+              Definition of ${title} automount units.
+              This is a list instead of an attrSet, because systemd mandates the names to be derived from
+              the 'where' attribute.
+            '';
           };
 
-          config = {
-            units = listToAttrs (map
-            (v: let
-              n = escapeSystemdPath v.where;
-            in
-              nameValuePair "${n}.automount" (automountToUnit n v))
-            config.automounts);
-          };
+          config.units = listToAttrs (map (v: let n = escapeSystemdPath v.where; in nameValuePair "${n}.automount" (automountToUnit n v)) config.automounts);
         };
       };
   }
