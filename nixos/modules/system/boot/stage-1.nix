@@ -340,6 +340,7 @@ in
 
     boot.initrd.extraUnits = mkOption {
       type = types.attrsOf types.path;
+      default = {};
       description =
         ''
           Systemd units that will be added to initrd.
