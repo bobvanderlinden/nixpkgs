@@ -8,7 +8,7 @@ let
   # compression type and filename extension.
   compressorName = fullCommand: builtins.elemAt (builtins.match "([^ ]*/)?([^ ]+).*" fullCommand) 1;
 in
-{ stdenvNoCC, perl, cpio, ubootTools, lib, pkgsBuildHost, makeInitrdNGTool, patchelf, runCommand, glibc, strip-nondeterminism
+{ stdenvNoCC, linkFarm, proot, cpio, lib, pkgsBuildHost, makeInitrdNGTool, patchelf, runCommand, glibc, strip-nondeterminism
 # Name of the derivation (not of the resulting file!)
 , name ? "initrd"
 
@@ -67,13 +67,22 @@ in
   };
 
   passAsFile = ["contents"];
-  contents = lib.concatMapStringsSep "\n" ({ object, symlink, ... }: "${object}\n${if symlink == null then "" else symlink}") contents + "\n";
+
+  contents = lib.concatMapStringsSep "\n" ({ object, ... }: object) contents;
+
+  root =
+    let
+      stripRoot = path: lib.removePrefix "/" path;
+      symlinks = builtins.filter ({ symlink, ... }: symlink != null) contents;
+      linkFarmEntries = map ({ object, symlink, executable ? false }: { name = stripRoot symlink; path = object; }) symlinks;
+    in linkFarm "root" linkFarmEntries;
 
   nativeBuildInputs = [makeInitrdNGTool patchelf glibc cpio strip-nondeterminism];
 } ''
-  mkdir ./root
-  make-initrd-ng "$contentsPath" ./root
   mkdir "$out"
-  (cd root && find * .[^.*] -exec touch -h -d '@1' '{}' +)
-  (cd root && find * .[^.*] -print0 | sort -z | cpio -o -H newc -R +0:+0 --reproducible --null | eval -- $compress >> "$out/initrd")
+
+  set -o pipefail
+  cd $root && (make-initrd-ng < "$contentsPath" && find * .[^.*]) \
+    | ${proot}/bin/proot -b /nix:$root/nix cpio --create --format newc --owner=+0:+0 --reproducible \
+    | eval -- $compress > "$out/initrd"
 ''
