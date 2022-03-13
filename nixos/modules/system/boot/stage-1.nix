@@ -338,20 +338,55 @@ in
         '';
     };
 
-    boot.initrd.extraUnits = mkOption { type = types.attrsOf types.path; };
+    boot.initrd.extraUnits = mkOption {
+      type = types.attrsOf types.path;
+      description =
+        ''
+          Systemd units that will be added to initrd.
+        '';
+    };
 
-    boot.initrd.unitOverrides = mkOption { type = types.attrsOf (types.attrsOf types.path); };
+    boot.initrd.unitOverrides = mkOption {
+      description = ''
+        TODO
+      '';
+      type = types.attrsOf (types.attrsOf types.path);
+    };
 
-    boot.initrd.emergencyPackages = mkOption { type = types.listOf types.package; };
+    boot.initrd.emergencyPackages = mkOption {
+      type = types.listOf types.package;
+      description =
+        ''
+          Packages that are accessible during emergency mode during boot.
+        '';
+    };
 
     boot.initrd.objects = with types; mkOption {
+      description = ''
+        File objects that will be included into initrd.
+      '';
       type = listOf (submodule {
-        options.object = mkOption { type = path; };
+        options.object = mkOption {
+          description = ''
+            Path of object to include in initrd.
+          '';
+          type = path;
+          example = literalExpression ''
+            "''${bash}/bin/bash"
+          '';
+        };
         options.symlink = mkOption {
+          description = ''
+            Symlink that will be created on initrd that links to the objects path.
+          '';
           type = nullOr path;
           default = null;
+          example = "/etc/modules-load.d/nixos.conf";
         };
         options.executable = mkOption {
+          description = ''
+            Whether the object should be flagged as executable.
+          '';
           type = bool;
           default = false;
         };
@@ -359,6 +394,11 @@ in
     };
 
     boot.initrd.emergencyHashedPassword = mkOption {
+      description =
+        ''
+          The password needed to access emergency mode during boot.
+          "!" or "*" disables access to emergency mode.
+        '';
       type = types.nullOr types.str;
       default = "!";
     };
