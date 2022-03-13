@@ -8,9 +8,9 @@
 with utils;
 with systemdUtils.unitOptions;
 with lib; let
-  cfg = config.systemd;
+  cfg = config.systemd.user;
 
-  systemd = cfg.package;
+  systemd = config.systemd.package;
 
   inherit
     (systemdUtils.lib)
@@ -48,7 +48,7 @@ with lib; let
       "timers.target"
       "xdg-desktop-autostart.target"
     ]
-    ++ cfg.additionalUpstreamUserUnits;
+    ++ config.systemd.additionalUpstreamUserUnits;
 in {
   options = {
     systemd.user.units = mkOption {
@@ -133,21 +133,21 @@ in {
     ];
 
     environment.etc = {
-      "systemd/user".source = generateUnits "user" config.systemd.user.units upstreamUserUnits [];
+      "systemd/user".source = generateUnits "user" cfg.units upstreamUserUnits [];
 
       "systemd/user.conf".text = ''
         [Manager]
-        ${config.systemd.user.extraConfig}
+        ${cfg.extraConfig}
       '';
     };
 
     systemd.user.units =
-      mapAttrs' (n: v: nameValuePair "${n}.path" (pathToUnit n v)) cfg.user.paths
-      // mapAttrs' (n: v: nameValuePair "${n}.service" (serviceToUnit n v)) cfg.user.services
-      // mapAttrs' (n: v: nameValuePair "${n}.slice" (sliceToUnit n v)) cfg.user.slices
-      // mapAttrs' (n: v: nameValuePair "${n}.socket" (socketToUnit n v)) cfg.user.sockets
-      // mapAttrs' (n: v: nameValuePair "${n}.target" (targetToUnit n v)) cfg.user.targets
-      // mapAttrs' (n: v: nameValuePair "${n}.timer" (timerToUnit n v)) cfg.user.timers;
+      mapAttrs' (n: v: nameValuePair "${n}.path" (pathToUnit n v)) cfg.paths
+      // mapAttrs' (n: v: nameValuePair "${n}.service" (serviceToUnit n v)) cfg.services
+      // mapAttrs' (n: v: nameValuePair "${n}.slice" (sliceToUnit n v)) cfg.slices
+      // mapAttrs' (n: v: nameValuePair "${n}.socket" (socketToUnit n v)) cfg.sockets
+      // mapAttrs' (n: v: nameValuePair "${n}.target" (targetToUnit n v)) cfg.targets
+      // mapAttrs' (n: v: nameValuePair "${n}.timer" (timerToUnit n v)) cfg.timers;
 
     # Generate timer units for all services that have a ‘startAt’ value.
     systemd.user.timers =
@@ -155,7 +155,7 @@ in {
         wantedBy = ["timers.target"];
         timerConfig.OnCalendar = service.startAt;
       })
-      (filterAttrs (name: service: service.startAt != []) cfg.user.services);
+      (filterAttrs (name: service: service.startAt != []) cfg.services);
 
     # Provide the systemd-user PAM service, required to run systemd
     # user instances.

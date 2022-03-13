@@ -5,7 +5,10 @@
   utils,
   ...
 }:
-with lib; {
+with lib; let
+  cfg = config.systemd.coredump;
+  systemd = config.systemd.package;
+in {
   ###### interface
 
   options = {
@@ -42,12 +45,12 @@ with lib; {
     environment.etc = {
       "systemd/coredump.conf".text = ''
         [Coredump]
-        ${config.systemd.coredump.extraConfig}
+        ${cfg.extraConfig}
       '';
 
       # install provided sysctl snippets
-      "sysctl.d/50-coredump.conf".source = "${config.systemd.package}/example/sysctl.d/50-coredump.conf";
-      "sysctl.d/50-default.conf".source = "${config.systemd.package}/example/sysctl.d/50-default.conf";
+      "sysctl.d/50-coredump.conf".source = "${systemd}/example/sysctl.d/50-coredump.conf";
+      "sysctl.d/50-default.conf".source = "${systemd}/example/sysctl.d/50-default.conf";
     };
 
     users.users.systemd-coredump = {
@@ -56,6 +59,6 @@ with lib; {
     };
     users.groups.systemd-coredump = {};
 
-    boot.kernel.sysctl."kernel.core_pattern" = mkIf (!config.systemd.coredump.enable) "core";
+    boot.kernel.sysctl."kernel.core_pattern" = mkIf (!cfg.enable) "core";
   };
 }
