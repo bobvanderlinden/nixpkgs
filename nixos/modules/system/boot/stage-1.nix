@@ -57,7 +57,7 @@ let
     "kvm"
   ];
 
-  initrdUdevRules = pkgs.runCommandNoCC "udev-rules" { udevPackages = [ systemd pkgs.lvm2 ]; } ''
+  initrdUdevRules = pkgs.runCommand "udev-rules" { udevPackages = [ systemd pkgs.lvm2 ]; } ''
     mkdir -p $out/lib/udev
     for p in $udevPackages; do
       cp -r --preserve=all --no-preserve=mode $p/lib/udev $out/lib
