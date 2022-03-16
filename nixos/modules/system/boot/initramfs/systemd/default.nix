@@ -61,6 +61,7 @@ with lib; let
     "cdrom"
     "tape"
     "kvm"
+    "sgx"
   ];
 
   initrdUdevRules = pkgs.runCommand "udev-rules" { udevPackages = [ systemd pkgs.lvm2 ]; } ''
@@ -146,6 +147,10 @@ in
         {
           object = builtins.toFile "shadow" "root:${config.boot.initramfs.systemd.emergency.hashedPassword}:::::::";
           symlink = "/etc/shadow";
+        }
+        {
+          object = builtins.toFile "group" (lib.concatStringsSep "\n" (lib.imap0 (id: group: "${group}:x:${toString id}:") groups));
+          symlink = "/etc/group";
         }
         # TODO: These are required for emergency mode; figure out which
         # parts specifically are needed
