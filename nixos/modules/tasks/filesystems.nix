@@ -334,13 +334,13 @@ in
     # IgnoreOnIsolate, the Requires dependency between sysroot.mount
     # and systemd-makefs@dev-vda.service causes the file system to be
     # unmounted when the service is stopped by the isolate command.
-    boot.initrd.unitOverrides."systemd-makefs@.service".mke2fs = pkgs.writeText "mke2fs.conf" ''
+    boot.initramfs.systemd.unitOverrides."systemd-makefs@.service".mke2fs = pkgs.writeText "mke2fs.conf" ''
       [Unit]
       IgnoreOnIsolate=yes
       [Service]
       Environment=PATH=${lib.concatMapStringsSep ":" (p: "${lib.getBin p}/bin") config.system.fsPackages}
     '';
-    boot.initrd.objects = map (p: { object = "${lib.getBin p}/bin"; executable = true; }) config.system.fsPackages;
+    boot.initramfs.objects = map (p: { object = "${lib.getBin p}/bin"; executable = true; }) config.system.fsPackages;
   };
 
 }

@@ -968,7 +968,7 @@ in
           };
       } // lib.mapAttrs' mkSharedDir cfg.sharedDirectories);
 
-    boot.initrd.extraUnits."rw-store.service" = lib.mkIf cfg.writableStore (pkgs.writeText "rw-store.service" ''
+    boot.initramfs.systemd.extraUnits."rw-store.service" = lib.mkIf cfg.writableStore (pkgs.writeText "rw-store.service" ''
       [Unit]
       Before=sysroot-nix-store.mount
       RequiresMountsFor=/sysroot/nix/.rw-store /sysroot/nix/.ro-store

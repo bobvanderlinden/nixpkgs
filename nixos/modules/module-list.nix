@@ -1161,6 +1161,8 @@
   ./system/boot/resolved.nix
   ./system/boot/shutdown.nix
   ./system/boot/stage-1.nix
+  ./system/boot/initramfs
+  ./system/boot/initramfs/systemd
   ./system/boot/stage-2.nix
   ./system/boot/systemd.nix
   ./system/boot/systemd-nspawn.nix

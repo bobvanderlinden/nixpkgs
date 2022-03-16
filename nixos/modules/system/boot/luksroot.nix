@@ -938,8 +938,8 @@ in
 
     environment.systemPackages = [ pkgs.cryptsetup ];
 
-    boot.initrd.emergencyPackages = [ pkgs.cryptsetup ];
-    boot.initrd.objects = [
+    boot.initramfs.systemd.emergency.packages = [ pkgs.cryptsetup ];
+    boot.initramfs.objects = [
       {
         object = pkgs.writeText "crypttab"
           (lib.concatMapStringsSep "\n" ({ device, name, ... }: "${name} ${device}")
