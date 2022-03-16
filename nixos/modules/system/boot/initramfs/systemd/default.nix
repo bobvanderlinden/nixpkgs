@@ -119,6 +119,10 @@ in
 
     boot.initrd.supportedFilesystems = map (fs: fs.fsType) fileSystems;
 
+    # TODO: Find out why udev doesn't automatically modprobe ext4 upon
+    #       detecting fs-ext4 in mod aliases.
+    boot.initrd.kernelModules = [ "ext4" ];
+
     boot.initramfs.systemd.emergency.packages = [
       pkgs.bash
       pkgs.coreutils
