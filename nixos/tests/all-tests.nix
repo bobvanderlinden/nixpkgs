@@ -54,6 +54,7 @@ in
   blockbook-frontend = handleTest ./blockbook-frontend.nix {};
   blocky = handleTest ./blocky.nix {};
   boot = handleTestOn ["x86_64-linux" "aarch64-linux"] ./boot.nix {};
+  boot-initrd-systemd = handleTest ./boot-initrd-systemd.nix {};
   boot-stage1 = handleTest ./boot-stage1.nix {};
   borgbackup = handleTest ./borgbackup.nix {};
   botamusique = handleTest ./botamusique.nix {};

@@ -140,7 +140,10 @@ let
         else if config.fsType == "reiserfs" then "-q"
         else null;
     in {
-      options = mkIf config.autoResize [ "x-nixos.autoresize" ];
+      options = mkMerge [
+        (mkIf config.autoResize [ "x-systemd.growfs" ])
+        (mkIf config.autoFormat [ "x-systemd.makefs" ])
+      ];
       formatOptions = mkIf (defaultFormatOptions != null) (mkDefault defaultFormatOptions);
     };
 

@@ -276,12 +276,36 @@ in {
       type = systemdUtils.types.slices;
       description = "Definition of slice configurations.";
     };
+
+    extraConfig = mkOption {
+      default = "";
+      type = types.lines;
+      example = "DefaultLimitCORE=infinity";
+      description = ''
+        Extra config options for systemd. See man systemd-system.conf for
+        available options.
+      '';
+    };
+
+    systemPackages = mkOption {
+      type = types.listOf types.package;
+      default = [];
+      example = literalExpression "[ pkgs.firefox pkgs.thunderbird ]";
+      description = ''
+      '';
+    };
   };
 
   config = mkIf (config.boot.initrd.enable && cfg.enable) {
     system.build = { inherit initialRamdisk stage1Units; };
     boot.initrd.systemd = {
       emergencyPackages = [pkgs.bash pkgs.coreutils pkgs.kmod cfg.package];
+
+      systemPackages = config.system.fsPackages;
+
+      extraConfig = ''
+        DefaultEnvironment="PATH=${lib.makeBinPath cfg.systemPackages}"
+      '';
 
       objects = [
         { object = "${cfg.package}/lib/systemd/systemd"; symlink = "/init"; }
@@ -320,7 +344,17 @@ in {
         { object = "${emergencyEnv}/bin"; symlink = "/bin"; }
         { object = "${emergencyEnv}/sbin"; symlink = "/sbin"; }
         { object = builtins.toFile "bashrc" "PATH=/bin:/sbin"; symlink = "/etc/bashrc"; }
-        { object = builtins.toFile "sysctl.conf" "kernel.modprobe = /sbin/modprobe"; symlink = "/etc/sysctl.d/nixos.conf"; }
+        { object = builtins.toFile "sysctl.conf" ''
+            kernel.modprobe = /sbin/modprobe
+          '';
+          symlink = "/etc/sysctl.d/nixos.conf";
+        }
+        { object = pkgs.writeText "system.conf" ''
+            [Manager]
+            ${cfg.extraConfig}
+          '';
+          symlink = "/etc/systemd/system.conf";
+        }
       ];
 
       targets.initrd.aliases = ["default.target"];
