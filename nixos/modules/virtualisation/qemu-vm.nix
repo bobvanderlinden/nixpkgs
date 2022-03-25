@@ -955,27 +955,45 @@ in
           };
       } // lib.mapAttrs' mkSharedDir cfg.sharedDirectories);
 
-    boot.initrd.systemd = lib.mkIf (config.boot.initrd.systemd.enable && cfg.writableStore) {
-      mounts = [{
-        where = "/sysroot/nix/store";
-        what = "overlay";
-        type = "overlay";
-        options = "lowerdir=/sysroot/nix/.ro-store,upperdir=/sysroot/nix/.rw-store/store,workdir=/sysroot/nix/.rw-store/work";
-        wantedBy = ["local-fs.target"];
-        before = ["local-fs.target"];
-        requires = ["sysroot-nix-.ro\\x2dstore.mount" "sysroot-nix-.rw\\x2dstore.mount" "rw-store.service"];
-        after = ["sysroot-nix-.ro\\x2dstore.mount" "sysroot-nix-.rw\\x2dstore.mount" "rw-store.service"];
-        unitConfig.IgnoreOnIsolate = true;
-      }];
-      services.rw-store = {
-        after = ["sysroot-nix-.rw\\x2dstore.mount"];
-        unitConfig.DefaultDependencies = false;
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "/bin/mkdir -p 0755 /sysroot/nix/.rw-store/store /sysroot/nix/.rw-store/work /sysroot/nix/store";
+    boot.initrd.systemd = lib.mkMerge [
+      (lib.mkIf (config.boot.initrd.systemd.enable && cfg.writableStore) {
+        mounts = [{
+          where = "/sysroot/nix/store";
+          what = "overlay";
+          type = "overlay";
+          options = "lowerdir=/sysroot/nix/.ro-store,upperdir=/sysroot/nix/.rw-store/store,workdir=/sysroot/nix/.rw-store/work";
+          wantedBy = ["local-fs.target"];
+          before = ["local-fs.target"];
+          requires = ["sysroot-nix-.ro\\x2dstore.mount" "sysroot-nix-.rw\\x2dstore.mount" "rw-store.service"];
+          after = ["sysroot-nix-.ro\\x2dstore.mount" "sysroot-nix-.rw\\x2dstore.mount" "rw-store.service"];
+          unitConfig.IgnoreOnIsolate = true;
+        }];
+        services.rw-store = {
+          after = ["sysroot-nix-.rw\\x2dstore.mount"];
+          unitConfig.DefaultDependencies = false;
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "/bin/mkdir -p 0755 /sysroot/nix/.rw-store/store /sysroot/nix/.rw-store/work /sysroot/nix/store";
+          };
         };
-      };
-    };
+      })
+      (lib.mkIf config.boot.initrd.systemd.enable {
+        services."qemu-vm-post-mount" = {
+          after = ["sysroot.mount"];
+          before = ["initrd-root-fs.target"];
+          script = ''
+            # Mark this as a NixOS machine.
+            mkdir -p /sysroot/etc
+            echo -n > /sysroot/etc/NIXOS
+
+            # Fix the permissions on /tmp.
+            chmod 1777 /sysroot/tmp
+
+            mkdir -p /sysroot/boot
+          '';
+        };
+      })
+    ];
 
     swapDevices = mkVMOverride [ ];
     boot.initrd.luks.devices = mkVMOverride {};

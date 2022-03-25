@@ -151,6 +151,48 @@ let
     ${concatStrings (mapAttrsToList (exec: target: "ln -s ${target} $out/${exec};\n") links)}
   '';
 
+  writeShellScript = name: text:
+    pkgs.writeTextFile {
+      inherit name;
+      executable = true;
+      text = ''
+        #!/bin/sh
+        ${text}
+        '';
+      checkPhase = ''
+        ${pkgs.stdenv.shellDryRun} "$target"
+      '';
+    };
+
+  nixosActivationScript = writeShellScript "initrd-nixos-activation" ''
+    set -euo pipefail
+    export PATH="/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin:${cfg.package.util-linux}/bin"
+
+    # Figure out what init to boot
+    init=
+    for o in $(< /proc/cmdline); do
+        case $o in
+            init=*)
+                IFS== read -r -a initParam <<< "$o"
+                init="''${initParam[1]}"
+                ;;
+        esac
+    done
+
+    # Sanity check
+    if [ -z "''${init:-}" ]; then
+      echo 'No init= parameter on the kernel command line' >&2
+      exit 1
+    fi
+
+    # HACK! Remove any fake current-system that was created previously.
+    rm -rf /run/current-system
+
+    # Initialize the system
+    export IN_NIXOS_SYSTEMD_STAGE1=1
+    exec $init
+  '';
+
 in {
   options.boot.initrd.systemd = {
     enable = mkEnableOption ''systemd in initrd.
@@ -326,7 +368,8 @@ in {
     system.build = { inherit initialRamdisk; };
     boot.initrd.systemd = {
       initrdBin = [
-        pkgs.busybox
+        pkgs.bash
+        pkgs.coreutils
         pkgs.kmod
         cfg.package
       ] ++ config.system.fsPackages;
@@ -393,6 +436,9 @@ in {
         { object = "${initrdBinEnv}/bin"; symlink = "/bin"; }
         { object = "${initrdBinEnv}/sbin"; symlink = "/sbin"; }
         { object = builtins.toFile "sysctl.conf" "kernel.modprobe = /sbin/modprobe"; symlink = "/etc/sysctl.d/nixos.conf"; }
+
+        # For switching to stage 2
+        { object = nixosActivationScript; }
       ];
 
       targets.initrd.aliases = ["default.target"];
@@ -424,6 +470,10 @@ in {
       '')];
       services."systemd-makefs@".unitConfig.IgnoreOnIsolate = true;
       services."systemd-growfs@".unitConfig.IgnoreOnIsolate = true;
+
+      # Creates a dummy /run/current-system.
+      # This is a workaround for /run/current-system/systemd/bin/systemctl
+      # usage from udevd rules.
       services."current-system" = {
         before = ["systemd-udevd.service"];
         wantedBy = ["systemd-udevd.service"];
@@ -433,9 +483,14 @@ in {
         serviceConfig = {
           RemainAfterExit = true;
           Environment = "PATH=/bin";
-          ExecStart = "${pkgs.busybox}/bin/sh -c 'mkdir -p /run/current-system/systemd; ln -s ${cfg.package}/bin /run/current-system/systemd/bin'";
+          ExecStart = "/bin/sh -c 'mkdir -p /run/current-system/systemd; ln -s ${cfg.package}/bin /run/current-system/systemd/bin'";
         };
       };
+
+      services.initrd-switch-root.serviceConfig.ExecStart = [
+        ""
+        "systemctl --no-block switch-root /sysroot ${nixosActivationScript}"
+      ];
     };
   };
 }
