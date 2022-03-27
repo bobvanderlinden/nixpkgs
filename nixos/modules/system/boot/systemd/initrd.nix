@@ -335,6 +335,26 @@ in {
             (lib.concatStringsSep "\n" config.boot.initrd.kernelModules);
         }
         { object = "${pkgs.fakeNss}/etc/passwd"; symlink = "/etc/passwd"; }
+        {
+          object = builtins.toFile "group" ''
+            root:x:0:
+            wheel:x:1:
+            audio:x:2:
+            cdrom:x:3:
+            dialout:x:4:
+            disk:x:5:
+            input:x:6:
+            kmem:x:7:
+            kvm:x:8:
+            lp:x:9:
+            render:x:10:
+            sgx:x:11:
+            tape:x:12:
+            tty:x:13:
+            video:x:14:
+          '';
+          symlink = "/etc/group";
+        }
         # so NSS can look up usernames
         { object = "${pkgs.glibc}/lib/libnss_files.so"; }
         {
