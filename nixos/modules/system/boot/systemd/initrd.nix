@@ -395,6 +395,18 @@ in {
       '')];
       services."systemd-makefs@".unitConfig.IgnoreOnIsolate = true;
       services."systemd-growfs@".unitConfig.IgnoreOnIsolate = true;
+      services."current-system" = {
+        before = ["systemd-udevd.service"];
+        wantedBy = ["systemd-udevd.service"];
+        unitConfig = {
+          DefaultDependencies = false;
+        };
+        serviceConfig = {
+          RemainAfterExit = true;
+          Environment = "PATH=/bin";
+          ExecStart = "${pkgs.busybox}/bin/sh -c 'mkdir -p /run/current-system/systemd; ln -s ${cfg.package}/bin /run/current-system/systemd/bin'";
+        };
+      };
     };
   };
 }
