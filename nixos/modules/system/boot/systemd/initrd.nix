@@ -127,6 +127,7 @@ let
     name = "initrd-emergency-env";
     paths = map getBin cfg.initrdBin;
     pathsToLink = ["/bin" "/sbin"];
+    ignoreCollisions = true;
   };
 
   initialRamdisk = pkgs.makeInitrdNG {
@@ -296,7 +297,11 @@ in {
   config = mkIf (config.boot.initrd.enable && cfg.enable) {
     system.build = { inherit initialRamdisk; };
     boot.initrd.systemd = {
-      initrdBin = [pkgs.bash pkgs.coreutils pkgs.kmod cfg.package] ++ config.system.fsPackages;
+      initrdBin = [
+        pkgs.busybox
+        pkgs.kmod
+        cfg.package
+      ] ++ config.system.fsPackages;
 
       objects = [
         { object = "${cfg.package}/lib/systemd/systemd"; symlink = "/init"; }
@@ -329,7 +334,6 @@ in {
           object = pkgs.writeText "nixos.conf"
             (lib.concatStringsSep "\n" config.boot.initrd.kernelModules);
         }
-
         { object = "${pkgs.fakeNss}/etc/passwd"; symlink = "/etc/passwd"; }
         # so NSS can look up usernames
         { object = "${pkgs.glibc}/lib/libnss_files.so"; }
