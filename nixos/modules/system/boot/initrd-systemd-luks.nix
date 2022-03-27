@@ -13,32 +13,35 @@ let
             optional (header != null) "header=${header}";
           optsSection = lib.concatStringsSep "," opts;
           keyFileSection = if keyFile == null then "-" else keyFile;
-        in "${name} ${device} ${keyFileSection} ${optsSection}";
+        in
+        "${name} ${device} ${keyFileSection} ${optsSection}";
       content = lib.concatMapStringsSep "\n" stringifyLuksDevice luksDevices;
-    in pkgs.writeText "crypttab" content;
+    in
+    pkgs.writeText "crypttab" content;
 in
 {
   config = {
     boot.initrd.kernelModules =
-      ["dm_mod" "dm_crypt" "cryptd" "input_leds"]
+      [ "dm_mod" "dm_crypt" "cryptd" "input_leds" ]
       ++ config.boot.initrd.luks.cryptoModules ++ [
         "ecb"
       ];
     boot.initrd.systemd = {
       enable = true;
       package = pkgs.systemd;
+
       additionalUpstreamUnits = [
         "cryptsetup-pre.target"
         "cryptsetup.target"
         "remote-cryptsetup.target"
       ];
-      emergencyPackages = [
+
+      initrdBin = [
         pkgs.cryptsetup
-        pkgs.systemd
-        pkgs.util-linux
       ];
+
       objects = [
-        {object = "${pkgs.systemd}/lib/systemd/systemd-cryptsetup";}
+        { object = "${pkgs.systemd}/lib/systemd/systemd-cryptsetup"; }
         {
           object = crypttab;
           symlink = "/etc/crypttab";
