@@ -134,6 +134,23 @@ let
     contents = cfg.objects;
   };
 
+  # generate contents for /etc/systemd/system-${type} from attrset of links and packages
+  hooks = type: links: pkgs.runCommand "system-${type}" {
+      preferLocalBuild = true;
+      packages = cfg.packages;
+  } ''
+    set -e
+    mkdir -p $out
+    for package in $packages
+    do
+      for hook in $package/lib/systemd/system-${type}/*
+      do
+        ln -s $hook $out/
+      done
+    done
+    ${concatStrings (mapAttrsToList (exec: target: "ln -s ${target} $out/${exec};\n") links)}
+  '';
+
 in {
   options.boot.initrd.systemd = {
     enable = mkEnableOption ''systemd in initrd.
@@ -292,6 +309,17 @@ in {
       visible = false;
       description = "Definition of slice configurations.";
     };
+
+    generators = mkOption {
+      type = types.attrsOf types.path;
+      default = {};
+      example = { systemd-gpt-auto-generator = "/dev/null"; };
+      description = ''
+        Definition of systemd generators.
+        For each <literal>NAME = VALUE</literal> pair of the attrSet, a link is generated from
+        <literal>/etc/systemd/system-generators/NAME</literal> to <literal>VALUE</literal>.
+      '';
+    };
   };
 
   config = mkIf (config.boot.initrd.enable && cfg.enable) {
@@ -306,6 +334,7 @@ in {
       objects = [
         { object = "${cfg.package}/lib/systemd/systemd"; symlink = "/init"; }
         { object = stage1Units; symlink = "/etc/systemd/system"; }
+        { object = hooks "generators" cfg.generators; symlink = "/etc/systemd/system-generators"; }
 
         # TODO: Limit this to the bare necessities
         { object = "${cfg.package}/lib"; }
