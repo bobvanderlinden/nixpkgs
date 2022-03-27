@@ -21,7 +21,7 @@ in
         cfg.package
       ];
 
-      emergencyPackages = [
+      initrdBin = [
         cfg.package
       ];
 
