@@ -27,9 +27,6 @@ in
         "ecb"
       ];
     boot.initrd.systemd = {
-      enable = true;
-      package = pkgs.systemd;
-
       additionalUpstreamUnits = [
         "cryptsetup-pre.target"
         "cryptsetup.target"
