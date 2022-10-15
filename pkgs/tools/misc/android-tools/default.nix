@@ -9,11 +9,11 @@ in
 
 stdenv.mkDerivation rec {
   pname = "android-tools";
-  version = "31.0.3p1";
+  version = "33.0.3";
 
   src = fetchurl {
     url = "https://github.com/nmeum/android-tools/releases/download/${version}/android-tools-${version}.tar.xz";
-    sha256 = "1f2svy381r798hjinrc2xiwz13gkkqxfill343zvv8jqkn8rzxhf";
+    sha256 = "sha256-jOF02reB1d69Ke0PllciMfd3vuGbjvPBZ+M9PqdnC8U=";
   };
 
   patches = [
