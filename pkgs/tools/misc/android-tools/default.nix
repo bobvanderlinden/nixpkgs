@@ -13,7 +13,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://github.com/nmeum/android-tools/releases/download/${version}/android-tools-${version}.tar.xz";
-    sha256 = "sha256-jOF02reB1d69Ke0PllciMfd3vuGbjvPBZ+M9PqdnC8U=";
+    hash = "sha256-jOF02reB1d69Ke0PllciMfd3vuGbjvPBZ+M9PqdnC8U=";
   };
 
   patches = [
