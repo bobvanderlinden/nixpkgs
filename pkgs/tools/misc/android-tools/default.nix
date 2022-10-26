@@ -16,17 +16,6 @@ stdenv.mkDerivation rec {
     hash = "sha256-jOF02reB1d69Ke0PllciMfd3vuGbjvPBZ+M9PqdnC8U=";
   };
 
-  patches = [
-    # fmt 8 breaks the build but we can use fmt 7 from Nixpkgs:
-    (fetchpatch {
-      # Vendor google's version of fmtlib
-      url = "https://github.com/nmeum/android-tools/commit/21061c1dfb006c22304053c1f6f9e48ae4cbe25a.patch";
-      sha256 = "17mcsgfc3i8xq4hck0ppnzafh15aljxy7j2q4djcmwnvrkv9kx3s";
-      revert = true;
-      excludes = [ "vendor/fmtlib" ];
-    })
-  ];
-
   nativeBuildInputs = [ cmake perl go ];
   buildInputs = [ protobuf zlib gtest brotli lz4 zstd libusb1 pcre2 fmt_7 ];
   propagatedBuildInputs = [ pythonEnv ];
