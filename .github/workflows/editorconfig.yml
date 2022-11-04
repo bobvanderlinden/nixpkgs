@@ -19,7 +19,7 @@ jobs:
       run: |
         gh api \
           repos/NixOS/nixpkgs/pulls/${{github.event.number}}/files --paginate \
-          | jq '.[] | select(.status != "removed") | .filename' \
+          | jq --raw-output '.[] | select(.status != "removed") | .filename' \
           > "$HOME/changed_files"
     - name: print list of changed files
       run: |
