@@ -6,23 +6,28 @@
 , pythonOlder
 , pretend
 , setuptools
+, flit-core
 }:
 
 let
   packaging = buildPythonPackage rec {
     pname = "packaging";
-    version = "21.3";
+    version = "23.0";
     format = "pyproject";
 
     disabled = pythonOlder "3.6";
 
     src = fetchPypi {
       inherit pname version;
-      sha256 = "sha256-3UfEKSfYmrkR5gZRiQfMLTofOLvQJjhZcGQ/nFuOz+s=";
+      sha256 = "sha256-tq0pf4kH3g+i/hzL0m/a84f19Hxydf7fjM6J+ZRGz5c=";
     };
 
     nativeBuildInputs = [
       setuptools
+    ];
+
+    buildInputs = [
+      flit-core
     ];
 
     propagatedBuildInputs = [ pyparsing ];
