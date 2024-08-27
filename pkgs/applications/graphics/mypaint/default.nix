@@ -19,7 +19,7 @@
 }:
 
 let
-  inherit (python3.pkgs) pycairo pygobject3 numpy buildPythonApplication;
+  inherit (python3.pkgs) pycairo pygobject3 numpy buildPythonApplication pytestCheckHook;
 in buildPythonApplication rec {
   pname = "mypaint";
   version = "2.0.1";
@@ -121,14 +121,6 @@ in buildPythonApplication rec {
     ${python3.interpreter} setup.py managed_install --prefix=$out
 
     runHook postInstall
-  '';
-
-  checkPhase = ''
-    runHook preCheck
-
-    HOME=$TEMPDIR ${python3.interpreter} setup.py test
-
-    runHook postCheck
   '';
 
   meta = with lib; {
