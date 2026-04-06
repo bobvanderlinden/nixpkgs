@@ -2,6 +2,7 @@
   stdenv,
   lib,
   fetchFromGitHub,
+  makeWrapper,
   makeBinaryWrapper,
   meson,
   ninja,
@@ -9,6 +10,7 @@
   pkg-config,
   fetchpatch,
   nix-update-script,
+  coreutils,
   bash,
   dmenu,
   libnotify,
@@ -39,6 +41,7 @@ stdenv.mkDerivation (finalAttrs: {
   };
 
   nativeBuildInputs = [
+    makeWrapper
     makeBinaryWrapper
     meson
     ninja
@@ -47,6 +50,7 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   buildInputs = [
+    coreutils # tr, rm, env, ls, id
     util-linux # waitpid
     newt # whiptail
     libnotify # notify-send
@@ -74,14 +78,19 @@ stdenv.mkDerivation (finalAttrs: {
     let
       wrapperArgs = "--suffix PATH : ${lib.makeBinPath finalAttrs.buildInputs}";
     in
-    lib.optionalString uuctlSupport ''
-      wrapProgram $out/bin/uuctl ${wrapperArgs}
+    ''
+      wrapProgramBinary $out/bin/uwsm ${wrapperArgs}
+      wrapProgramShell $out/libexec/uwsm/prepare-env.sh ${wrapperArgs}
+      wrapProgramShell $out/libexec/uwsm/signal-handler.sh ${wrapperArgs}
+    ''
+    + lib.optionalString uuctlSupport ''
+      wrapProgramBinary $out/bin/uuctl ${wrapperArgs}
     ''
     + lib.optionalString uwsmAppSupport ''
-      wrapProgram $out/bin/uwsm-app ${wrapperArgs}
+      wrapProgramBinary $out/bin/uwsm-app ${wrapperArgs}
     ''
     + lib.optionalString fumonSupport ''
-      wrapProgram $out/bin/fumon ${wrapperArgs}
+      wrapProgramBinary $out/bin/fumon ${wrapperArgs}
     '';
 
   outputs = [
