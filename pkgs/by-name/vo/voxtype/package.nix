@@ -1,11 +1,14 @@
 {
   lib,
   stdenv,
+  config,
+  cudaPackages ? { },
   rustPlatform,
   fetchFromGitHub,
   nix-update-script,
   versionCheckHook,
 
+  autoAddDriverRunpath,
   clang,
   cmake,
   gitMinimal,
@@ -27,6 +30,8 @@
 
   installManPages ? stdenv.buildPlatform.canExecute stdenv.hostPlatform,
   installShellCompletions ? stdenv.buildPlatform.canExecute stdenv.hostPlatform,
+
+  cudaSupport ? config.cudaSupport,
 
   vulkanSupport ? false,
   shaderc,
@@ -50,7 +55,12 @@
   ],
 }:
 
-rustPlatform.buildRustPackage (finalAttrs: {
+assert cudaSupport -> cudaPackages != { };
+
+let
+  effectiveStdenv = if cudaSupport then cudaPackages.backendStdenv else stdenv;
+in
+rustPlatform.buildRustPackage.override { stdenv = effectiveStdenv; } (finalAttrs: {
   pname = "voxtype";
   version = "0.7.5";
 
@@ -68,6 +78,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   buildFeatures =
     [ ]
+    ++ lib.optionals cudaSupport [ "gpu-cuda" ]
     ++ lib.optionals vulkanSupport [ "gpu-vulkan" ]
     ++ lib.optionals onnxSupport [
       "parakeet-load-dynamic"
@@ -86,6 +97,10 @@ rustPlatform.buildRustPackage (finalAttrs: {
     makeBinaryWrapper
     pkg-config
   ]
+  ++ lib.optionals cudaSupport [
+    autoAddDriverRunpath
+    cudaPackages.cuda_nvcc
+  ]
   ++ lib.optionals vulkanSupport [
     shaderc
     vulkan-headers
@@ -95,6 +110,12 @@ rustPlatform.buildRustPackage (finalAttrs: {
   buildInputs = [
     alsa-lib
     openssl
+  ]
+  ++ lib.optionals cudaSupport [
+    cudaPackages.cccl
+    cudaPackages.cuda_cudart
+    (lib.getOutput "stubs" cudaPackages.cuda_cudart)
+    cudaPackages.libcublas
   ]
   ++ lib.optionals vulkanSupport [
     vulkan-headers
@@ -113,6 +134,9 @@ rustPlatform.buildRustPackage (finalAttrs: {
     RUSTFLAGS = lib.optionalString (
       stdenv.hostPlatform.isLinux && stdenv.hostPlatform.isx86_64
     ) "-C target-cpu=x86-64-v3";
+  }
+  // lib.optionalAttrs cudaSupport {
+    CMAKE_CUDA_ARCHITECTURES = cudaPackages.flags.cmakeCudaArchitecturesString;
   };
 
   preBuild = ''
